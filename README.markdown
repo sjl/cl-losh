@@ -1,1 +1,3 @@
-A little sandbox for me to play around in.
+Common Lisp utilities I use a lot.
+
+License: MIT/X11.
