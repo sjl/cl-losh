@@ -53,6 +53,7 @@
     #:run-time
     #:in-lists
     #:in-sequences
+    #:in-whatever
 
     #:hash-set
     #:make-set
