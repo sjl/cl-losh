@@ -461,7 +461,6 @@
   (format t (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
   (values))
 
-
 (defmacro dis (arglist &body body)
   "Disassemble the code generated for a `lambda` with `arglist` and `body`.
 
@@ -469,12 +468,11 @@
   doing what you think it should be doing.
 
   "
-  `(->> '(lambda ,arglist
-          (declare (optimize speed))
-          ,@body)
-    (compile nil)
-    #+sbcl sb-disassem:disassemble-code-component
-    #-sbcl disassemble))
+  (let ((%disassemble #+sbcl 'sb-disassem:disassemble-code-component
+                      #-sbcl 'disassemble))
+    `(,%disassemble (compile nil '(lambda ,arglist
+                                   (declare (optimize speed))
+                                   ,@body)))))
 
 
 ;;;; File IO
