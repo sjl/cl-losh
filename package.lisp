@@ -69,6 +69,7 @@
 
     #:pr
     #:bits
+    #:dis
 
     #:slurp
     #:spit

@@ -387,6 +387,7 @@
                             (elt ,source ,i)
                             (terminate))))))))
 
+
 ;;;; Hash Sets
 (defclass hash-set ()
   ((data :initarg :data)))
@@ -459,6 +460,21 @@
   ;; http://blog.chaitanyagupta.com/2013/10/print-bit-representation-of-signed.html
   (format t (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
   (values))
+
+
+(defmacro dis (arglist &body body)
+  "Disassemble the code generated for a `lambda` with `arglist` and `body`.
+
+  It will also spew compiler notes so you can see why the garbage box isn't
+  doing what you think it should be doing.
+
+  "
+  `(->> '(lambda ,arglist
+          (declare (optimize speed))
+          ,@body)
+    (compile nil)
+    #+sbcl sb-disassem:disassemble-code-component
+    #-sbcl disassemble))
 
 
 ;;;; File IO
