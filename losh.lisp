@@ -118,8 +118,11 @@
 
 (defun random-around (value spread)
   "Return a random number within `spread` of `value`."
-  (random-range (- value spread)
-                (+ value spread)))
+  (etypecase spread
+    (integer (random-range (- value spread)
+                           (+ value spread 1)))
+    (real (random-range (- value spread)
+                        (+ value spread)))))
 
 (defun d (n sides &optional (plus 0))
   "Roll some dice.
@@ -134,8 +137,6 @@
   (+ (iterate (repeat n)
               (sum (1+ (random sides))))
      plus))
-
-
 
 
 ;;;; Functions
