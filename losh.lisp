@@ -136,6 +136,8 @@
      plus))
 
 
+
+
 ;;;; Functions
 (defun juxt (&rest fns)
   "Return a function that will juxtipose the results of `functions`.
@@ -216,6 +218,25 @@
     ,@(iterate (for (place function) :on args :by #'cddr)
                (collect `(zap% ,place ,function %)))))
 
+
+;;;; Lists
+(defun take (n list)
+  "Return a fresh list of the first `n` elements of `list`.
+
+  If `list` is shorter than `n` a shorter result will be returned.
+
+  Example:
+
+    (take 2 '(a b c))
+    => (a b)
+
+    (take 4 '(1))
+    => (1)
+
+  "
+  (iterate (repeat n)
+           (for item :in list)
+           (collect item)))
 
 ;;;; Hash Tables
 (defmacro gethash-or-init (key hash-table default-form)
@@ -388,6 +409,40 @@
                           (if (< ,i ,len)
                             (elt ,source ,i)
                             (terminate))))))))
+
+
+;;;; Distributions
+(defun prefix-sums (list)
+  "Return a list of the prefix sums of the numbers in `list`.
+
+  Example:
+
+    (prefix-sums '(10 10 10 0 1))
+    => (10 20 30 30 31)
+
+  "
+  (iterate
+    (for i :in list)
+    (sum i :into s)
+    (collect s)))
+
+(defun frequencies (seq &key (test 'eql))
+  "Return a hash table containing the feqeuencies of the items in `seq`.
+
+  Uses `test` for the `:test` of the hash table.
+
+  Example:
+
+    (frequencies '(foo foo bar))
+    => {foo 2
+        bar 1}
+
+  "
+  (iterate
+    (with result = (make-hash-table :test test))
+    (for i :in-whatever seq)
+    (incf (gethash i result 0))
+    (finally (return result))))
 
 
 ;;;; Hash Sets

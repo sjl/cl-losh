@@ -32,6 +32,8 @@
     #:mulf
     #:zapf
 
+    #:take
+
     #:gethash-or-init
 
     #:queue
@@ -54,6 +56,9 @@
     #:in-lists
     #:in-sequences
     #:in-whatever
+
+    #:prefix-sums
+    #:frequencies
 
     #:hash-set
     #:make-set
