@@ -210,9 +210,11 @@
   "Multiply `place` by `n` in-place."
   `(zap% ,place #'* % ,n))
 
-(defmacro zapf (place function)
-  "Update `place` with the result of calling `function` on it."
-  `(zap% ,place ,function %))
+(defmacro zapf (&rest args)
+  "Zap each place with each function."
+  `(progn
+    ,@(iterate (for (place function) :on args :by #'cddr)
+               (collect `(zap% ,place ,function %)))))
 
 
 ;;;; Hash Tables
