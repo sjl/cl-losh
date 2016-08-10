@@ -20,6 +20,7 @@
     #:random-range
     #:random-range-exclusive
     #:random-around
+    #:random-gaussian
     #:d
 
     #:juxt

@@ -1,5 +1,13 @@
 (in-package #:losh)
 
+;;;; Chili Dogs
+(defmacro defun-inlineable (name &body body)
+  `(progn
+     (declaim (inline ,name))
+     (defun ,name ,@body)
+     (declaim (notinline ,name))
+     ',name))
+
 
 ;;;; Symbols
 (defun symbolize (&rest args)
@@ -18,7 +26,7 @@
 (defparameter tau (coerce (* pi 2) 'single-float)) ; fuck a pi
 
 
-(defun square (x)
+(defun-inlineable square (x)
   (* x x))
 
 (defun dividesp (n divisor)
@@ -83,9 +91,9 @@
 
 
 ;;;; Random
-(defun randomp ()
-  "Return a random boolean."
-  (zerop (random 2)))
+(defun-inlineable randomp (&optional (chance 0.5))
+  "Return a random boolean with `chance` probability of `t`."
+  (< (random 1.0) chance))
 
 (defun random-elt (seq)
   "Return a random element of `seq`, and whether one was available.
@@ -108,11 +116,11 @@
       (values nil nil)
       (values (elt seq (random length)) t))))
 
-(defun random-range (min max)
+(defun-inlineable random-range (min max)
   "Return a random number between [`min`, `max`)."
   (+ min (random (- max min))))
 
-(defun random-range-exclusive (min max)
+(defun-inlineable random-range-exclusive (min max)
   "Return a random number between (`min`, `max`)."
   (+ 1 min (random (- max min 1))))
 
@@ -123,6 +131,30 @@
                            (+ value spread 1)))
     (real (random-range (- value spread)
                         (+ value spread)))))
+
+
+(let (spare)
+  (defun random-gaussian (&optional (mean 0.0) (standard-deviation 1.0))
+    "Return a random float from a gaussian distribution.  NOT THREAD-SAFE (yet)!"
+    ;; https://en.wikipedia.org/wiki/Marsaglia_polar_method
+    (declare (optimize (speed 3))
+             (inline square random-range))
+    (flet ((scale (n)
+             (+ mean (* n standard-deviation))))
+      (if spare
+        (prog1
+            (scale spare)
+          (setf spare nil))
+        (loop :for u = (random-range -1.0 1.0)
+              :for v = (random-range -1.0 1.0)
+              :for s = (+ (square u) (square v))
+              :while (or (>= s 1.0) (= s 0.0))
+              :finally
+              (setf s (sqrt (/ (* -2.0 (the (single-float * (0.0)) (log s)))
+                               s))
+                    spare (* v s))
+              (return (scale (* u s))))))))
+
 
 (defun d (n sides &optional (plus 0))
   "Roll some dice.
