@@ -155,6 +155,10 @@
                     spare (* v s))
               (return (scale (* u s))))))))
 
+(defun random-gaussian-integer (&optional (mean 0) (standard-deviation 1))
+  "Return a random integer from a gaussian distribution.  NOT THREAD-SAFE (yet)!"
+  (round (random-gaussian mean standard-deviation)))
+
 
 (defun d (n sides &optional (plus 0))
   "Roll some dice.

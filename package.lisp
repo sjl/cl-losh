@@ -21,6 +21,7 @@
     #:random-range-exclusive
     #:random-around
     #:random-gaussian
+    #:random-gaussian-integer
     #:d
 
     #:juxt
