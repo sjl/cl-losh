@@ -275,6 +275,35 @@
            (for item :in list)
            (collect item)))
 
+
+;;;; Arrays
+(defmacro do-array ((value array) &body body)
+  "Perform `body` once for each element in `array` using `value` for the place.
+
+  `array` can be multidimensional.
+
+  `value` will be `symbol-macrolet`ed to the appropriate `aref`, so you can use
+  it as a place if you want.
+
+  Returns the array.
+
+  Example:
+
+    (let ((arr (vector 1 2 3)))
+      (do-array (x arr)
+        (setf x (1+ x))))
+    => #(2 3 4)
+
+  "
+  (with-gensyms (i)
+    (once-only (array)
+      `(iterate (for ,i :index-of-flat-array ,array)
+        (symbol-macrolet ((,value (row-major-aref ,array ,i)))
+          ,@body)
+        (finally (return ,array))))))
+
+
+
 ;;;; Hash Tables
 (defmacro gethash-or-init (key hash-table default-form)
   "Get `key`'s value in `hash-table`, initializing if necessary.
@@ -446,6 +475,13 @@
                           (if (< ,i ,len)
                             (elt ,source ,i)
                             (terminate))))))))
+
+
+(defclause-sequence ACROSS-FLAT-ARRAY INDEX-OF-FLAT-ARRAY
+  :access-fn 'row-major-aref
+  :size-fn 'array-total-size
+  :sequence-type 'array
+  :element-type t)
 
 
 ;;;; Distributions

@@ -36,6 +36,8 @@
 
     #:take
 
+    #:do-array
+
     #:gethash-or-init
 
     #:queue
@@ -58,6 +60,8 @@
     #:in-lists
     #:in-sequences
     #:in-whatever
+    #:across-flat-array
+    #:index-of-flat-array
 
     #:prefix-sums
     #:frequencies
