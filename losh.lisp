@@ -192,6 +192,30 @@
   (lambda (&rest args)
     (mapcar (rcurry #'apply args) fns)))
 
+(defun nullary (function &optional result)
+  "Return a new function that acts as a nullary-patched version of `function`.
+
+  The new function will return `result` when called with zero arguments, and
+  delegate to `function` otherwise.
+
+  Examples:
+
+    (max 1 10 2)                     => 10
+    (max)                            => invalid number of arguments
+
+    (funcall (nullary #'max))        => nil
+    (funcall (nullary #'max 0))      => 0
+    (funcall (nullary #'max) 1 10 2) => 10
+
+    (reduce #'max nil)                  => invalid number of arguments
+    (reduce (nullary #'max) nil)        => nil
+    (reduce (nullary #'max :empty) nil) => :empty
+    (reduce (nullary #'max) '(1 10 2))  => 10
+
+  "
+  (lambda (&rest args)
+    (if (null args) result (apply function args))))
+
 
 ;;;; Control Flow
 (defmacro recursively (bindings &body body)
