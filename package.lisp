@@ -60,6 +60,7 @@
     #:in-lists
     #:in-sequences
     #:in-whatever
+    #:in-array
     #:across-flat-array
     #:index-of-flat-array
 

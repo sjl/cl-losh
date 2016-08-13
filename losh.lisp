@@ -327,7 +327,6 @@
         (finally (return ,array))))))
 
 
-
 ;;;; Hash Tables
 (defmacro gethash-or-init (key hash-table default-form)
   "Get `key`'s value in `hash-table`, initializing if necessary.
@@ -388,7 +387,16 @@
 
 ;;;; Iterate
 (defmacro-driver (FOR var PAIRS-OF-LIST list)
-  "Iterate over the all pairs of the (including (last . first))."
+  "Iterate over the all pairs of the (including (last . first)).
+
+  Examples:
+
+    (iterate (for p :pairs-of-list (list 1 2 3 4))
+             (collect p))
+    =>
+    ((1 . 2) (2 . 3) (3 . 4) (4 . 1))
+
+  "
   (let ((kwd (if generate 'generate 'for)))
     (with-gensyms (current l)
       `(progn
@@ -411,6 +419,24 @@
 
 
 (defmacro-clause (AVERAGING expr &optional INTO var)
+  "Maintain a running average of `expr` in `var`.
+
+  If `var` is omitted the final average will be returned instead.
+
+  Examples:
+
+    (iterate (for x :in '(0 10 0 10))
+             (averaging x))
+    =>
+    5
+
+    (iterate (for x :in '(1.0 1 2 3 4))
+             (averaging (/ x 10) :into avg)
+             (collect avg))
+    =>
+    (0.1 0.1 0.13333334 0.17500001 0.22)
+
+  "
   (with-gensyms (count)
     (let ((average (or var (gensym "average"))))
       `(progn
@@ -426,28 +452,87 @@
            ;; todo handle this better
            `(finally (return ,average)))))))
 
-(defmacro-clause (TIMING time-type &optional SINCE-START-INTO var PER-ITERATION-INTO per)
+(defmacro-clause (TIMING time-type &optional
+                  SINCE-START-INTO since-var
+                  PER-ITERATION-INTO per-var)
+  "Time [real/run]-time into variables.
+
+  `time-type` should be either the symbol `run-time` or `real-time`, depending
+  on which kind of time you want to track.  Times are reported in
+  `internal-time-units-per-second`.
+
+  If `since-var` is given, on each iteration it will be bound to the amount of
+  time that has passed since the beginning of the loop.
+
+  If `per-var` is given, on each iteration it will be bound to the amount of
+  time that has passed since the last time it was set.  On the first iteration
+  it will be bound to the amount of time since the loop started.
+
+  If neither var is given, it is as if `since-var` were given and returned as
+  the value of the `iterate` statement.
+
+  Note that the position of this clause in the `iterate` statement matters.
+  Also, the code movement of `iterate` can change things around.  Overall the
+  results should be pretty intuitive, but if you need absolute accuracy you
+  should use something else.
+
+  Examples:
+
+    ; sleep BEFORE the timing clause
+    (iterate (repeat 3)
+             (sleep 1.0)
+             (timing real-time :since-start-into s :per-iteration-into p)
+             (collect (list (/ s internal-time-units-per-second 1.0)
+                            (/ p internal-time-units-per-second 1.0))))
+    =>
+    ((1.0003 1.0003)
+     (2.0050 1.0047)
+     (3.0081 1.0030))
+
+    ; sleep AFTER the timing clause
+    (iterate (repeat 3)
+             (timing real-time :since-start-into s :per-iteration-into p)
+             (sleep 1.0)
+             (collect (list (/ s internal-time-units-per-second 1.0)
+                            (/ p internal-time-units-per-second 1.0))))
+    =>
+    ((0.0   0.0)
+     (1.001 1.001)
+     (2.005 1.004))
+
+  "
   (let ((timing-function (ecase time-type
                            ((real-time) #'get-internal-real-time)
                            ((run-time) #'get-internal-run-time)))
-        (since (or var (gensym))))
+        (since (or since-var (gensym))))
     (with-gensyms (start-time current-time previous-time)
       `(progn
         (with ,start-time = (funcall ,timing-function))
         (for ,current-time = (funcall ,timing-function))
         (for ,previous-time :previous ,current-time :initially ,start-time)
         (for ,since = (- ,current-time ,start-time))
-        ,(when per
-           `(for ,per = (- ,current-time ,previous-time)))
-        ,(when (and (null var) (null per))
+        ,(when per-var
+           `(for ,per-var = (- ,current-time ,previous-time)))
+        ,(when (and (null since-var) (null per-var))
            `(finally (return ,since)))))))
 
 
 (defmacro-driver (FOR var IN-LISTS lists)
+  "Iterate each element of each list in `lists` in turn.
+
+  Examples:
+
+    (iterate (with things = (list (list 1 2 3) nil (list :a :b :c)))
+             (for val :in-lists things)
+             (collect val))
+    =>
+    (1 2 3 :a :b :c)
+
+  "
   (let ((kwd (if generate 'generate 'for)))
     (with-gensyms (list)
       `(progn
-        (generate ,list :in (remove nil (list ,@lists)))
+        (generate ,list :in (remove nil ,lists))
         (,kwd ,var next (progn (when (null ,list)
                                  (next ,list))
                                (pop ,list)))))))
@@ -459,12 +544,25 @@
     (null seq)))
 
 (defmacro-driver (FOR var IN-SEQUENCES seqs)
+  "Iterate each element of each sequence in `seqs` in turn.
+
+  Examples:
+
+    (iterate (with things = (list (list 1 2 3) nil #(:a :b :c) #()))
+             (for val :in-sequences things)
+             (collect val))
+    =>
+    (1 2 3 :a :b :c)
+
+  "
   (let ((kwd (if generate 'generate 'for)))
-    (with-gensyms (seq len idx)
+    (with-gensyms (s seq len idx)
       `(progn
         (with ,len = nil)
         (with ,idx = nil)
-        (generate ,seq :in (remove-if #'emptyp (list ,@seqs)))
+        (generate ,seq :in (iterate (for ,s :in-sequence ,seqs)
+                                    (unless (emptyp ,s)
+                                      (collect ,s))))
         (,kwd ,var next
          (progn
            (when (seq-done-p ,seq ,len ,idx)
@@ -481,7 +579,7 @@
 (defmacro-driver (FOR var IN-WHATEVER seq)
   "Iterate over items in the given sequence.
 
-  Unlike iterate's own `in-sequence` this won't use the horrifically inefficient
+  Unlike iterate's own `in-sequence` this won't use the horrifyingly inefficient
   `elt`/`length` functions on a list.
 
   "
@@ -506,6 +604,58 @@
   :size-fn 'array-total-size
   :sequence-type 'array
   :element-type t)
+
+
+(defun calculate-array-floors (array)
+  (iterate (for (nil . later) :on (array-dimensions array))
+           (collect (apply #'* later) :result-type vector)))
+
+(defmacro-driver (FOR binding-form IN-ARRAY array)
+  "Iterate over `array`, binding the things in `binding-form` each time.
+
+  This driver iterates over every element in `array`.  Multidimensional arrays
+  are supported -- the array will be stepped in row-major order.
+
+  `binding-form` should be a list of `(value ...index-vars...)`.  An index
+  variable can be `nil` to ignore it.  Missing index variables are ignored.  If
+  no index variables are needed, `binding-form` can simply be the value symbol.
+
+  `generate` is supported.  Call `next` on the value symbol to use it.
+
+  Examples:
+
+    (iterate (for (height x y) :in-array some-2d-heightmap-array)
+             (draw-terrain x y height))
+
+    (iterate (for (val nil nil z) :in-array some-3d-array)
+             (collect (cons z val)))
+
+    (iterate (for val :in-array any-array)
+             (print val))
+
+  "
+  (destructuring-bind (var &rest index-vars)
+      (ensure-list binding-form)
+    (with-gensyms (%i i arr dims floors)
+      (let ((kwd (if generate 'generate 'for)))
+        `(progn
+          (with ,arr = ,array)
+          ,@(when (some #'identity index-vars)
+              `((with ,dims = (coerce (array-dimensions ,arr) 'vector))
+                (with ,floors = (calculate-array-floors ,arr))))
+          ,@(iterate (for index :in index-vars)
+                     (when index (collect `(with ,index = 0))))
+          (generate ,%i :from 0 :below (array-total-size ,arr))
+          (,kwd ,var next (progn
+                            (let ((,i (next ,%i)))
+                              ,@(iterate
+                                  (for index :in index-vars)
+                                  (for n :from 0)
+                                  (when index
+                                    (collect
+                                      `(setf ,index (mod (floor ,i (svref ,floors ,n))
+                                                         (svref ,dims ,n))))))
+                              (row-major-aref ,arr ,i)))))))))
 
 
 ;;;; Distributions

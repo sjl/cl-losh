@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:CURRY :RCURRY :WITH-GENSYMS :ONCE-ONLY) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:CURRY :RCURRY :EMPTYP :ENSURE-LIST :WITH-GENSYMS :ONCE-ONLY) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -14,7 +14,8 @@
 
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
-                                         :CURRY :RCURRY :STRING-DESIGNATOR
+                                         :CURRY :RCURRY :NON-ZERO-P :EMPTYP
+                                         :ENSURE-LIST :STRING-DESIGNATOR
                                          :WITH-GENSYMS :ONCE-ONLY))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
@@ -68,6 +69,27 @@ with and `arguments` to `function`."
       (lambda (&rest more)
         (declare (dynamic-extent more))
         (multiple-value-call fn (values-list more) (values-list arguments)))))
+  
+
+  (defun non-zero-p (n)
+    "Check if `n` is non-zero."
+    (not (zerop n)))
+  
+
+  (defgeneric emptyp (object)
+    (:documentation "Determine if `object` is empty.")
+    (:method ((x null)) t)
+    (:method ((x cons)) nil)
+    (:method ((x vector)) (zerop (length x))) ; STRING :< VECTOR
+    (:method ((x array)) (notany #'non-zero-p (array-dimensions x)))
+    (:method ((x hash-table)) (zerop (hash-table-count x))))
+  
+
+  (defun ensure-list (list)
+    "If `list` is a list, it is returned. Otherwise returns the list designated by `list`."
+    (if (listp list)
+        list
+        (list list)))
   
 
   (deftype string-designator ()
@@ -153,6 +175,7 @@ Example:
                ,@forms)))))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(curry rcurry with-gensyms with-unique-names once-only)))
+  (export '(curry rcurry emptyp ensure-list with-gensyms with-unique-names
+            once-only)))
 
 ;;;; END OF quickutils.lisp ;;;;
