@@ -269,15 +269,20 @@
                       ,@(substitute access-expr '% arguments))))
       ,store-expr)))
 
-(defmacro mulf (place n)
-  "Multiply `place` by `n` in-place."
-  `(zap% ,place #'* % ,n))
 
 (defmacro zapf (&rest args)
   "Zap each place with each function."
   `(progn
     ,@(iterate (for (place function) :on args :by #'cddr)
                (collect `(zap% ,place ,function %)))))
+
+(defmacro mulf (place n)
+  "Multiply `place` by `n` in-place."
+  `(zap% ,place #'* % ,n))
+
+(defmacro clampf (place from to)
+  "Clamp `place` between `from` and `to` in-place."
+  `(zap% ,place #'clamp ,from ,to %))
 
 
 ;;;; Lists

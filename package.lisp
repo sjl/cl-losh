@@ -31,8 +31,9 @@
 
     #:zap%
     #:%
-    #:mulf
     #:zapf
+    #:mulf
+    #:clampf
 
     #:take
 
