@@ -64,6 +64,8 @@
     #:in-array
     #:across-flat-array
     #:index-of-flat-array
+    #:cycling
+    #:for-nested
 
     #:prefix-sums
     #:frequencies

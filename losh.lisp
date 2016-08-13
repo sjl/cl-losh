@@ -663,6 +663,131 @@
                               (row-major-aref ,arr ,i)))))))))
 
 
+(defun parse-sequence-arguments
+    (from upfrom downfrom to downto above below by)
+  (let* ((start (or from upfrom downfrom))
+         (end (or to downto above below))
+         (increment (or by 1))
+         (down (or downfrom downto above))
+         (exclusive (or below above))
+         (done-p (if exclusive
+                   (if down '<= '>=)
+                   (if down '< '>)))
+         (op (if down '- '+)))
+    (values start end increment op done-p)))
+
+(defmacro-driver (FOR var CYCLING on-cycle &sequence)
+  "Iterate numerically as with `for`, but cycle around once finished.
+
+  `on-cycle` should be a form to execute every time the number cycles back to
+  the beginning.  The value of `var` during this form's execution is undefined.
+
+  `generate` is supported.
+
+  Results are undefined if the cycle doesn't contain at least one number.
+
+  Examples:
+
+    (iterate (repeat 10)
+             (for x :cycling t :from 0 :to 3)
+             (collect x))
+    =>
+    (0 1 2 3 0 1 2 3 0 1)
+
+    (iterate (repeat 5)
+             (for x :cycling (print 'beep) :from 1 :downto 0 :by 0.5)
+             (print x))
+    =>
+    1
+    0.5
+    0.0
+    BEEP
+    1
+    0.5
+
+  "
+  (declare (ignore iterate::with-index))
+  (multiple-value-bind (start end increment op done-p)
+      (parse-sequence-arguments iterate::from iterate::upfrom iterate::downfrom
+                                iterate::to iterate::downto
+                                iterate::above iterate::below
+                                iterate::by)
+    (let ((kwd (if generate 'generate 'for)))
+      (with-gensyms (%counter %start %end %increment)
+        `(progn
+          (with ,%start = ,start)
+          (with ,%end = ,end)
+          (with ,%increment = ,increment)
+          (with ,%counter)
+          (,kwd ,var next
+           (progn
+             (setf ,%counter
+                   (if-first-time ,%start (,op ,%counter ,%increment)))
+             (if (,done-p ,%counter ,%end)
+               (prog1
+                   (setf ,%counter ,%start)
+                 ,on-cycle)
+               ,%counter))))))))
+
+(defmacro-clause (FOR-NESTED forms)
+  "Iterate the given `forms` in a nested fashion.
+
+   `forms` should be a list of iteration forms.  Each one should have the same
+   format as a standard `(for var ...)` numeric iteration clause, but WITHOUT
+   the `for`.
+
+   The forms will iterate numerically as if in a series of nested loops, with
+   later forms cycling around as many times as is necessary.
+
+   Examples:
+
+    (iterate (for-nested ((x :from 0 :to 3)
+                          (y :from 0 :below 1 :by 0.4)))
+             (print (list x y)))
+    =>
+    (0 0)
+    (0 0.4)
+    (0 0.8)
+    (1 0)
+    (1 0.4)
+    (1 0.8)
+    (2 0)
+    (2 0.4)
+    (2 0.8)
+    (3 0)
+    (3 0.4)
+    (3 0.8)
+
+   "
+  (iterate
+    (for (var . args) :in forms)
+    (for prev :previous var :initially nil)
+
+    ;; we basically turn
+    ;;   (for-nested ((x :from 0 :to n)
+    ;;                (y :from 0 :to m)
+    ;;                (z :from 0 :to q)))
+    ;; into
+    ;;   (generate x :from 0 :to n)
+    ;;   (generate y :cycling (next x) :from 0 :to m)
+    ;;   (generate z :cycling (next y) :from 0 :to q)
+    ;;   (if-first-time
+    ;;     (progn (next x) (next y) (next z))
+    ;;     (next z))
+    (collect var :into vars)
+    (collect `(generate ,var
+               ,@(when prev `(:cycling (next ,prev)))
+               ,@args)
+             :into cycling-forms)
+
+    (finally (return `(progn
+                       ,@cycling-forms
+                       (if-first-time
+                         (progn ,@(iterate (for v :in vars)
+                                           (collect `(next ,v))))
+                         (next ,var)))))))
+
+
 ;;;; Distributions
 (defun prefix-sums (list)
   "Return a list of the prefix sums of the numbers in `list`.
