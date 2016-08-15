@@ -935,3 +935,61 @@
       `(lambda (,message &rest ,arguments)
         (ecase ,message
           ,@(mapcar #'parse-clause clauses))))))
+
+
+;;;; Eldritch Horrors
+(defmacro define-with-macro (type &rest slots)
+  "Define a with-`type` macro for the given `type` and `slots`.
+
+  This new macro wraps `with-accessors` so you don't have to type `type-`
+  a billion times.
+
+  The given `type` must be a symbol naming a struct or class.  It must have the
+  appropriate accessors with names exactly of the form `type`-`slot`.
+
+  The defined macro will look something like this:
+
+    (define-with-macro foo a b)
+    =>
+    (defmacro with-foo ((foo &optional (a-symbol 'a) (b-symbol 'b))
+                        &body body)
+      `(with-accessors ((,a-symbol 'foo-a) (,b-symbol 'foo-b))
+           ,foo
+         ,@body))
+
+  There's a lot of magic here, but it cuts down on boilerplate for simple things
+  quite a lot.
+
+  Example:
+
+    (defstruct foo x y)
+    (define-with-macro foo x y)
+
+    (defparameter *f* (make-foo :x 10 :y 20))
+    (defparameter *g* (make-foo :x 555 :y 999))
+
+    (with-foo (*f*)
+      (with-foo (*g* gx gy)
+        (print (list x y gx gy))))
+    =>
+    (10 20 555 999)
+
+  "
+  (let* ((accessors (loop :for slot :in slots
+                          :collect (symbolize type '- slot)))
+         (symbol-args (loop :for slot :in slots
+                            :collect (symbolize slot '-symbol)))
+         (macro-name (symbolize 'with- type))
+         (macro-arglist `((,type &optional
+                           ,@(loop :for slot :in slots
+                                   :for arg :in symbol-args
+                                   :collect `(,arg ',slot)))
+                          &body body))
+         (accessor-binding-list (loop :for arg :in symbol-args
+                                      :for accessor :in accessors
+                                      :collect ``(,,arg ,',accessor))))
+    `(defmacro ,macro-name ,macro-arglist
+      `(with-accessors ,,`(list ,@accessor-binding-list)
+          ,,type
+        ,@body))))
+

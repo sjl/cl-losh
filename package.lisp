@@ -91,4 +91,6 @@
 
     #:dlambda
 
+    #:define-with-macro
+
     ))
