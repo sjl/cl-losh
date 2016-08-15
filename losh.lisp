@@ -244,7 +244,7 @@
 
 
 ;;;; Mutation
-(defun build-zap% (place expr env)
+(defun build-zap (place expr env)
   (multiple-value-bind (temps exprs stores store-expr access-expr)
       (get-setf-expansion place env)
     `(let* (,@(mapcar #'list temps exprs)
@@ -252,36 +252,68 @@
                              ,expr)))
       ,store-expr)))
 
-(defmacro zap% (&rest place-expr-pairs &environment env)
+(defmacro zapf (&rest place-expr-pairs &environment env)
   "Update each `place` by evaluating `expr` with `%` bound to the current value.
 
-  `zap%` works like `setf`, but when evaluating the value expressions the symbol
-  `%` will be `symbol-macrolet`ed to the current value of the place.
+  `zapf` works like `setf`, but when evaluating the value expressions the symbol
+  `%` will be bound to the current value of the place.
 
   Examples:
 
-    (zap% foo (1+ %)
+    (zapf foo (1+ %)
           (car bar) (if (> % 10) :a :b))
 
   "
   ;; original idea/name from http://malisper.me/2015/09/29/zap/
   `(progn
     ,@(loop :for (place expr . rest) :on place-expr-pairs :by #'cddr
-            :collect (build-zap% place expr env))))
+            :collect (build-zap place expr env))))
 
-(defmacro zapf (&rest args)
-  "Zap each place with each function."
+
+(define-modify-macro mulf (factor) *
+  "Multiply `place` by `factor` in-place.")
+
+(define-modify-macro divf (&optional divisor)
+  (lambda (value divisor)
+    (if divisor
+      (/ value divisor)
+      (/ value)))
+  "Divide `place` by `divisor` in-place.
+
+  If `divisor` is not given, `place` will be set to `(/ 1 place).
+
+  ")
+
+(define-modify-macro modf (divisor) mod
+  "Modulo `place` by `divisor` in-place.")
+
+(define-modify-macro remainderf (divisor) rem
+  "Remainder `place` by `divisor` in-place.")
+
+(define-modify-macro clampf (from to) clamp
+  "Clamp `place` between `from` and `to` in-place.")
+
+
+(define-modify-macro %callf (function)
+  (lambda (value function)
+    (funcall function value))
+  "Set `place` to the result of calling `function` on its current value.")
+
+(defmacro callf (&rest place-function-pairs)
+  "Set each `place` to the result of calling `function` on its current value.
+
+  Examples:
+
+    (let ((x 10) (y 20))
+      (callf x #'1-
+             y #'1+)
+      (list x y))
+    =>
+    (9 21)
+  "
   `(progn
-    ,@(iterate (for (place function) :on args :by #'cddr)
-               (collect `(zap% ,place (funcall ,function %))))))
-
-(defmacro mulf (place n)
-  "Multiply `place` by `n` in-place."
-  `(zap% ,place (* % ,n)))
-
-(defmacro clampf (place from to)
-  "Clamp `place` between `from` and `to` in-place."
-  `(zap% ,place (clamp ,from ,to %)))
+     ,@(loop :for (place function . rest) :on place-function-pairs :by #'cddr
+             :collect `(%callf ,place ,function))))
 
 
 ;;;; Lists

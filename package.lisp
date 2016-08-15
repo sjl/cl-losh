@@ -29,11 +29,14 @@
     #:recursively
     #:recur
 
-    #:zap%
-    #:%
     #:zapf
+    #:%
     #:mulf
+    #:divf
+    #:modf
+    #:remainderf
     #:clampf
+    #:callf
 
     #:take
 
