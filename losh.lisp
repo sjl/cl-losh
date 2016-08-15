@@ -23,7 +23,7 @@
 
 
 ;;;; Math
-(defparameter tau (coerce (* pi 2) 'single-float)) ; fuck a pi
+(defconstant tau (coerce (* pi 2) 'single-float)) ; fuck a pi
 
 
 (defun-inlineable square (x)
@@ -203,9 +203,9 @@
     (max 1 10 2)                     => 10
     (max)                            => invalid number of arguments
 
-    (funcall (nullary #'max))        => nil
-    (funcall (nullary #'max 0))      => 0
-    (funcall (nullary #'max) 1 10 2) => 10
+    (funcall (nullary #'max))          => nil
+    (funcall (nullary #'max 0))        => 0
+    (funcall (nullary #'max 0) 1 10 2) => 10
 
     (reduce #'max nil)                  => invalid number of arguments
     (reduce (nullary #'max) nil)        => nil
@@ -244,45 +244,44 @@
 
 
 ;;;; Mutation
-(defmacro zap% (place function &rest arguments &environment env)
-  "Update `place` by applying `function` to its current value and `arguments`.
-
-  `arguments` should contain the symbol `%`, which is treated as a placeholder
-  where the current value of the place will be substituted into the function
-  call.
-
-  For example:
-
-  (zap% foo #'- % 10) => (setf foo (- foo 10)
-  (zap% foo #'- 10 %) => (setf foo (- 10 foo)
-
-  "
-  ;; original idea/name from http://malisper.me/2015/09/29/zap/
-  (assert (find '% arguments)
-      ()
-    "Placeholder % not included in zap macro form.")
+(defun build-zap% (place expr env)
   (multiple-value-bind (temps exprs stores store-expr access-expr)
       (get-setf-expansion place env)
     `(let* (,@(mapcar #'list temps exprs)
-            (,(car stores)
-             (funcall ,function
-                      ,@(substitute access-expr '% arguments))))
+            (,(car stores) (symbol-macrolet ((% ,access-expr))
+                             ,expr)))
       ,store-expr)))
 
+(defmacro zap% (&rest place-expr-pairs &environment env)
+  "Update each `place` by evaluating `expr` with `%` bound to the current value.
+
+  `zap%` works like `setf`, but when evaluating the value expressions the symbol
+  `%` will be `symbol-macrolet`ed to the current value of the place.
+
+  Examples:
+
+    (zap% foo (1+ %)
+          (car bar) (if (> % 10) :a :b))
+
+  "
+  ;; original idea/name from http://malisper.me/2015/09/29/zap/
+  `(progn
+    ,@(loop :for (place expr . rest) :on place-expr-pairs :by #'cddr
+            :collect (build-zap% place expr env))))
 
 (defmacro zapf (&rest args)
   "Zap each place with each function."
   `(progn
     ,@(iterate (for (place function) :on args :by #'cddr)
-               (collect `(zap% ,place ,function %)))))
+               (collect `(zap% ,place (funcall ,function %))))))
 
 (defmacro mulf (place n)
   "Multiply `place` by `n` in-place."
-  `(zap% ,place #'* % ,n))
+  `(zap% ,place (* % ,n)))
 
 (defmacro clampf (place from to)
   "Clamp `place` between `from` and `to` in-place."
-  `(zap% ,place #'clamp ,from ,to %))
+  `(zap% ,place (clamp ,from ,to %)))
 
 
 ;;;; Lists
