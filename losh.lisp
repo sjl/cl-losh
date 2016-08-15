@@ -953,7 +953,7 @@
     =>
     (defmacro with-foo ((foo &optional (a-symbol 'a) (b-symbol 'b))
                         &body body)
-      `(with-accessors ((,a-symbol 'foo-a) (,b-symbol 'foo-b))
+      `(with-accessors ((,a-symbol foo-a) (,b-symbol foo-b))
            ,foo
          ,@body))
 
