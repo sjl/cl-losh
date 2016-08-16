@@ -293,6 +293,9 @@
 (define-modify-macro clampf (from to) clamp
   "Clamp `place` between `from` and `to` in-place.")
 
+(define-modify-macro negatef () -
+  "Negate the value of `place`.")
+
 
 (define-modify-macro %callf (function)
   (lambda (value function)

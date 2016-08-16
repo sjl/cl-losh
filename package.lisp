@@ -36,6 +36,7 @@
     #:modf
     #:remainderf
     #:clampf
+    #:negatef
     #:callf
 
     #:take
