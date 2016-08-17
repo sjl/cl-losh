@@ -1,0 +1,505 @@
+# Documentation for `cl-losh`
+
+This library is my own personal utility belt.
+
+  Everything I write in here is MIT/X11 licensed, so you're free to use it if
+  you want.  But I make no guarantees about backwards compatibility -- I might
+  change and break things at any time.  Use this at your own risk.
+
+  [TOC]
+
+## Package `LOSH`
+
+### `BITS` (function)
+
+    (BITS N SIZE)
+
+### `CALLF` (macro)
+
+    (CALLF &REST PLACE-FUNCTION-PAIRS)
+
+Set each `place` to the result of calling `function` on its current value.
+
+  Examples:
+
+    (let ((x 10) (y 20))
+      (callf x #'1-
+             y #'1+)
+      (list x y))
+    =>
+    (9 21)
+  
+
+### `CLAMP` (function)
+
+    (CLAMP FROM TO VALUE)
+
+Clamp `value` between `from` and `to`.
+
+### `CLAMPF` (macro)
+
+    (CLAMPF PLACE FROM TO &ENVIRONMENT ENV)
+
+Clamp `place` between `from` and `to` in-place.
+
+### `D` (function)
+
+    (D N SIDES &OPTIONAL (PLUS 0))
+
+Roll some dice.
+
+  Examples:
+
+    (d 1 4)     ; rolls 1d4
+    (d 2 8)     ; rolls 2d8
+    (d 1 10 -1) ; rolls 1d10-1
+
+  
+
+### `DEFINE-WITH-MACRO` (macro)
+
+    (DEFINE-WITH-MACRO TYPE &REST SLOTS)
+
+Define a with-`type` macro for the given `type` and `slots`.
+
+  This new macro wraps `with-accessors` so you don't have to type `type-`
+  a billion times.
+
+  The given `type` must be a symbol naming a struct or class.  It must have the
+  appropriate accessors with names exactly of the form `type`-`slot`.
+
+  The defined macro will look something like this:
+
+    (define-with-macro foo a b)
+    =>
+    (defmacro with-foo ((foo &optional (a-symbol 'a) (b-symbol 'b))
+                        &body body)
+      `(with-accessors ((,a-symbol foo-a) (,b-symbol foo-b))
+           ,foo
+         ,@body))
+
+  There's a lot of magic here, but it cuts down on boilerplate for simple things
+  quite a lot.
+
+  Example:
+
+    (defstruct foo x y)
+    (define-with-macro foo x y)
+
+    (defparameter *f* (make-foo :x 10 :y 20))
+    (defparameter *g* (make-foo :x 555 :y 999))
+
+    (with-foo (*f*)
+      (with-foo (*g* gx gy)
+        (print (list x y gx gy))))
+    =>
+    (10 20 555 999)
+
+  
+
+### `DEQUEUE` (function)
+
+    (DEQUEUE Q)
+
+### `DIS` (macro)
+
+    (DIS ARGLIST
+      &BODY
+      BODY)
+
+Disassemble the code generated for a `lambda` with `arglist` and `body`.
+
+  It will also spew compiler notes so you can see why the garbage box isn't
+  doing what you think it should be doing.
+
+  
+
+### `DIVF` (macro)
+
+    (DIVF PLACE &OPTIONAL DIVISOR &ENVIRONMENT ENV)
+
+Divide `place` by `divisor` in-place.
+
+  If `divisor` is not given, `place` will be set to `(/ 1 place).
+
+  
+
+### `DIVIDESP` (function)
+
+    (DIVIDESP N DIVISOR)
+
+Return whether `n` is evenly divisible by `divisor`.
+
+### `DLAMBDA` (macro)
+
+    (DLAMBDA &REST CLAUSES)
+
+### `DO-ARRAY` (macro)
+
+    (DO-ARRAY (VALUE ARRAY)
+      &BODY
+      BODY)
+
+Perform `body` once for each element in `array` using `value` for the place.
+
+  `array` can be multidimensional.
+
+  `value` will be `symbol-macrolet`ed to the appropriate `aref`, so you can use
+  it as a place if you want.
+
+  Returns the array.
+
+  Example:
+
+    (let ((arr (vector 1 2 3)))
+      (do-array (x arr)
+        (setf x (1+ x))))
+    => #(2 3 4)
+
+  
+
+### `ENQUEUE` (function)
+
+    (ENQUEUE ITEM Q)
+
+### `FREQUENCIES` (function)
+
+    (FREQUENCIES SEQ &KEY (TEST 'EQL))
+
+Return a hash table containing the feqeuencies of the items in `seq`.
+
+  Uses `test` for the `:test` of the hash table.
+
+  Example:
+
+    (frequencies '(foo foo bar))
+    => {foo 2
+        bar 1}
+
+  
+
+### `GETHASH-OR-INIT` (macro)
+
+    (GETHASH-OR-INIT KEY HASH-TABLE DEFAULT-FORM)
+
+Get `key`'s value in `hash-table`, initializing if necessary.
+
+  If `key` is in `hash-table`: return its value without evaluating
+  `default-form` at all.
+
+  If `key` is NOT in `hash-table`: evaluate `default-form` and insert it before
+  returning it.
+
+  
+
+### `HASH-SET` (class)
+
+#### Slot `DATA`
+
+* Allocation: `:INSTANCE`
+* Initarg: `:DATA`
+
+### `JUXT` (function)
+
+    (JUXT &REST FNS)
+
+Return a function that will juxtipose the results of `functions`.
+
+  This is like Clojure's `juxt`.  Given functions `(f0 f1 ... fn)`, this will
+  return a new function which, when called with some arguments, will return
+  `(list (f0 ...args...) (f1 ...args...) ... (fn ...args...))`.
+
+  Example:
+
+    (funcall (juxt #'list #'+ #'- #'*) 1 2)
+    => ((1 2) 3 -1 2)
+
+  
+
+### `LERP` (function)
+
+    (LERP FROM TO N)
+
+Lerp together `from` and `to` by factor `n`.
+
+  Note that you might want `precise-lerp` instead.
+
+  
+
+### `MAKE-QUEUE` (function)
+
+    (MAKE-QUEUE)
+
+### `MAKE-SET` (function)
+
+    (MAKE-SET &KEY (TEST #'EQL) (INITIAL-DATA NIL))
+
+### `MAP-RANGE` (function)
+
+    (MAP-RANGE SOURCE-FROM SOURCE-TO DEST-FROM DEST-TO SOURCE-VAL)
+
+Map `source-val` from the source range to the destination range.
+
+  Example:
+
+    ;          source    dest        value
+    (map-range 0.0 1.0   10.0 20.0   0.2)
+    => 12.0
+
+  
+
+### `MODF` (macro)
+
+    (MODF PLACE DIVISOR &ENVIRONMENT ENV)
+
+Modulo `place` by `divisor` in-place.
+
+### `MULF` (macro)
+
+    (MULF PLACE FACTOR &ENVIRONMENT ENV)
+
+Multiply `place` by `factor` in-place.
+
+### `NEGATEF` (macro)
+
+    (NEGATEF PLACE &ENVIRONMENT ENV)
+
+Negate the value of `place`.
+
+### `NORM` (function)
+
+    (NORM MIN MAX VAL)
+
+Normalize `val` to a number between `0` and `1` (maybe).
+
+  If `val` is between `max` and `min`, the result will be a number between `0`
+  and `1`.
+
+  If `val` lies outside of the range, it'll be still be scaled and will end up
+  outside the 0/1 range.
+
+  
+
+### `PR` (function)
+
+    (PR &REST ARGS)
+
+### `PREFIX-SUMS` (function)
+
+    (PREFIX-SUMS LIST)
+
+Return a list of the prefix sums of the numbers in `list`.
+
+  Example:
+
+    (prefix-sums '(10 10 10 0 1))
+    => (10 20 30 30 31)
+
+  
+
+### `QUEUE`
+
+`#<STANDARD-CLASS DOCPARSER:STRUCT-NODE>`
+
+### `QUEUE-APPEND` (function)
+
+    (QUEUE-APPEND Q L)
+
+### `QUEUE-CONTENTS` (function)
+
+    (QUEUE-CONTENTS VALUE INSTANCE)
+
+### `QUEUE-EMPTY-P` (function)
+
+    (QUEUE-EMPTY-P Q)
+
+### `QUEUE-SIZE` (function)
+
+    (QUEUE-SIZE VALUE INSTANCE)
+
+### `RANDOM-AROUND` (function)
+
+    (RANDOM-AROUND VALUE SPREAD)
+
+Return a random number within `spread` of `value`.
+
+### `RANDOM-ELT` (function)
+
+    (RANDOM-ELT SEQ)
+
+Return a random element of `seq`, and whether one was available.
+
+  This will NOT be efficient for lists.
+
+  Examples:
+
+    (random-elt #(1 2 3))
+    => 1
+       T
+
+    (random-elt nil)
+    => nil
+       nil
+
+  
+
+### `RANDOM-GAUSSIAN` (function)
+
+    (RANDOM-GAUSSIAN &OPTIONAL (MEAN 0.0) (STANDARD-DEVIATION 1.0))
+
+Return a random float from a gaussian distribution.  NOT THREAD-SAFE (yet)!
+
+### `RANDOM-GAUSSIAN-INTEGER` (function)
+
+    (RANDOM-GAUSSIAN-INTEGER &OPTIONAL (MEAN 0) (STANDARD-DEVIATION 1))
+
+Return a random integer from a gaussian distribution.  NOT THREAD-SAFE (yet)!
+
+### `RANDOM-RANGE` (function)
+
+    (RANDOM-RANGE MIN MAX)
+
+Return a random number between [`min`, `max`).
+
+### `RANDOM-RANGE-EXCLUSIVE` (function)
+
+    (RANDOM-RANGE-EXCLUSIVE MIN MAX)
+
+Return a random number between (`min`, `max`).
+
+### `RANDOMP` (function)
+
+    (RANDOMP &OPTIONAL (CHANCE 0.5))
+
+Return a random boolean with `chance` probability of `t`.
+
+### `RECURSIVELY` (macro)
+
+    (RECURSIVELY BINDINGS
+      &BODY
+      BODY)
+
+Execute body recursively, like Clojure's `loop`/`recur`.
+
+  `bindings` should contain a list of symbols and (optional) default values.
+
+  In `body`, `recur` will be bound to the function for recurring.
+
+  Example:
+
+      (defun length (some-list)
+        (recursively ((list some-list) (n 0))
+          (if (null list)
+            n
+            (recur (cdr list) (1+ n)))))
+
+  
+
+### `REMAINDERF` (macro)
+
+    (REMAINDERF PLACE DIVISOR &ENVIRONMENT ENV)
+
+Remainder `place` by `divisor` in-place.
+
+### `SET-ADD` (function)
+
+    (SET-ADD SET VALUE)
+
+### `SET-ADD-ALL` (function)
+
+    (SET-ADD-ALL SET SEQ)
+
+### `SET-CLEAR` (function)
+
+    (SET-CLEAR SET)
+
+### `SET-CONTAINS-P` (function)
+
+    (SET-CONTAINS-P SET VALUE)
+
+### `SET-EMPTY-P` (function)
+
+    (SET-EMPTY-P SET)
+
+### `SET-POP` (function)
+
+    (SET-POP SET)
+
+### `SET-RANDOM` (function)
+
+    (SET-RANDOM SET)
+
+### `SET-REMOVE` (function)
+
+    (SET-REMOVE SET VALUE)
+
+### `SET-REMOVE-ALL` (function)
+
+    (SET-REMOVE-ALL SET SEQ)
+
+### `SLURP` (function)
+
+    (SLURP PATH)
+
+Sucks up an entire file from PATH into a freshly-allocated string,
+   returning two values: the string and the number of bytes read.
+
+### `SPIT` (function)
+
+    (SPIT PATH STR)
+
+Spit the string into a file at the given path.
+
+### `SQUARE` (function)
+
+    (SQUARE X)
+
+### `SYMBOLIZE` (function)
+
+    (SYMBOLIZE &REST ARGS)
+
+Slap `args` together stringishly into a symbol and intern it.
+
+  Example:
+
+    (symbolize 'foo :bar "baz")
+    => 'foobarbaz
+
+  
+
+### `TAKE` (function)
+
+    (TAKE N LIST)
+
+Return a fresh list of the first `n` elements of `list`.
+
+  If `list` is shorter than `n` a shorter result will be returned.
+
+  Example:
+
+    (take 2 '(a b c))
+    => (a b)
+
+    (take 4 '(1))
+    => (1)
+
+  
+
+### `TAU` (variable)
+
+### `ZAPF` (macro)
+
+    (ZAPF &REST PLACE-EXPR-PAIRS &ENVIRONMENT ENV)
+
+Update each `place` by evaluating `expr` with `%` bound to the current value.
+
+  `zapf` works like `setf`, but when evaluating the value expressions the symbol
+  `%` will be bound to the current value of the place.
+
+  Examples:
+
+    (zapf foo (1+ %)
+          (car bar) (if (> % 10) :a :b))
+
+  
+
