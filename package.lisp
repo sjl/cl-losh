@@ -110,6 +110,7 @@
     #:queue-append))
 
 (defsubpackage #:losh.iterate
+  (:use #:iterate) ; need this for iterate's `for` symbol fuckery
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
     #:pairs-of-list
