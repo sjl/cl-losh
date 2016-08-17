@@ -1,7 +1,26 @@
 (ql:quickload "cl-d-api")
 
 (defparameter *document-packages*
-  (list "LOSH"))
+  (list "LOSH"
+
+        "LOSH.ARRAYS"
+        "LOSH.CONTROL-FLOW"
+        "LOSH.DEBUGGING"
+        "LOSH.DISTRIBUTIONS"
+        "LOSH.ELDRITCH-HORRORS"
+        "LOSH.FILE-IO"
+        "LOSH.FUNCTIONS"
+        "LOSH.HASH-SETS"
+        "LOSH.HASH-TABLES"
+        "LOSH.ITERATE"
+        "LOSH.LISTS"
+        "LOSH.MATH"
+        "LOSH.MUTATION"
+        "LOSH.QUEUES"
+        "LOSH.RANDOM"
+        "LOSH.SYMBOLS"
+
+        ))
 
 (defparameter *output-path*
   #p"DOCUMENTATION.markdown" )

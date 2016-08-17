@@ -958,9 +958,9 @@
     (format s "~A" str)))
 
 
-;;;; dlambda
-;;; From Let Over Lambda.
+;;;; Eldritch Horrors
 (defmacro dlambda (&rest clauses)
+  ;;; From Let Over Lambda.
   (with-gensyms (message arguments)
     (flet ((parse-clause (clause)
              (destructuring-bind (key arglist &rest body)
@@ -970,8 +970,6 @@
         (ecase ,message
           ,@(mapcar #'parse-clause clauses))))))
 
-
-;;;; Eldritch Horrors
 (defmacro define-with-macro (type &rest slots)
   "Define a with-`type` macro for the given `type` and `slots`.
 
