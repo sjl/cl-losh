@@ -419,47 +419,47 @@ Set each `place` to the result of calling `function` on its current value.
 
 ### `CLAMPF` (macro)
 
-    (CLAMPF PLACE FROM TO &ENVIRONMENT ENV)
+    (CLAMPF PLACE FROM TO)
 
 Clamp `place` between `from` and `to` in-place.
 
 ### `DIVF` (macro)
 
-    (DIVF PLACE &OPTIONAL DIVISOR &ENVIRONMENT ENV)
+    (DIVF PLACE &OPTIONAL DIVISOR)
 
 Divide `place` by `divisor` in-place.
 
-  If `divisor` is not given, `place` will be set to `(/ 1 place).
+  If `divisor` is not given, `place` will be set to `(/ 1 place)`.
 
   
 
 ### `MODF` (macro)
 
-    (MODF PLACE DIVISOR &ENVIRONMENT ENV)
+    (MODF PLACE DIVISOR)
 
 Modulo `place` by `divisor` in-place.
 
 ### `MULF` (macro)
 
-    (MULF PLACE FACTOR &ENVIRONMENT ENV)
+    (MULF PLACE FACTOR)
 
 Multiply `place` by `factor` in-place.
 
 ### `NEGATEF` (macro)
 
-    (NEGATEF PLACE &ENVIRONMENT ENV)
+    (NEGATEF PLACE)
 
 Negate the value of `place`.
 
 ### `REMAINDERF` (macro)
 
-    (REMAINDERF PLACE DIVISOR &ENVIRONMENT ENV)
+    (REMAINDERF PLACE DIVISOR)
 
 Remainder `place` by `divisor` in-place.
 
 ### `ZAPF` (macro)
 
-    (ZAPF &REST PLACE-EXPR-PAIRS &ENVIRONMENT ENV)
+    (ZAPF &REST PLACE-EXPR-PAIRS)
 
 Update each `place` by evaluating `expr` with `%` bound to the current value.
 

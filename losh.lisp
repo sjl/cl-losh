@@ -280,7 +280,7 @@
       (/ value)))
   "Divide `place` by `divisor` in-place.
 
-  If `divisor` is not given, `place` will be set to `(/ 1 place).
+  If `divisor` is not given, `place` will be set to `(/ 1 place)`.
 
   ")
 
