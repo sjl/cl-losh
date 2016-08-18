@@ -91,7 +91,10 @@
   (:documentation "Utilities related to arrays.")
   (:export
     #:do-array
-    #:fill-multidimensional-array))
+    #:fill-multidimensional-array
+    #:fill-multidimensional-array-t
+    #:fill-multidimensional-array-fixnum
+    #:fill-multidimensional-array-single-float))
 
 (defsubpackage #:losh.hash-tables
   (:documentation "Utilities related to hash tables.")

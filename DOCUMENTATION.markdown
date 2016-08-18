@@ -57,6 +57,39 @@ Fill `array` with `item`.
 
   
 
+### `FILL-MULTIDIMENSIONAL-ARRAY-FIXNUM` (function)
+
+    (FILL-MULTIDIMENSIONAL-ARRAY-FIXNUM ARRAY ITEM)
+
+Fill `array` (which must be of type `(array FIXNUM *)`) with `item`.
+
+  Unlike `fill`, this works on multidimensional arrays.  It won't cons on SBCL,
+  but it may in other implementations.
+
+  
+
+### `FILL-MULTIDIMENSIONAL-ARRAY-SINGLE-FLOAT` (function)
+
+    (FILL-MULTIDIMENSIONAL-ARRAY-SINGLE-FLOAT ARRAY ITEM)
+
+Fill `array` (which must be of type `(array SINGLE-FLOAT *)`) with `item`.
+
+  Unlike `fill`, this works on multidimensional arrays.  It won't cons on SBCL,
+  but it may in other implementations.
+
+  
+
+### `FILL-MULTIDIMENSIONAL-ARRAY-T` (function)
+
+    (FILL-MULTIDIMENSIONAL-ARRAY-T ARRAY ITEM)
+
+Fill `array` (which must be of type `(array T *)`) with `item`.
+
+  Unlike `fill`, this works on multidimensional arrays.  It won't cons on SBCL,
+  but it may in other implementations.
+
+  
+
 ## Package `LOSH.CONTROL-FLOW`
 
 Utilities for managing control flow.
