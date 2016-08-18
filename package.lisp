@@ -90,7 +90,8 @@
 (defsubpackage #:losh.arrays
   (:documentation "Utilities related to arrays.")
   (:export
-    #:do-array))
+    #:do-array
+    #:fill-multidimensional-array))
 
 (defsubpackage #:losh.hash-tables
   (:documentation "Utilities related to hash tables.")

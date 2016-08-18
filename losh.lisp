@@ -340,6 +340,9 @@
 
 
 ;;;; Arrays
+(declaim (ftype (function ((array t *) t))
+                fill-multidimensional-array))
+
 (defmacro do-array ((value array) &body body)
   "Perform `body` once for each element in `array` using `value` for the place.
 
@@ -364,6 +367,39 @@
         (symbol-macrolet ((,value (row-major-aref ,array ,i)))
           ,@body)
         (finally (return ,array))))))
+
+
+(defun fill-multidimensional-array (array item)
+  "Fill `array` with `item`.
+
+  Unlike `fill`, this works on multidimensional arrays.  It won't cons on SBCL,
+  but it may in other implementations.
+
+  "
+  ;; from #lisp:
+  ;;
+  ;; <scymtym> sjl: the problem with the displaced array version is that it
+  ;; accumulates weak pointers to displaced arrays when the arrays are created
+  ;; and only removes them when the arrays are gced. that list is traversed each
+  ;; time a displaced array is created. so it can get much worse with more
+  ;; repetitions and depends on gc behavior
+  ;;
+  ;; <sjl> scymtym: ugh, that's an sbcl-specific thing then?
+  ;;
+  ;; <scymtym> sjl: probably. i don't know how other implementations handle the
+  ;; problem. the reason for this weak pointer mechanism is that resizing the
+  ;; displaced-to array can propagate to the displaced array which has to be
+  ;; a pretty rare case
+  #+sbcl
+  (fill (sb-ext:array-storage-vector array) item)
+  #-(or sbcl)
+  (fill (make-array (array-total-size array)
+          :adjustable nil
+          :fill-pointer nil
+          :displaced-to array
+          :element-type (array-element-type array))
+        item)
+  array)
 
 
 ;;;; Hash Tables

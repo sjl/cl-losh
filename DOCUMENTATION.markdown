@@ -46,6 +46,17 @@ Perform `body` once for each element in `array` using `value` for the place.
 
   
 
+### `FILL-MULTIDIMENSIONAL-ARRAY` (function)
+
+    (FILL-MULTIDIMENSIONAL-ARRAY ARRAY ITEM)
+
+Fill `array` with `item`.
+
+  Unlike `fill`, this works on multidimensional arrays.  It won't cons on SBCL,
+  but it may in other implementations.
+
+  
+
 ## Package `LOSH.CONTROL-FLOW`
 
 Utilities for managing control flow.
