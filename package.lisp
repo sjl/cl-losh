@@ -132,7 +132,9 @@
     #:across-flat-array
     #:index-of-flat-array
     #:cycling
-    #:for-nested))
+    #:for-nested
+    #:within-radius
+    #:skip-origin))
 
 (defsubpackage #:losh.distributions
   (:documentation "Utilities for calculating statistical... things.")

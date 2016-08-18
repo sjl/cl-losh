@@ -1,4 +1,4 @@
-.PHONY:
+.PHONY: docs
 
 sourcefiles = $(shell ffind --full-path --literal .lisp)
 
@@ -7,4 +7,6 @@ quickutils.lisp: make-quickutils.lisp
 
 DOCUMENTATION.markdown: $(sourcefiles)
 	sbcl --noinform --load make-docs.lisp  --eval '(quit)'
+
+docs: DOCUMENTATION.markdown
 

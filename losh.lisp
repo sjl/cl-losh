@@ -833,6 +833,39 @@
                  ,on-cycle)
                ,%counter))))))))
 
+
+(defmacro-clause (GENERATE-NESTED forms CONTROL-VAR control-var)
+  (iterate
+    (for (var . args) :in forms)
+    (for prev :previous var :initially nil)
+
+    ;; we basically turn
+    ;;   (for-nested ((x :from 0 :to n)
+    ;;                (y :from 0 :to m)
+    ;;                (z :from 0 :to q)))
+    ;; into
+    ;;   (generate x :from 0 :to n)
+    ;;   (generate y :cycling (next x) :from 0 :to m)
+    ;;   (generate z :cycling (next y) :from 0 :to q)
+    ;;   (generate control-var
+    ;;     :next (if-first-time
+    ;;             (progn (next x) (next y) (next z))
+    ;;             (next z)))
+    (collect var :into vars)
+    (collect `(generate ,var
+               ,@(when prev `(:cycling (next ,prev)))
+               ,@args)
+             :into cycling-forms)
+
+    (finally (return `(progn
+                       ,@cycling-forms
+                       (declare (ignorable ,control-var))
+                       (generate ,control-var :next
+                                 (if-first-time
+                                   (progn ,@(iterate (for v :in vars)
+                                                     (collect `(next ,v))))
+                                   (next ,var))))))))
+
 (defmacro-clause (FOR-NESTED forms)
   "Iterate the given `forms` in a nested fashion.
 
@@ -863,33 +896,72 @@
     (3 0.8)
 
    "
-  (iterate
-    (for (var . args) :in forms)
-    (for prev :previous var :initially nil)
+  (with-gensyms (control)
+    `(progn
+      (generate-nested ,forms :control-var ,control)
+      (next ,control))))
 
-    ;; we basically turn
-    ;;   (for-nested ((x :from 0 :to n)
-    ;;                (y :from 0 :to m)
-    ;;                (z :from 0 :to q)))
-    ;; into
-    ;;   (generate x :from 0 :to n)
-    ;;   (generate y :cycling (next x) :from 0 :to m)
-    ;;   (generate z :cycling (next y) :from 0 :to q)
-    ;;   (if-first-time
-    ;;     (progn (next x) (next y) (next z))
-    ;;     (next z))
-    (collect var :into vars)
-    (collect `(generate ,var
-               ,@(when prev `(:cycling (next ,prev)))
-               ,@args)
-             :into cycling-forms)
 
-    (finally (return `(progn
-                       ,@cycling-forms
-                       (if-first-time
-                         (progn ,@(iterate (for v :in vars)
-                                           (collect `(next ,v))))
-                         (next ,var)))))))
+(defmacro-clause (FOR delta-vars WITHIN-RADIUS radius &optional
+                  SKIP-ORIGIN should-skip-origin)
+  "Iterate through a number of delta values within a given radius.
+
+  Imagine you have a 2D array and you want to find all the neighbors of a given
+  cell:
+
+     .........
+     ...nnn...
+     ...nXn...
+     ...nnn...
+     .........
+
+  You'll need to iterate over the cross product of the array indices from
+  `(- target 1)` to `(+ target 1)`.
+
+  You may want to have a larger radius, and you may or may not want to include
+  the origin (delta `(0 0)`).
+
+  This clause handles calculating the deltas for you, without needless consing.
+
+  Examples:
+
+    (iterate (for (x) :within-radius 2)
+             (collect (list x)))
+    =>
+    ((-2) (-1) (0) (1) (2))
+
+    (iterate (for (x y) :within-radius 1 :skip-origin t)
+             (collect (list x y)))
+    =>
+    ((-1 -1)
+     (-1  0)
+     (-1  1)
+     ( 0 -1)
+     ( 0  1)
+     ( 1 -1)
+     ( 1  0)
+     ( 1  1))
+
+    (iterate (for (x y z) :within-radius 3)
+             (collect (list x y z)))
+    =>
+    ; ... a bigass list of deltas,
+    ; the point it is works in arbitrary dimensions.
+
+  "
+  (with-gensyms (r -r control skip)
+    `(progn
+      (with ,r = ,radius)
+      (with ,-r = (- ,r))
+      (with ,skip = ,should-skip-origin)
+      (generate-nested ,(iterate (for var :in delta-vars)
+                                 (collect `(,var :from ,-r :to ,r)))
+                       :control-var ,control)
+      (next ,control)
+      (when (and ,skip
+                 ,@(iterate (for var :in delta-vars)
+                            (collect `(zerop ,var))))
+        (next ,control)))))
 
 
 ;;;; Distributions
