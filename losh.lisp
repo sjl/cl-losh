@@ -280,16 +280,19 @@
 (define-modify-macro mulf (factor) *
   "Multiply `place` by `factor` in-place.")
 
-(define-modify-macro divf (&optional divisor)
-  (lambda (value divisor)
-    (if divisor
-      (/ value divisor)
-      (/ value)))
+
+(defun %divf (value &optional divisor)
+  (if divisor
+    (/ value divisor)
+    (/ value)))
+
+(define-modify-macro divf (&optional divisor) %divf
   "Divide `place` by `divisor` in-place.
 
   If `divisor` is not given, `place` will be set to `(/ 1 place)`.
 
   ")
+
 
 (define-modify-macro modf (divisor) mod
   "Modulo `place` by `divisor` in-place.")
@@ -304,10 +307,12 @@
   "Negate the value of `place`.")
 
 
-(define-modify-macro %callf (function)
-  (lambda (value function)
-    (funcall function value))
+(defun %funcall (value function)
+  (funcall function value))
+
+(define-modify-macro %callf (function) %funcall
   "Set `place` to the result of calling `function` on its current value.")
+
 
 (defmacro callf (&rest place-function-pairs)
   "Set each `place` to the result of calling `function` on its current value.
