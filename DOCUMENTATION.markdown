@@ -644,3 +644,36 @@ Slap `args` together stringishly into a symbol and intern it.
 
   
 
+## Package `LOSH.WEIGHTLISTS`
+
+A simple data structure for choosing random items with weighted probabilities.
+
+### `MAKE-WEIGHTLIST` (function)
+
+    (MAKE-WEIGHTLIST ITEMS WEIGHTS)
+
+Make a weightlist of the given items and weights.
+  
+  Weights can be any `real` numbers.  Weights of zero are fine, as long as at
+  least one of the weights is nonzero (otherwise there's nothing to choose).
+
+  
+
+### `WEIGHTLIST`
+
+`#<STANDARD-CLASS DOCPARSER:STRUCT-NODE>`
+
+### `WEIGHTLIST-ITEMS` (function)
+
+    (WEIGHTLIST-ITEMS VALUE INSTANCE)
+
+### `WEIGHTLIST-RANDOM` (function)
+
+    (WEIGHTLIST-RANDOM WEIGHTLIST)
+
+Return a random item from the weightlist, taking the weights into account.
+
+### `WEIGHTLIST-WEIGHTS` (function)
+
+    (WEIGHTLIST-WEIGHTS VALUE INSTANCE)
+

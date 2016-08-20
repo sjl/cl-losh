@@ -170,6 +170,16 @@
     #:slurp
     #:spit))
 
+(defsubpackage #:losh.weightlists
+  (:documentation
+    "A simple data structure for choosing random items with weighted probabilities.")
+  (:export
+    #:weightlist
+    #:weightlist-weights
+    #:weightlist-items
+    #:make-weightlist
+    #:weightlist-random))
+
 (defsubpackage #:losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")
   (:export
