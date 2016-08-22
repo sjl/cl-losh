@@ -443,27 +443,6 @@
 (defun-fmda single-float)
 
 
-;;;; Hash Tables
-(defmacro gethash-or-init (key hash-table default-form)
-  "Get `key`'s value in `hash-table`, initializing if necessary.
-
-  If `key` is in `hash-table`: return its value without evaluating
-  `default-form` at all.
-
-  If `key` is NOT in `hash-table`: evaluate `default-form` and insert it before
-  returning it.
-
-  "
-  ;; TODO: think up a less shitty name for this
-  (once-only (key hash-table)
-    (with-gensyms (value found)
-      `(multiple-value-bind (,value ,found)
-        (gethash ,key ,hash-table)
-        (if ,found
-          ,value
-          (setf (gethash ,key ,hash-table) ,default-form))))))
-
-
 ;;;; Queues
 ;;; Based on the PAIP queues (thanks, Norvig), but beefed up a little bit to add
 ;;; tracking of the queue size.

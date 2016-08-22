@@ -96,11 +96,6 @@
     #:fill-multidimensional-array-fixnum
     #:fill-multidimensional-array-single-float))
 
-(defsubpackage #:losh.hash-tables
-  (:documentation "Utilities related to hash tables.")
-  (:export
-    #:gethash-or-init))
-
 (defsubpackage #:losh.queues
   (:documentation "A simple queue implementation.")
   (:export
