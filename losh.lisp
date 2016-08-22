@@ -249,6 +249,106 @@
                 ,@body))
       (recur ,@(mapcar #'extract-val bindings)))))
 
+(defmacro when-found (var lookup-expr &body body)
+  "Perform `body` with `var` to the results of `lookup-expr`, when valid.
+
+  `lookup-expr` should be an expression that returns two values, the first being
+  the result (which will be bound to `var`) and the second indicating whether
+  the lookup was successful.  The standard `gethash` is an example of a function
+  that behaves like this.
+
+  If the lookup was successful, `body` will be executed and its value returned.
+
+  Example:
+
+    (multiple-value-bind (val found) (gethash :foo hash)
+      (when found
+        body))
+
+    ; becomes
+
+    (when-found val (gethash :foo hash)
+      body)
+
+  "
+  (with-gensyms (found)
+    `(multiple-value-bind (,var ,found) ,lookup-expr
+       ;; We could preserve and pass along the value of found as a secondary
+       ;; return value from the form, but that would kill potential last-call
+       ;; optimization (and the ability to return multiple values from `body`).
+       (when ,found
+         ,@body))))
+
+(defmacro if-found (var lookup-expr then else)
+  "Perform `body` or `else` depending on the results of `lookup-expr`.
+
+  `lookup-expr` should be an expression that returns two values, the first being
+  the result and the second indicating whether the lookup was successful.  The
+  standard `gethash` is an example of a function that behaves like this.
+
+  If the lookup was successful, `then` will be executed with `var` bound to the
+  result, and its value returned.
+
+  Otherwise `else` will be executed, without any extra bindings.
+
+  Example:
+
+    (multiple-value-bind (val found) (gethash :foo hash)
+      (if found
+        'yes
+        'no))
+
+    ; becomes
+
+    (if-found val (gethash :foo hash)
+      'yes
+      'no)
+
+  "
+  (with-gensyms (found result)
+    `(multiple-value-bind (,result ,found) ,lookup-expr
+      (if ,found
+        (let ((,var ,result))
+          ,then)
+        ,else))))
+
+(defmacro gathering (&body body)
+  "Run `body` to gather some things and return them.
+
+  `body` will be executed with the symbol `gather` bound to a function of one
+  argument.  Once `body` has finished, a list of everything `gather` was called
+  on will be returned.
+
+  It's handy for pulling results out of code that executes procedurally and
+  doesn't return anything, like `maphash` or Alexandria's `map-permutations`.
+
+  The `gather` function can be passed to other functions, but should not be
+  retained once the `gathering` form has returned (it would be useless to do so
+  anyway).
+
+  Examples:
+
+    (gathering
+      (dotimes (i 5)
+        (gather i))
+    =>
+    (0 1 2 3 4)
+
+    (gathering
+      (mapc #'gather '(1 2 3))
+      (mapc #'gather '(a b)))
+    =>
+    (1 2 3 a b)
+
+  "
+  (with-gensyms (result)
+    `(let ((,result (make-queue)))
+      (flet ((gather (item)
+               (enqueue item ,result)))
+        (declare (dynamic-extent #'gather))
+        ,@body)
+      (queue-contents ,result))))
+
 
 ;;;; Mutation
 (defun build-zap (place expr env)

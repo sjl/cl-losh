@@ -67,7 +67,11 @@
   (:documentation "Utilities for managing control flow.")
   (:export
     #:recursively
-    #:recur))
+    #:recur
+    #:when-found
+    #:if-found
+    #:gathering
+    #:gather))
 
 (defsubpackage #:losh.mutation
   (:documentation "Utilities for mutating places in-place.")
