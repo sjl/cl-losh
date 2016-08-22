@@ -402,6 +402,7 @@
   ;; a pretty rare case
   #+sbcl
   (fill (sb-ext:array-storage-vector array) item)
+
   #-(or sbcl)
   (fill (make-array (array-total-size array)
           :adjustable nil
@@ -409,6 +410,7 @@
           :displaced-to array
           :element-type (array-element-type array))
         item)
+
   array)
 
 
@@ -552,19 +554,14 @@
 
   "
   (with-gensyms (count)
-    (let ((average (or var (gensym "average"))))
+    (let ((average (or var iterate::*result-var*)))
       `(progn
+        (for ,count :from 0)
         (for ,average
              :first ,expr
-             ;; continuously recompute the running average instead of keeping
-             ;; a running total to avoid bignums when possible
              :then (/ (+ (* ,average ,count)
                          ,expr)
-                      (1+ ,count)))
-        (for ,count :from 1)
-        ,(when (null var)
-           ;; todo handle this better
-           `(finally (return ,average)))))))
+                      (1+ ,count)))))))
 
 (defmacro-clause (TIMING time-type &optional
                   SINCE-START-INTO since-var
