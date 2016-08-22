@@ -615,17 +615,17 @@
   (let ((timing-function (ecase time-type
                            ((real-time) #'get-internal-real-time)
                            ((run-time) #'get-internal-run-time)))
-        (since (or since-var (gensym))))
+        (since (or since-var (when (null per-var)
+                               iterate::*result-var*))))
     (with-gensyms (start-time current-time previous-time)
       `(progn
         (with ,start-time = (funcall ,timing-function))
         (for ,current-time = (funcall ,timing-function))
         (for ,previous-time :previous ,current-time :initially ,start-time)
-        (for ,since = (- ,current-time ,start-time))
+        ,(when since
+           `(for ,since = (- ,current-time ,start-time)))
         ,(when per-var
-           `(for ,per-var = (- ,current-time ,previous-time)))
-        ,(when (and (null since-var) (null per-var))
-           `(finally (return ,since)))))))
+           `(for ,per-var = (- ,current-time ,previous-time)))))))
 
 
 (defmacro-driver (FOR var IN-LISTS lists)
