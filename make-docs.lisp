@@ -11,7 +11,6 @@
         "LOSH.FILE-IO"
         "LOSH.FUNCTIONS"
         "LOSH.HASH-SETS"
-        "LOSH.HASH-TABLES"
         "LOSH.ITERATE"
         "LOSH.LISTS"
         "LOSH.MATH"

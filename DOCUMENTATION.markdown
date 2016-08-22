@@ -94,6 +94,71 @@ Fill `array` (which must be of type `(array T *)`) with `item`.
 
 Utilities for managing control flow.
 
+### `GATHERING` (macro)
+
+    (GATHERING
+      &BODY
+      BODY)
+
+Run `body` to gather some things and return them.
+
+  `body` will be executed with the symbol `gather` bound to a function of one
+  argument.  Once `body` has finished, a list of everything `gather` was called
+  on will be returned.
+
+  It's handy for pulling results out of code that executes procedurally and
+  doesn't return anything, like `maphash` or Alexandria's `map-permutations`.
+
+  The `gather` function can be passed to other functions, but should not be
+  retained once the `gathering` form has returned (it would be useless to do so
+  anyway).
+
+  Examples:
+
+    (gathering
+      (dotimes (i 5)
+        (gather i))
+    =>
+    (0 1 2 3 4)
+
+    (gathering
+      (mapc #'gather '(1 2 3))
+      (mapc #'gather '(a b)))
+    =>
+    (1 2 3 a b)
+
+  
+
+### `IF-FOUND` (macro)
+
+    (IF-FOUND VAR LOOKUP-EXPR THEN ELSE)
+
+Perform `body` or `else` depending on the results of `lookup-expr`.
+
+  `lookup-expr` should be an expression that returns two values, the first being
+  the result and the second indicating whether the lookup was successful.  The
+  standard `gethash` is an example of a function that behaves like this.
+
+  If the lookup was successful, `then` will be executed with `var` bound to the
+  result, and its value returned.
+
+  Otherwise `else` will be executed, without any extra bindings.
+
+  Example:
+
+    (multiple-value-bind (val found) (gethash :foo hash)
+      (if found
+        'yes
+        'no))
+
+    ; becomes
+
+    (if-found val (gethash :foo hash)
+      'yes
+      'no)
+
+  
+
 ### `RECURSIVELY` (macro)
 
     (RECURSIVELY BINDINGS
@@ -113,6 +178,35 @@ Execute body recursively, like Clojure's `loop`/`recur`.
           (if (null list)
             n
             (recur (cdr list) (1+ n)))))
+
+  
+
+### `WHEN-FOUND` (macro)
+
+    (WHEN-FOUND VAR
+        LOOKUP-EXPR
+      &BODY
+      BODY)
+
+Perform `body` with `var` to the results of `lookup-expr`, when valid.
+
+  `lookup-expr` should be an expression that returns two values, the first being
+  the result (which will be bound to `var`) and the second indicating whether
+  the lookup was successful.  The standard `gethash` is an example of a function
+  that behaves like this.
+
+  If the lookup was successful, `body` will be executed and its value returned.
+
+  Example:
+
+    (multiple-value-bind (val found) (gethash :foo hash)
+      (when found
+        body))
+
+    ; becomes
+
+    (when-found val (gethash :foo hash)
+      body)
 
   
 
@@ -337,24 +431,6 @@ A simple hash set implementation.
 
     (SET-REMOVE-ALL SET SEQ)
 
-## Package `LOSH.HASH-TABLES`
-
-Utilities related to hash tables.
-
-### `GETHASH-OR-INIT` (macro)
-
-    (GETHASH-OR-INIT KEY HASH-TABLE DEFAULT-FORM)
-
-Get `key`'s value in `hash-table`, initializing if necessary.
-
-  If `key` is in `hash-table`: return its value without evaluating
-  `default-form` at all.
-
-  If `key` is NOT in `hash-table`: evaluate `default-form` and insert it before
-  returning it.
-
-  
-
 ## Package `LOSH.ITERATE`
 
 Custom `iterate` drivers and clauses.
@@ -533,9 +609,9 @@ A simple queue implementation.
 
     (MAKE-QUEUE)
 
-### `QUEUE`
+### `QUEUE` (struct)
 
-`#<STANDARD-CLASS DOCPARSER:STRUCT-NODE>`
+Slots: `CONTENTS`, `LAST`, `SIZE`
 
 ### `QUEUE-APPEND` (function)
 
@@ -659,9 +735,9 @@ Make a weightlist of the given items and weights.
 
   
 
-### `WEIGHTLIST`
+### `WEIGHTLIST` (struct)
 
-`#<STANDARD-CLASS DOCPARSER:STRUCT-NODE>`
+Slots: `WEIGHTS`, `SUMS`, `ITEMS`, `TOTAL`
 
 ### `WEIGHTLIST-ITEMS` (function)
 
