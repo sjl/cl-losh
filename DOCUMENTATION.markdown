@@ -177,7 +177,8 @@ Execute `body` recursively, like Clojure's `loop`/`recur`.
   Example:
 
       (defun length (some-list)
-        (recursively ((list some-list) (n 0))
+        (recursively ((list some-list)
+                      (n 0))
           (if (null list)
             n
             (recur (cdr list) (1+ n)))))
