@@ -1159,13 +1159,29 @@
 
 ;;;; Debugging & Logging
 (defun pr (&rest args)
+  "Print `args` readably, separated by spaces and followed by a newline.
+
+  This is what `print` should have been.
+
+  "
   (format t "~{~S~^ ~}~%" args)
   (finish-output)
   (values))
 
-(defun bits (n size)
+(defun bits (n size &optional (stream t))
+  "Print the bits of the `size`-bit two's complement integer `n` to `stream`.
+
+  Examples:
+
+    (bits 5 10)
+    => 0000000101
+
+    (bits -5 10)
+    => 1111111011
+
+  "
   ;; http://blog.chaitanyagupta.com/2013/10/print-bit-representation-of-signed.html
-  (format t (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
+  (format stream (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
   (values))
 
 (defmacro dis (arglist &body body)
@@ -1188,7 +1204,7 @@
 
 (defun make-weightlist (items weights)
   "Make a weightlist of the given items and weights.
-  
+
   Weights can be any `real` numbers.  Weights of zero are fine, as long as at
   least one of the weights is nonzero (otherwise there's nothing to choose).
 

@@ -220,7 +220,19 @@ Utilities for figuring out what the hell is going on.
 
 ### `BITS` (function)
 
-    (BITS N SIZE)
+    (BITS N SIZE &OPTIONAL (STREAM T))
+
+Print the bits of the `size`-bit two's complement integer `n` to `stream`.
+
+  Examples:
+
+    (bits 5 10)
+    => 0000000101
+
+    (bits -5 10)
+    => 1111111011
+
+  
 
 ### `DIS` (macro)
 
@@ -238,6 +250,12 @@ Disassemble the code generated for a `lambda` with `arglist` and `body`.
 ### `PR` (function)
 
     (PR &REST ARGS)
+
+Print `args` readably, separated by spaces and followed by a newline.
+
+  This is what `print` should have been.
+
+  
 
 ## Package `LOSH.DISTRIBUTIONS`
 
@@ -727,7 +745,7 @@ A simple data structure for choosing random items with weighted probabilities.
     (MAKE-WEIGHTLIST ITEMS WEIGHTS)
 
 Make a weightlist of the given items and weights.
-  
+
   Weights can be any `real` numbers.  Weights of zero are fine, as long as at
   least one of the weights is nonzero (otherwise there's nothing to choose).
 
