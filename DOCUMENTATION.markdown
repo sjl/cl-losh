@@ -600,15 +600,21 @@ A simple queue implementation.
 
 ### `DEQUEUE` (function)
 
-    (DEQUEUE Q)
+    (DEQUEUE QUEUE)
+
+Dequeue an item from `queue` and return it.
 
 ### `ENQUEUE` (function)
 
-    (ENQUEUE ITEM Q)
+    (ENQUEUE ITEM QUEUE)
+
+Enqueue `item` in `queue`, returning the new size of the queue.
 
 ### `MAKE-QUEUE` (function)
 
     (MAKE-QUEUE)
+
+Allocate and return a fresh queue.
 
 ### `QUEUE` (struct)
 
@@ -616,7 +622,9 @@ Slots: `CONTENTS`, `LAST`, `SIZE`
 
 ### `QUEUE-APPEND` (function)
 
-    (QUEUE-APPEND Q L)
+    (QUEUE-APPEND QUEUE LIST)
+
+Enqueue each element of `list` in `queue` and return the queue's final size.
 
 ### `QUEUE-CONTENTS` (function)
 
@@ -624,7 +632,9 @@ Slots: `CONTENTS`, `LAST`, `SIZE`
 
 ### `QUEUE-EMPTY-P` (function)
 
-    (QUEUE-EMPTY-P Q)
+    (QUEUE-EMPTY-P QUEUE)
+
+Return whether `queue` is empty.
 
 ### `QUEUE-SIZE` (function)
 
@@ -703,23 +713,6 @@ Return a random number between (`min`, `max`).
     (RANDOMP &OPTIONAL (CHANCE 0.5))
 
 Return a random boolean with `chance` probability of `t`.
-
-## Package `LOSH.SYMBOLS`
-
-Utilities related to symbols.
-
-### `SYMBOLIZE` (function)
-
-    (SYMBOLIZE &REST ARGS)
-
-Slap `args` together stringishly into a symbol and intern it.
-
-  Example:
-
-    (symbolize 'foo :bar "baz")
-    => 'foobarbaz
-
-  
 
 ## Package `LOSH.WEIGHTLISTS`
 

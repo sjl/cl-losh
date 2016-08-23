@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:CURRY :RCURRY :EMPTYP :ENSURE-LIST :WITH-GENSYMS :ONCE-ONLY) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:CURRY :RCURRY :EMPTYP :SYMB :ENSURE-LIST :WITH-GENSYMS :ONCE-ONLY) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -15,8 +15,9 @@
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
                                          :CURRY :RCURRY :NON-ZERO-P :EMPTYP
-                                         :ENSURE-LIST :STRING-DESIGNATOR
-                                         :WITH-GENSYMS :ONCE-ONLY))))
+                                         :MKSTR :SYMB :ENSURE-LIST
+                                         :STRING-DESIGNATOR :WITH-GENSYMS
+                                         :ONCE-ONLY))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -83,6 +84,23 @@ with and `arguments` to `function`."
     (:method ((x vector)) (zerop (length x))) ; STRING :< VECTOR
     (:method ((x array)) (notany #'non-zero-p (array-dimensions x)))
     (:method ((x hash-table)) (zerop (hash-table-count x))))
+  
+
+  (defun mkstr (&rest args)
+    "Receives any number of objects (string, symbol, keyword, char, number), extracts all printed representations, and concatenates them all into one string.
+
+Extracted from _On Lisp_, chapter 4."
+    (with-output-to-string (s)
+      (dolist (a args) (princ a s))))
+  
+
+  (defun symb (&rest args)
+    "Receives any number of objects, concatenates all into one string with `#'mkstr` and converts them to symbol.
+
+Extracted from _On Lisp_, chapter 4.
+
+See also: `symbolicate`"
+    (values (intern (apply #'mkstr args))))
   
 
   (defun ensure-list (list)
@@ -175,7 +193,7 @@ Example:
                ,@forms)))))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(curry rcurry emptyp ensure-list with-gensyms with-unique-names
+  (export '(curry rcurry emptyp symb ensure-list with-gensyms with-unique-names
             once-only)))
 
 ;;;; END OF quickutils.lisp ;;;;

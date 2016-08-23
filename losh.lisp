@@ -15,20 +15,6 @@
      ',name))
 
 
-;;;; Symbols
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun symbolize (&rest args)
-    "Slap `args` together stringishly into a symbol and intern it.
-
-  Example:
-
-    (symbolize 'foo :bar \"baz\")
-    => 'foobarbaz
-
-  "
-    (intern (format nil "~{~A~}" args))))
-
-
 ;;;; Math
 (defconstant tau (coerce (* pi 2) 'single-float)) ; fuck a pi
 
@@ -537,7 +523,7 @@
   "))
 
 (defmacro defun-fmda (type)
-  `(defun ,(symbolize 'fill-multidimensional-array- type) (array item)
+  `(defun ,(symb 'fill-multidimensional-array- type) (array item)
     ,(format nil *fmda-docstring* type)
     (fill-mda array item)))
 
@@ -1268,10 +1254,10 @@
 
   "
   (let* ((accessors (loop :for slot :in slots
-                          :collect (symbolize type '- slot)))
+                          :collect (symb type '- slot)))
          (symbol-args (loop :for slot :in slots
-                            :collect (symbolize slot '-symbol)))
-         (macro-name (symbolize 'with- type))
+                            :collect (symb slot '-symbol)))
+         (macro-name (symb 'with- type))
          (macro-arglist `((,type &optional
                            ,@(loop :for slot :in slots
                                    :for arg :in symbol-args

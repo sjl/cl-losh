@@ -16,7 +16,6 @@
         "LOSH.MUTATION"
         "LOSH.QUEUES"
         "LOSH.RANDOM"
-        "LOSH.SYMBOLS"
         "LOSH.WEIGHTLISTS"
 
         ))

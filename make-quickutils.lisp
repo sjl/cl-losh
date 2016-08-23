@@ -5,6 +5,7 @@
   :utilities '(:curry
                :rcurry
                :emptyp
+               :symb
                :ensure-list
                :with-gensyms
                :once-only)

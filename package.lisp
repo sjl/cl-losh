@@ -28,11 +28,6 @@
   "))
 
 
-(defsubpackage #:losh.symbols
-  (:documentation "Utilities related to symbols.")
-  (:export
-    #:symbolize))
-
 (defsubpackage #:losh.math
   (:documentation "Utilities related to math and numbers.")
   (:export
