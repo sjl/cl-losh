@@ -19,15 +19,24 @@
 (defconstant tau (coerce (* pi 2) 'single-float)) ; fuck a pi
 
 
-(defun-inlineable square (x)
+(defun-inline square (x)
   (* x x))
 
-(defun dividesp (n divisor)
+(defun-inline dividesp (n divisor)
   "Return whether `n` is evenly divisible by `divisor`."
   (zerop (mod n divisor)))
 
 
-(defun norm (min max val)
+(declaim (ftype (function (real real real)
+                          (values real &optional))
+                norm lerp precise-lerp clamp))
+
+(declaim (ftype (function (real real real real real)
+                          (values real &optional))
+                map-range))
+
+
+(defun-inline norm (min max val)
   "Normalize `val` to a number between `0` and `1` (maybe).
 
   If `val` is between `max` and `min`, the result will be a number between `0`
@@ -40,16 +49,16 @@
   (/ (- val min)
      (- max min)))
 
-(defun lerp (from to n)
+(defun-inline lerp (from to n)
   "Lerp together `from` and `to` by factor `n`.
 
-  Note that you might want `precise-lerp` instead.
+  You might want `precise-lerp` instead.
 
   "
   (+ from
      (* n (- to from))))
 
-(defun precise-lerp (from to n)
+(defun-inline precise-lerp (from to n)
   "Lerp together `from` and `to` by factor `n`, precisely.
 
   Vanilla lerp does not guarantee `(lerp from to 0.0)` will return exactly
@@ -60,7 +69,7 @@
   (+ (* (- 1 n) from)
      (* n to)))
 
-(defun map-range (source-from source-to dest-from dest-to source-val)
+(defun-inline map-range (source-from source-to dest-from dest-to source-val)
   "Map `source-val` from the source range to the destination range.
 
   Example:
@@ -73,7 +82,7 @@
   (lerp dest-from dest-to
         (norm source-from source-to source-val)))
 
-(defun clamp (from to value)
+(defun-inline clamp (from to value)
   "Clamp `value` between `from` and `to`."
   (let ((max (max from to))
         (min (min from to)))
@@ -131,7 +140,7 @@
     "Return a random float from a gaussian distribution.  NOT THREAD-SAFE (yet)!"
     ;; https://en.wikipedia.org/wiki/Marsaglia_polar_method
     (declare (optimize (speed 3))
-             (inline square random-range))
+             (inline random-range))
     (flet ((scale (n)
              (+ mean (* n standard-deviation))))
       (if spare
@@ -150,7 +159,7 @@
 
 (defun random-gaussian-integer (&optional (mean 0) (standard-deviation 1))
   "Return a random integer from a gaussian distribution.  NOT THREAD-SAFE (yet)!"
-  (round (random-gaussian mean standard-deviation)))
+  (values (round (random-gaussian mean standard-deviation))))
 
 
 (defun d (n sides &optional (plus 0))
