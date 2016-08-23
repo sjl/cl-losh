@@ -484,7 +484,7 @@ Return whether `n` is evenly divisible by `divisor`.
 
 Lerp together `from` and `to` by factor `n`.
 
-  Note that you might want `precise-lerp` instead.
+  You might want `precise-lerp` instead.
 
   
 

@@ -3,32 +3,25 @@
 
 (in-package #:losh.internal)
 
-(defun reexport (source-package &optional (target-package '#:losh))
-  (do-external-symbols (s (find-package source-package))
-    (import s (find-package target-package))
-    (export s (find-package target-package))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun external-symbols (package)
+    (let ((symbols nil))
+      (do-external-symbols (s (find-package package) symbols)
+        (push s symbols)))))
 
-(defmacro defsubpackage (name &rest args)
-  `(progn
-    (defpackage ,name ,@args)
-    (reexport ',name)))
-
-
-(defpackage #:losh
-  (:use
-    #:cl
-    #:iterate
-    #:losh.quickutils)
-  (:documentation
-    "This package exports all of the symbols in the other packages.
-
-  If you just want to get everything you can `:use` this one and be done with
-  it.  Otherwise you can `:use` only the ones you need.
-
-  "))
+(defmacro defpackage-inheriting (name parent-packages &rest args)
+  `(defpackage ,name
+     ,@args
+     ,@(loop :for parent-package :in parent-packages
+             :collect
+             `(:use ,parent-package)
+             :collect
+             `(:export ,@(external-symbols parent-package)))))
 
 
-(defsubpackage #:losh.math
+
+
+(defpackage #:losh.math
   (:documentation "Utilities related to math and numbers.")
   (:export
     #:tau
@@ -40,7 +33,7 @@
     #:map-range
     #:clamp))
 
-(defsubpackage #:losh.random
+(defpackage #:losh.random
   (:documentation "Utilities related to randomness.")
   (:export
     #:randomp
@@ -52,13 +45,13 @@
     #:random-gaussian-integer
     #:d))
 
-(defsubpackage #:losh.functions
+(defpackage #:losh.functions
   (:documentation "Utilities for working with higher-order functions.")
   (:export
     #:juxt
     #:nullary))
 
-(defsubpackage #:losh.control-flow
+(defpackage #:losh.control-flow
   (:documentation "Utilities for managing control flow.")
   (:export
     #:recursively
@@ -68,7 +61,7 @@
     #:gathering
     #:gather))
 
-(defsubpackage #:losh.mutation
+(defpackage #:losh.mutation
   (:documentation "Utilities for mutating places in-place.")
   (:export
     #:zapf
@@ -82,12 +75,12 @@
     #:notf
     #:callf))
 
-(defsubpackage #:losh.lists
+(defpackage #:losh.lists
   (:documentation "Utilities related to lists.")
   (:export
     #:take))
 
-(defsubpackage #:losh.arrays
+(defpackage #:losh.arrays
   (:documentation "Utilities related to arrays.")
   (:export
     #:do-array
@@ -96,7 +89,7 @@
     #:fill-multidimensional-array-fixnum
     #:fill-multidimensional-array-single-float))
 
-(defsubpackage #:losh.queues
+(defpackage #:losh.queues
   (:documentation "A simple queue implementation.")
   (:export
     #:queue
@@ -108,7 +101,7 @@
     #:dequeue
     #:queue-append))
 
-(defsubpackage #:losh.iterate
+(defpackage #:losh.iterate
   (:use #:iterate) ; need this for iterate's `for` symbol fuckery
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
@@ -131,13 +124,13 @@
     #:within-radius
     #:skip-origin))
 
-(defsubpackage #:losh.distributions
+(defpackage #:losh.distributions
   (:documentation "Utilities for calculating statistical... things.")
   (:export
     #:prefix-sums
     #:frequencies))
 
-(defsubpackage #:losh.hash-sets
+(defpackage #:losh.hash-sets
   (:documentation "A simple hash set implementation.")
   (:export
     #:hash-set
@@ -152,14 +145,14 @@
     #:set-random
     #:set-pop))
 
-(defsubpackage #:losh.debugging
+(defpackage #:losh.debugging
   (:documentation "Utilities for figuring out what the hell is going on.")
   (:export
     #:pr
     #:bits
     #:dis))
 
-(defsubpackage #:losh.weightlists
+(defpackage #:losh.weightlists
   (:documentation
     "A simple data structure for choosing random items with weighted probabilities.")
   (:export
@@ -169,11 +162,39 @@
     #:make-weightlist
     #:weightlist-random))
 
-(defsubpackage #:losh.eldritch-horrors
+(defpackage #:losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")
   (:export
     #:dlambda
     #:define-with-macro))
+
+
+(defpackage-inheriting #:losh
+  (#:losh.arrays
+   #:losh.control-flow
+   #:losh.debugging
+   #:losh.distributions
+   #:losh.eldritch-horrors
+   #:losh.functions
+   #:losh.hash-sets
+   #:losh.iterate
+   #:losh.lists
+   #:losh.math
+   #:losh.mutation
+   #:losh.queues
+   #:losh.random
+   #:losh.weightlists)
+  (:use
+    #:cl
+    #:iterate
+    #:losh.quickutils)
+  (:documentation
+    "This package exports all of the symbols in the other packages.
+
+  If you just want to get everything you can `:use` this one and be done with
+  it.  Otherwise you can `:use` only the ones you need.
+
+  "))
 
 
 ;;;; Remember to add it to the docs!
