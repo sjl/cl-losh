@@ -566,6 +566,12 @@ Multiply `place` by `factor` in-place.
 
 Negate the value of `place`.
 
+### `NOTF` (macro)
+
+    (NOTF PLACE)
+
+Set `place` to `(not place)` in-place.
+
 ### `REMAINDERF` (macro)
 
     (REMAINDERF PLACE DIVISOR)

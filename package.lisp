@@ -84,6 +84,7 @@
     #:remainderf
     #:clampf
     #:negatef
+    #:notf
     #:callf))
 
 (defsubpackage #:losh.lists

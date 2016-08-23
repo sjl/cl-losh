@@ -406,6 +406,9 @@
 (define-modify-macro negatef () -
   "Negate the value of `place`.")
 
+(define-modify-macro notf () not
+  "Set `place` to `(not place)` in-place.")
+
 
 (defun %funcall (value function)
   (funcall function value))
