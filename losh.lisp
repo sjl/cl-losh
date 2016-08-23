@@ -266,7 +266,7 @@
          ,@body))))
 
 (defmacro if-found (var lookup-expr then else)
-  "Perform `body` or `else` depending on the results of `lookup-expr`.
+  "Perform `then` or `else` depending on the results of `lookup-expr`.
 
   `lookup-expr` should be an expression that returns two values, the first being
   the result and the second indicating whether the lookup was successful.  The
