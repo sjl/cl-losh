@@ -494,6 +494,18 @@ Normalize `val` to a number between `0` and `1` (maybe).
 
   
 
+### `PRECISE-LERP` (function)
+
+    (PRECISE-LERP FROM TO N)
+
+Lerp together `from` and `to` by factor `n`, precisely.
+
+  Vanilla lerp does not guarantee `(lerp from to 0.0)` will return exactly
+  `from` due to floating-point errors.  This version will return exactly `from`
+  when given a `n` of `0.0`, at the cost of an extra multiplication.
+
+  
+
 ### `SQUARE` (function)
 
     (SQUARE X)

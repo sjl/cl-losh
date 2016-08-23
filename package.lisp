@@ -41,7 +41,7 @@
     #:dividesp
     #:norm
     #:lerp
-    #:precide-lerp
+    #:precise-lerp
     #:map-range
     #:clamp))
 
