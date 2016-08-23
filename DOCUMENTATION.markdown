@@ -347,7 +347,7 @@ Utilities for working with higher-order functions.
 
     (JUXT &REST FNS)
 
-Return a function that will juxtipose the results of `functions`.
+Return a function that will juxtapose the results of `functions`.
 
   This is like Clojure's `juxt`.  Given functions `(f0 f1 ... fn)`, this will
   return a new function which, when called with some arguments, will return
