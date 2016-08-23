@@ -169,7 +169,7 @@
 
 
 ;;;; Functions
-(defun juxt (&rest fns)
+(defun juxt (&rest functions)
   "Return a function that will juxtapose the results of `functions`.
 
   This is like Clojure's `juxt`.  Given functions `(f0 f1 ... fn)`, this will
@@ -183,7 +183,7 @@
 
   "
   (lambda (&rest args)
-    (mapcar (rcurry #'apply args) fns)))
+    (mapcar (rcurry #'apply args) functions)))
 
 (defun nullary (function &optional result)
   "Return a new function that acts as a nullary-patched version of `function`.
