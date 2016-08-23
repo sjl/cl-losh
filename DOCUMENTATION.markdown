@@ -345,7 +345,7 @@ Utilities for working with higher-order functions.
 
 ### `JUXT` (function)
 
-    (JUXT &REST FNS)
+    (JUXT &REST FUNCTIONS)
 
 Return a function that will juxtapose the results of `functions`.
 
