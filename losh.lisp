@@ -558,28 +558,51 @@
   (size 0 :type fixnum))
 
 
+(declaim
+  (ftype (function ()
+                   (values queue &optional))
+         make-queue)
+  (ftype (function (queue)
+                   (values boolean &optional))
+         queue-empty-p)
+  (ftype (function (t queue)
+                   (values fixnum &optional))
+         enqueue)
+  (ftype (function (queue)
+                   (values t &optional))
+         dequeue)
+  (ftype (function (queue list)
+                   (values fixnum &optional))
+         queue-append))
+
+
 (defun make-queue ()
+  "Allocate and return a fresh queue."
   (make-queue%))
 
-(defun queue-empty-p (q)
-  (zerop (queue-size q)))
+(defun queue-empty-p (queue)
+  "Return whether `queue` is empty."
+  (zerop (queue-size queue)))
 
-(defun enqueue (item q)
+(defun enqueue (item queue)
+  "Enqueue `item` in `queue`, returning the new size of the queue."
   (let ((cell (cons item nil)))
-    (setf (queue-last q)
-          (if (queue-empty-p q)
-            (setf (queue-contents q) cell)
-            (setf (cdr (queue-last q)) cell))))
-  (incf (queue-size q)))
+    (setf (queue-last queue)
+          (if (queue-empty-p queue)
+            (setf (queue-contents queue) cell)
+            (setf (cdr (queue-last queue)) cell))))
+  (incf (queue-size queue)))
 
-(defun dequeue (q)
-  (when (zerop (decf (queue-size q)))
-    (setf (queue-last q) nil))
-  (pop (queue-contents q)))
+(defun dequeue (queue)
+  "Dequeue an item from `queue` and return it."
+  (when (zerop (decf (queue-size queue)))
+    (setf (queue-last queue) nil))
+  (pop (queue-contents queue)))
 
-(defun queue-append (q l)
-  (loop :for item :in l
-        :for size = (enqueue item q)
+(defun queue-append (queue list)
+  "Enqueue each element of `list` in `queue` and return the queue's final size."
+  (loop :for item :in list
+        :for size = (enqueue item queue)
         :finally (return size)))
 
 
