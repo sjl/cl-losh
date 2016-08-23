@@ -218,6 +218,9 @@
 
   In `body` the symbol `recur` will be bound to the function for recurring.
 
+  Does not perform a tail-recursion check like Clojure's `loop`.  You know what
+  you're doing, right?
+
   Example:
 
       (defun length (some-list)
