@@ -265,7 +265,7 @@ Utilities for calculating statistical... things.
 
     (FREQUENCIES SEQ &KEY (TEST 'EQL))
 
-Return a hash table containing the feqeuencies of the items in `seq`.
+Return a hash table containing the freqeuencies of the items in `seq`.
 
   Uses `test` for the `:test` of the hash table.
 

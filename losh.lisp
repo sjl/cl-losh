@@ -1077,7 +1077,7 @@
     (collect s)))
 
 (defun frequencies (seq &key (test 'eql))
-  "Return a hash table containing the feqeuencies of the items in `seq`.
+  "Return a hash table containing the freqeuencies of the items in `seq`.
 
   Uses `test` for the `:test` of the hash table.
 
