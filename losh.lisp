@@ -275,7 +275,7 @@
   If the lookup was successful, `then` will be executed with `var` bound to the
   result, and its value returned.
 
-  Otherwise `else` will be executed, without any extra bindings.
+  Otherwise `else` will be executed and returned, without any extra bindings.
 
   Example:
 

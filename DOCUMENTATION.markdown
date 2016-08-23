@@ -133,7 +133,7 @@ Run `body` to gather some things and return them.
 
     (IF-FOUND VAR LOOKUP-EXPR THEN ELSE)
 
-Perform `body` or `else` depending on the results of `lookup-expr`.
+Perform `then` or `else` depending on the results of `lookup-expr`.
 
   `lookup-expr` should be an expression that returns two values, the first being
   the result and the second indicating whether the lookup was successful.  The
@@ -142,7 +142,7 @@ Perform `body` or `else` depending on the results of `lookup-expr`.
   If the lookup was successful, `then` will be executed with `var` bound to the
   result, and its value returned.
 
-  Otherwise `else` will be executed, without any extra bindings.
+  Otherwise `else` will be executed and returned, without any extra bindings.
 
   Example:
 
