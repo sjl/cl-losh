@@ -212,7 +212,7 @@
 
 ;;;; Control Flow
 (defmacro recursively (bindings &body body)
-  "Execute body recursively, like Clojure's `loop`/`recur`.
+  "Execute `body` recursively, like Clojure's `loop`/`recur`.
 
   `bindings` should contain a list of symbols and (optional) starting values.
 

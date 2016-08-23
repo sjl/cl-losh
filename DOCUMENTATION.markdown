@@ -165,7 +165,7 @@ Perform `then` or `else` depending on the results of `lookup-expr`.
       &BODY
       BODY)
 
-Execute body recursively, like Clojure's `loop`/`recur`.
+Execute `body` recursively, like Clojure's `loop`/`recur`.
 
   `bindings` should contain a list of symbols and (optional) starting values.
 
