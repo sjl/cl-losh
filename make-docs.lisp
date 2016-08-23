@@ -8,7 +8,6 @@
         "LOSH.DEBUGGING"
         "LOSH.DISTRIBUTIONS"
         "LOSH.ELDRITCH-HORRORS"
-        "LOSH.FILE-IO"
         "LOSH.FUNCTIONS"
         "LOSH.HASH-SETS"
         "LOSH.ITERATE"

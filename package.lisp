@@ -163,12 +163,6 @@
     #:bits
     #:dis))
 
-(defsubpackage #:losh.file-io
-  (:documentation "Utilities for reading from and writing to files.")
-  (:export
-    #:slurp
-    #:spit))
-
 (defsubpackage #:losh.weightlists
   (:documentation
     "A simple data structure for choosing random items with weighted probabilities.")

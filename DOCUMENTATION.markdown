@@ -317,23 +317,6 @@ Define a with-`type` macro for the given `type` and `slots`.
 
     (DLAMBDA &REST CLAUSES)
 
-## Package `LOSH.FILE-IO`
-
-Utilities for reading from and writing to files.
-
-### `SLURP` (function)
-
-    (SLURP PATH)
-
-Sucks up an entire file from PATH into a freshly-allocated string,
-   returning two values: the string and the number of bytes read.
-
-### `SPIT` (function)
-
-    (SPIT PATH STR)
-
-Spit the string into a file at the given path.
-
 ## Package `LOSH.FUNCTIONS`
 
 Utilities for working with higher-order functions.
