@@ -1170,12 +1170,15 @@
 (defun pr (&rest args)
   "Print `args` readably, separated by spaces and followed by a newline.
 
+  Returns the first argument, so you can just wrap it around a form without
+  interfering with the rest of the program.
+
   This is what `print` should have been.
 
   "
   (format t "~{~S~^ ~}~%" args)
   (finish-output)
-  (values))
+  (first args))
 
 (defun bits (n size &optional (stream t))
   "Print the bits of the `size`-bit two's complement integer `n` to `stream`.
