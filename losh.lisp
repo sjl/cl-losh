@@ -372,7 +372,7 @@
   "
   ;; original idea/name from http://malisper.me/2015/09/29/zap/
   `(progn
-    ,@(loop :for (place expr . rest) :on place-expr-pairs :by #'cddr
+    ,@(loop :for (place expr . nil) :on place-expr-pairs :by #'cddr
             :collect (build-zap place expr env))))
 
 
@@ -429,7 +429,7 @@
     (9 21)
   "
   `(progn
-     ,@(loop :for (place function . rest) :on place-function-pairs :by #'cddr
+     ,@(loop :for (place function . nil) :on place-function-pairs :by #'cddr
              :collect `(%callf ,place ,function))))
 
 
@@ -1248,7 +1248,7 @@
         (ecase ,message
           ,@(mapcar #'parse-clause clauses))))))
 
-(defmacro define-with-macro (type &rest slots)
+(defmacro define-with-macro (type-and-options &rest slots)
   "Define a with-`type` macro for the given `type` and `slots`.
 
   This new macro wraps `with-accessors` so you don't have to type `type-`
@@ -1285,21 +1285,23 @@
     (10 20 555 999)
 
   "
-  (let* ((accessors (loop :for slot :in slots
-                          :collect (symb type '- slot)))
-         (symbol-args (loop :for slot :in slots
-                            :collect (symb slot '-symbol)))
-         (macro-name (symb 'with- type))
-         (macro-arglist `((,type &optional
-                           ,@(loop :for slot :in slots
-                                   :for arg :in symbol-args
-                                   :collect `(,arg ',slot)))
-                          &body body))
-         (accessor-binding-list (loop :for arg :in symbol-args
-                                      :for accessor :in accessors
-                                      :collect ``(,,arg ,',accessor))))
-    `(defmacro ,macro-name ,macro-arglist
-      `(with-accessors ,,`(list ,@accessor-binding-list)
+  (destructuring-bind (type &key (conc-name type))
+      (ensure-list type-and-options)
+    (let* ((accessors (loop :for slot :in slots
+                            :collect (symb conc-name '- slot)))
+           (symbol-args (loop :for slot :in slots
+                              :collect (symb slot '-symbol)))
+           (macro-name (symb 'with- type))
+           (macro-arglist `((,type &optional
+                             ,@(loop :for slot :in slots
+                                     :for arg :in symbol-args
+                                     :collect `(,arg ',slot)))
+                            &body body))
+           (accessor-binding-list (loop :for arg :in symbol-args
+                                        :for accessor :in accessors
+                                        :collect ``(,,arg ,',accessor))))
+      `(defmacro ,macro-name ,macro-arglist
+        `(with-accessors ,,`(list ,@accessor-binding-list)
           ,,type
-        ,@body))))
+          ,@body)))))
 
