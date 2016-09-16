@@ -19,8 +19,6 @@
              `(:export ,@(external-symbols parent-package)))))
 
 
-
-
 (defpackage #:losh.math
   (:documentation "Utilities related to math and numbers.")
   (:export
@@ -150,6 +148,7 @@
   (:export
     #:pr
     #:bits
+    #:shut-up
     #:dis))
 
 (defpackage #:losh.weightlists

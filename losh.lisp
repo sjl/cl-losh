@@ -1196,6 +1196,12 @@
   (format stream (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
   (values))
 
+(defmacro shut-up (&body body)
+  "Run `body` with stdout and stderr redirected to the void."
+  `(let ((*standard-output* (make-broadcast-stream))
+         (*error-output* (make-broadcast-stream)))
+    ,@body))
+
 (defmacro dis (arglist &body body)
   "Disassemble the code generated for a `lambda` with `arglist` and `body`.
 
