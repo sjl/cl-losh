@@ -253,9 +253,20 @@ Disassemble the code generated for a `lambda` with `arglist` and `body`.
 
 Print `args` readably, separated by spaces and followed by a newline.
 
+  Returns the first argument, so you can just wrap it around a form without
+  interfering with the rest of the program.
+
   This is what `print` should have been.
 
   
+
+### `SHUT-UP` (macro)
+
+    (SHUT-UP
+      &BODY
+      BODY)
+
+Run `body` with stdout and stderr redirected to the void.
 
 ## Package `LOSH.DISTRIBUTIONS`
 
@@ -296,7 +307,7 @@ Abandon all hope, ye who enter here.
 
 ### `DEFINE-WITH-MACRO` (macro)
 
-    (DEFINE-WITH-MACRO TYPE &REST SLOTS)
+    (DEFINE-WITH-MACRO TYPE-AND-OPTIONS &REST SLOTS)
 
 Define a with-`type` macro for the given `type` and `slots`.
 
@@ -439,6 +450,23 @@ A simple hash set implementation.
 ## Package `LOSH.ITERATE`
 
 Custom `iterate` drivers and clauses.
+
+### `MACROEXPAND-ITERATE` (function)
+
+    (MACROEXPAND-ITERATE CLAUSE &OPTIONAL (COCKS :FOO))
+
+Macroexpand the given iterate clause/driver.
+
+  Example:
+
+    (macroexpand-iterate '(averaging (+ x 10) :into avg))
+    =>
+    (PROGN
+     (FOR #:COUNT665 :FROM 0)
+     (FOR AVG :FIRST (+ X 10) :THEN
+      (/ (+ (* AVG #:COUNT665) (+ X 10)) (1+ #:COUNT665))))
+
+  
 
 ## Package `LOSH.LISTS`
 
