@@ -1,5 +1,6 @@
 (in-package #:losh)
 
+
 ;;;; Chili Dogs
 (defmacro defun-inlineable (name &body body)
   `(progn
@@ -1068,6 +1069,55 @@
                  ,@(iterate (for var :in delta-vars)
                             (collect `(zerop ,var))))
         (next ,control)))))
+
+
+(defun keywordize-clause (clause)
+  (iterate
+    (for (k v . nil) :on clause :by #'cddr)
+    (collect (ensure-keyword k))
+    (collect v)))
+
+(defun keywordize-some-of-clause (clause)
+  ; please kill me
+  (append (take 2 clause) (keywordize-clause (nthcdr 2 clause))))
+
+(defun macroexpand-iterate (clause)
+  "Macroexpand the given iterate clause/driver.
+
+  Example:
+
+    (macroexpand-iterate '(averaging (+ x 10) :into avg))
+    =>
+    (PROGN
+     (FOR #:COUNT665 :FROM 0)
+     (FOR AVG :FIRST (+ X 10) :THEN
+      (/ (+ (* AVG #:COUNT665) (+ X 10)) (1+ #:COUNT665))))
+
+  "
+  ;; Given a clause like (for foo in-whatever bar) we need to:
+  ;;
+  ;; 1. Look up the appropriate macro (confusingly named via gentemp).  This
+  ;;    requires calling `iterate::get-clause-info` with an appropriately-formed
+  ;;    clause.
+  ;;
+  ;;    The first item in the clause must be a normal (non-keyword) symbol, but
+  ;;    the rest of the clause keywords must be actual keyword symbols.
+  ;;
+  ;; 2. Build the appropriate list to `macroexpand-1`.  This should be of the
+  ;;    form `(the-wierdly-named-macro ...)`.
+  ;;
+  ;;    Note that the macro will be expecting the clause to come in as keyword
+  ;;    arguments, so unlike in step 1 ALL the clause keywords need to be actual
+  ;;    keywords, including the first.
+  ;;
+  ;; We'll also bind `iterate::*result-var*` so any macros that use it won't
+  ;; immediately shit the bed.
+  (let ((iterate::*result-var* 'iterate::*result-var*))
+    (values
+      (macroexpand-1 (cons (iterate::clause-info-function
+                             (iterate::get-clause-info
+                               (keywordize-some-of-clause clause)))
+                           (keywordize-clause clause))))))
 
 
 ;;;; Distributions

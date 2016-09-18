@@ -120,7 +120,8 @@
     #:cycling
     #:for-nested
     #:within-radius
-    #:skip-origin))
+    #:skip-origin
+    #:macroexpand-iterate))
 
 (defpackage #:losh.distributions
   (:documentation "Utilities for calculating statistical... things.")
