@@ -23,6 +23,23 @@
   (:documentation "Utilities related to math and numbers.")
   (:export
     #:tau
+    #:tau/2
+    #:1tau/2
+    #:tau/4
+    #:1tau/4
+    #:2tau/4
+    #:3tau/4
+    #:tau/8
+    #:1tau/8
+    #:2tau/8
+    #:3tau/8
+    #:4tau/8
+    #:5tau/8
+    #:6tau/8
+    #:7tau/8
+
+    #:radians
+    #:degrees
     #:square
     #:dividesp
     #:norm

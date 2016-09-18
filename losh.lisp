@@ -17,7 +17,41 @@
 
 
 ;;;; Math
-(defconstant tau (coerce (* pi 2) 'single-float)) ; fuck a pi
+(defconstant tau (* pi 2)) ; fuck a pi
+
+(defconstant tau/2 (* tau 1/2))
+(defconstant 1tau/2 (* tau 1/2))
+
+(defconstant tau/4 (* tau 1/4))
+(defconstant 1tau/4 (* tau 1/4))
+(defconstant 2tau/4 (* tau 2/4))
+(defconstant 3tau/4 (* tau 3/4))
+
+(defconstant tau/8 (* tau 1/8))
+(defconstant 1tau/8 (* tau 1/8))
+(defconstant 2tau/8 (* tau 2/8))
+(defconstant 3tau/8 (* tau 3/8))
+(defconstant 4tau/8 (* tau 4/8))
+(defconstant 5tau/8 (* tau 5/8))
+(defconstant 6tau/8 (* tau 6/8))
+(defconstant 7tau/8 (* tau 7/8))
+
+
+(defun-inline degrees (radians)
+  "Convert `radians` into degrees.
+
+  The result will be the same type as `tau` and `pi`.
+
+  "
+  (* radians (/ 360 tau)))
+
+(defun-inline radians (degrees)
+  "Convert `degrees` into radians.
+
+  The result will be the same type as `tau` and `pi`.
+
+  "
+  (* degrees (/ tau 360)))
 
 
 (defun-inline square (x)
