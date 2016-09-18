@@ -11,6 +11,8 @@
 
   :serial t
   :components
-  ((:file "quickutils")
+  ((:module "vendor"
+    :serial t
+    :components ((:file "quickutils")))
    (:file "package")
    (:file "losh")))

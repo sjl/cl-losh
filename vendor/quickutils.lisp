@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:CURRY :RCURRY :EMPTYP :SYMB :ENSURE-LIST :WITH-GENSYMS :ONCE-ONLY) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :MKSTR :ONCE-ONLY :RCURRY :SYMB :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -14,10 +14,10 @@
 
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
-                                         :CURRY :RCURRY :NON-ZERO-P :EMPTYP
-                                         :MKSTR :SYMB :ENSURE-LIST
-                                         :STRING-DESIGNATOR :WITH-GENSYMS
-                                         :ONCE-ONLY))))
+                                         :CURRY :NON-ZERO-P :EMPTYP
+                                         :ENSURE-KEYWORD :ENSURE-LIST :MKSTR
+                                         :ONCE-ONLY :RCURRY :SYMB
+                                         :STRING-DESIGNATOR :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -62,16 +62,6 @@ it is called with to `function`."
            (apply ,fun ,@curries more)))))
   
 
-  (defun rcurry (function &rest arguments)
-    "Returns a function that applies the arguments it is called
-with and `arguments` to `function`."
-    (declare (optimize (speed 3) (safety 1) (debug 1)))
-    (let ((fn (ensure-function function)))
-      (lambda (&rest more)
-        (declare (dynamic-extent more))
-        (multiple-value-call fn (values-list more) (values-list arguments)))))
-  
-
   (defun non-zero-p (n)
     "Check if `n` is non-zero."
     (not (zerop n)))
@@ -86,12 +76,73 @@ with and `arguments` to `function`."
     (:method ((x hash-table)) (zerop (hash-table-count x))))
   
 
+  (defun ensure-keyword (x)
+    "Ensure that a keyword is returned for the string designator `x`."
+    (values (intern (string x) :keyword)))
+  
+
+  (defun ensure-list (list)
+    "If `list` is a list, it is returned. Otherwise returns the list designated by `list`."
+    (if (listp list)
+        list
+        (list list)))
+  
+
   (defun mkstr (&rest args)
     "Receives any number of objects (string, symbol, keyword, char, number), extracts all printed representations, and concatenates them all into one string.
 
 Extracted from _On Lisp_, chapter 4."
     (with-output-to-string (s)
       (dolist (a args) (princ a s))))
+  
+
+  (defmacro once-only (specs &body forms)
+    "Evaluates `forms` with symbols specified in `specs` rebound to temporary
+variables, ensuring that each initform is evaluated only once.
+
+Each of `specs` must either be a symbol naming the variable to be rebound, or of
+the form:
+
+    (symbol initform)
+
+Bare symbols in `specs` are equivalent to
+
+    (symbol symbol)
+
+Example:
+
+    (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
+      (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
+    (let ((gensyms (make-gensym-list (length specs) "ONCE-ONLY"))
+          (names-and-forms (mapcar (lambda (spec)
+                                     (etypecase spec
+                                       (list
+                                        (destructuring-bind (name form) spec
+                                          (cons name form)))
+                                       (symbol
+                                        (cons spec spec))))
+                                   specs)))
+      ;; bind in user-macro
+      `(let ,(mapcar (lambda (g n) (list g `(gensym ,(string (car n)))))
+              gensyms names-and-forms)
+         ;; bind in final expansion
+         `(let (,,@(mapcar (lambda (g n)
+                             ``(,,g ,,(cdr n)))
+                           gensyms names-and-forms))
+            ;; bind in user-macro
+            ,(let ,(mapcar (lambda (n g) (list (car n) g))
+                    names-and-forms gensyms)
+               ,@forms)))))
+  
+
+  (defun rcurry (function &rest arguments)
+    "Returns a function that applies the arguments it is called
+with and `arguments` to `function`."
+    (declare (optimize (speed 3) (safety 1) (debug 1)))
+    (let ((fn (ensure-function function)))
+      (lambda (&rest more)
+        (declare (dynamic-extent more))
+        (multiple-value-call fn (values-list more) (values-list arguments)))))
   
 
   (defun symb (&rest args)
@@ -101,13 +152,6 @@ Extracted from _On Lisp_, chapter 4.
 
 See also: `symbolicate`"
     (values (intern (apply #'mkstr args))))
-  
-
-  (defun ensure-list (list)
-    "If `list` is a list, it is returned. Otherwise returns the list designated by `list`."
-    (if (listp list)
-        list
-        (list list)))
   
 
   (deftype string-designator ()
@@ -153,47 +197,8 @@ The string-designator is used as the argument to `gensym` when constructing the
 unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
-
-  (defmacro once-only (specs &body forms)
-    "Evaluates `forms` with symbols specified in `specs` rebound to temporary
-variables, ensuring that each initform is evaluated only once.
-
-Each of `specs` must either be a symbol naming the variable to be rebound, or of
-the form:
-
-    (symbol initform)
-
-Bare symbols in `specs` are equivalent to
-
-    (symbol symbol)
-
-Example:
-
-    (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
-      (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
-    (let ((gensyms (make-gensym-list (length specs) "ONCE-ONLY"))
-          (names-and-forms (mapcar (lambda (spec)
-                                     (etypecase spec
-                                       (list
-                                        (destructuring-bind (name form) spec
-                                          (cons name form)))
-                                       (symbol
-                                        (cons spec spec))))
-                                   specs)))
-      ;; bind in user-macro
-      `(let ,(mapcar (lambda (g n) (list g `(gensym ,(string (car n)))))
-              gensyms names-and-forms)
-         ;; bind in final expansion
-         `(let (,,@(mapcar (lambda (g n)
-                             ``(,,g ,,(cdr n)))
-                           gensyms names-and-forms))
-            ;; bind in user-macro
-            ,(let ,(mapcar (lambda (n g) (list (car n) g))
-                    names-and-forms gensyms)
-               ,@forms)))))
-  
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(curry rcurry emptyp symb ensure-list with-gensyms with-unique-names
-            once-only)))
+  (export '(curry emptyp ensure-keyword ensure-list mkstr once-only rcurry symb
+            with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

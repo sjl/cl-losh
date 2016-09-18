@@ -2,8 +2,9 @@
 
 sourcefiles = $(shell ffind --full-path --literal .lisp)
 
-quickutils.lisp: make-quickutils.lisp
-	sbcl --noinform --load make-quickutils.lisp  --eval '(quit)'
+vendor: vendor/quickutils.lisp
+vendor/quickutils.lisp: vendor/make-quickutils.lisp
+	cd vendor && ros run -L sbcl --load make-quickutils.lisp  --eval '(quit)'
 
 DOCUMENTATION.markdown: $(sourcefiles)
 	sbcl --noinform --load make-docs.lisp  --eval '(quit)'
