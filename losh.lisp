@@ -692,15 +692,12 @@
     (0.1 0.1 0.13333334 0.17500001 0.22)
 
   "
-  (with-gensyms (count)
+  (with-gensyms (count total)
     (let ((average (or var iterate::*result-var*)))
       `(progn
-        (for ,count :from 0)
-        (for ,average
-             :first ,expr
-             :then (/ (+ (* ,average ,count)
-                         ,expr)
-                      (1+ ,count)))))))
+        (for ,count :from 1)
+        (sum ,expr :into ,total)
+        (for ,average = (/ ,total ,count))))))
 
 (defmacro-clause (TIMING time-type &optional
                   SINCE-START-INTO since-var
