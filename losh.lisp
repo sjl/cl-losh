@@ -1120,9 +1120,9 @@
     (macroexpand-iterate '(averaging (+ x 10) :into avg))
     =>
     (PROGN
-     (FOR #:COUNT665 :FROM 0)
-     (FOR AVG :FIRST (+ X 10) :THEN
-      (/ (+ (* AVG #:COUNT665) (+ X 10)) (1+ #:COUNT665))))
+     (FOR #:COUNT630 :FROM 1)
+     (SUM (+ X 10) :INTO #:TOTAL631)
+     (FOR AVG = (/ #:TOTAL631 #:COUNT630)))
 
   "
   ;; Given a clause like (for foo in-whatever bar) we need to:
