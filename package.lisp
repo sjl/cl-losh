@@ -24,19 +24,19 @@
   (:export
     #:tau
     #:tau/2
-    #:1tau/2
+    #:1/2tau
     #:tau/4
-    #:1tau/4
-    #:2tau/4
-    #:3tau/4
+    #:1/4tau
+    #:2/4tau
+    #:3/4tau
     #:tau/8
-    #:1tau/8
-    #:2tau/8
-    #:3tau/8
-    #:4tau/8
-    #:5tau/8
-    #:6tau/8
-    #:7tau/8
+    #:1/8tau
+    #:2/8tau
+    #:3/8tau
+    #:4/8tau
+    #:5/8tau
+    #:6/8tau
+    #:7/8tau
 
     #:radians
     #:degrees
