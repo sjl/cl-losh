@@ -1295,6 +1295,41 @@
                                    ,@body)))))
 
 
+(defun aesthetic-string (thing)
+  "Return the string used to represent `thing` when printing aesthetically."
+  (format nil "~A" thing))
+
+(defun structural-string (thing)
+  "Return the string used to represent `thing` when printing structurally."
+  (format nil "~S" thing))
+
+(defun print-table (rows)
+  "Print `rows` as a nicely-formatted table.
+
+  Each row should have the same number of colums.
+
+  Columns will be justified properly to fit the longest item in each one.
+
+  Example:
+
+    (print-table '((1 :red something)
+                   (2 :green more)))
+    =>
+    1 | RED   | SOMETHING
+    2 | GREEN | MORE
+
+  "
+  (when rows
+    (iterate
+      (with column-sizes =
+            (reduce (curry #'mapcar #'max)
+                    (mapcar (curry #'mapcar (compose #'length #'aesthetic-string))
+                            rows))) ; lol
+      (for row :in rows)
+      (format t "~{~vA~^ | ~}~%" (weave column-sizes row))))
+  (values))
+
+
 ;;;; Weightlists
 (defstruct (weightlist (:constructor %make-weightlist))
   weights sums items total)
@@ -1319,6 +1354,63 @@
     (for item :in (weightlist-items weightlist))
     (for weight :in (weightlist-sums weightlist))
     (finding item :such-that (< n weight))))
+
+
+;;;; Licensing
+;;; Original code from @dk_jackdaniel:
+;;; http://paste.lisp.org/display/327154
+(defun license-tree (quicklisp-project-designator)
+  (let ((sys (ql-dist:dependency-tree quicklisp-project-designator)))
+    (assert (not (null sys)) ()
+      "Cannot find Quicklisp project for designator ~S"
+      quicklisp-project-designator)
+    (shut-up
+      (ql:quickload quicklisp-project-designator))
+    (map-tree
+      (lambda (s)
+        (vector (slot-value s 'ql-dist:name)
+                (or (asdf:system-license
+                      (asdf:find-system
+                        (ql-dist:system-file-name s)))
+                    "Unspecified")))
+      sys)))
+
+(defun license-list (quicklisp-project-designator)
+  (remove-duplicates
+    (mapcar (rcurry #'coerce 'list)
+            (flatten (license-tree quicklisp-project-designator)))
+    :key #'car :test #'string=))
+
+(defun print-licenses (quicklisp-project-designator)
+  "Print the licenses used by the given project and its dependencies.
+
+  Note that in order to do this the project must be `quickload`ed, so you might
+  want to do this in a separate Lisp image if you don't want to clutter your
+  current one.
+
+  If the project does not specify its license in its ASDF system definition it
+  will be listed as 'Unspecified'.  You should manually figure out what license
+  it uses (and maybe send a pull request).
+
+  Example:
+
+    (print-licenses 'fast-io)
+    =>
+    alexandria           | Public Domain / 0-clause MIT
+    babel                | MIT
+    cffi                 | MIT
+    cffi-grovel          | MIT
+    cffi-toolchain       | MIT
+    fast-io              | NewBSD
+    static-vectors       | MIT
+    trivial-features     | MIT
+    trivial-gray-streams | MIT
+    uiop                 | Unspecified
+
+  "
+  (print-table (sort (license-list quicklisp-project-designator)
+                     #'string<
+                     :key #'car)))
 
 
 ;;;; Eldritch Horrors

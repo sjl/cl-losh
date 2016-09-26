@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :MKSTR :ONCE-ONLY :RCURRY :SYMB :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -14,10 +14,11 @@
 
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
-                                         :CURRY :NON-ZERO-P :EMPTYP
-                                         :ENSURE-KEYWORD :ENSURE-LIST :MKSTR
-                                         :ONCE-ONLY :RCURRY :SYMB
-                                         :STRING-DESIGNATOR :WITH-GENSYMS))))
+                                         :COMPOSE :CURRY :NON-ZERO-P :EMPTYP
+                                         :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN
+                                         :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY
+                                         :SYMB :WEAVE :STRING-DESIGNATOR
+                                         :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -41,6 +42,35 @@ it must be a function name and its `fdefinition` is returned."
         function-designator
         (fdefinition function-designator)))
   )                                        ; eval-when
+
+  (defun compose (function &rest more-functions)
+    "Returns a function composed of `function` and `more-functions` that applies its ;
+arguments to to each in turn, starting from the rightmost of `more-functions`,
+and then calling the next one with the primary value of the last."
+    (declare (optimize (speed 3) (safety 1) (debug 1)))
+    (reduce (lambda (f g)
+              (let ((f (ensure-function f))
+                    (g (ensure-function g)))
+                (lambda (&rest arguments)
+                  (declare (dynamic-extent arguments))
+                  (funcall f (apply g arguments)))))
+            more-functions
+            :initial-value function))
+
+  (define-compiler-macro compose (function &rest more-functions)
+    (labels ((compose-1 (funs)
+               (if (cdr funs)
+                   `(funcall ,(car funs) ,(compose-1 (cdr funs)))
+                   `(apply ,(car funs) arguments))))
+      (let* ((args (cons function more-functions))
+             (funs (make-gensym-list (length args) "COMPOSE")))
+        `(let ,(loop for f in funs for arg in args
+                     collect `(,f (ensure-function ,arg)))
+           (declare (optimize (speed 3) (safety 1) (debug 1)))
+           (lambda (&rest arguments)
+             (declare (dynamic-extent arguments))
+             ,(compose-1 funs))))))
+  
 
   (defun curry (function &rest arguments)
     "Returns a function that applies `arguments` and the arguments
@@ -86,6 +116,28 @@ it is called with to `function`."
     (if (listp list)
         list
         (list list)))
+  
+
+  (defun flatten (&rest xs)
+    "Flatten (and append) all lists `xs` completely."
+    (labels ((rec (xs acc)
+               (cond ((null xs)  acc)
+                     ((consp xs) (rec (car xs) (rec (cdr xs) acc)))
+                     (t          (cons xs acc)))))
+      (rec xs nil)))
+  
+
+  (defun map-tree (function tree)
+    "Map `function` to each of the leave of `tree`."
+    (check-type tree cons)
+    (labels ((rec (tree)
+               (cond
+                 ((null tree) nil)
+                 ((atom tree) (funcall function tree))
+                 ((consp tree)
+                  (cons (rec (car tree))
+                        (rec (cdr tree)))))))
+      (rec tree)))
   
 
   (defun mkstr (&rest args)
@@ -154,6 +206,12 @@ See also: `symbolicate`"
     (values (intern (apply #'mkstr args))))
   
 
+  (defun weave (&rest lists)
+    "Return a list whose elements alternate between each of the lists
+`lists`. Weaving stops when any of the lists has been exhausted."
+    (apply #'mapcan #'list lists))
+  
+
   (deftype string-designator ()
     "A string designator type. A string designator is either a string, a symbol,
 or a character."
@@ -198,7 +256,7 @@ unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(curry emptyp ensure-keyword ensure-list mkstr once-only rcurry symb
-            with-gensyms with-unique-names)))
+  (export '(compose curry emptyp ensure-keyword ensure-list flatten map-tree
+            mkstr once-only rcurry symb weave with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

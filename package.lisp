@@ -167,7 +167,10 @@
     #:pr
     #:bits
     #:shut-up
-    #:dis))
+    #:dis
+    #:aesthetic-string
+    #:structural-string
+    #:print-table))
 
 (defpackage #:losh.weightlists
   (:documentation
@@ -178,6 +181,11 @@
     #:weightlist-items
     #:make-weightlist
     #:weightlist-random))
+
+(defpackage #:losh.licensing
+  (:documentation "Utilities related to open source licenses.")
+  (:export
+    #:print-licenses))
 
 (defpackage #:losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")
@@ -200,7 +208,8 @@
    #:losh.mutation
    #:losh.queues
    #:losh.random
-   #:losh.weightlists)
+   #:losh.weightlists
+   #:losh.licensing)
   (:use
     #:cl
     #:iterate

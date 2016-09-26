@@ -11,6 +11,7 @@
         "LOSH.FUNCTIONS"
         "LOSH.HASH-SETS"
         "LOSH.ITERATE"
+        "LOSH.LICENSING"
         "LOSH.LISTS"
         "LOSH.MATH"
         "LOSH.MUTATION"

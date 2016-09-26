@@ -4,14 +4,18 @@
   "quickutils.lisp"
   :utilities '(
 
+               :compose
                :curry
                :emptyp
                :ensure-keyword
                :ensure-list
+               :flatten
+               :map-tree
                :mkstr
                :once-only
                :rcurry
                :symb
+               :weave
                :with-gensyms
 
                )

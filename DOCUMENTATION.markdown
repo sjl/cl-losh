@@ -218,6 +218,12 @@ Perform `body` with `var` to the results of `lookup-expr`, when valid.
 
 Utilities for figuring out what the hell is going on.
 
+### `AESTHETIC-STRING` (function)
+
+    (AESTHETIC-STRING THING)
+
+Return the string used to represent `thing` when printing aesthetically.
+
 ### `BITS` (function)
 
     (BITS N SIZE &OPTIONAL (STREAM T))
@@ -260,6 +266,26 @@ Print `args` readably, separated by spaces and followed by a newline.
 
   
 
+### `PRINT-TABLE` (function)
+
+    (PRINT-TABLE ROWS)
+
+Print `rows` as a nicely-formatted table.
+
+  Each row should have the same number of colums.
+
+  Columns will be justified properly to fit the longest item in each one.
+
+  Example:
+
+    (print-table '((1 :red something)
+                   (2 :green more)))
+    =>
+    1 | RED   | SOMETHING
+    2 | GREEN | MORE
+
+  
+
 ### `SHUT-UP` (macro)
 
     (SHUT-UP
@@ -267,6 +293,12 @@ Print `args` readably, separated by spaces and followed by a newline.
       BODY)
 
 Run `body` with stdout and stderr redirected to the void.
+
+### `STRUCTURAL-STRING` (function)
+
+    (STRUCTURAL-STRING THING)
+
+Return the string used to represent `thing` when printing structurally.
 
 ## Package `LOSH.DISTRIBUTIONS`
 
@@ -453,7 +485,7 @@ Custom `iterate` drivers and clauses.
 
 ### `MACROEXPAND-ITERATE` (function)
 
-    (MACROEXPAND-ITERATE CLAUSE &OPTIONAL (COCKS :FOO))
+    (MACROEXPAND-ITERATE CLAUSE)
 
 Macroexpand the given iterate clause/driver.
 
@@ -462,9 +494,44 @@ Macroexpand the given iterate clause/driver.
     (macroexpand-iterate '(averaging (+ x 10) :into avg))
     =>
     (PROGN
-     (FOR #:COUNT665 :FROM 0)
-     (FOR AVG :FIRST (+ X 10) :THEN
-      (/ (+ (* AVG #:COUNT665) (+ X 10)) (1+ #:COUNT665))))
+     (FOR #:COUNT630 :FROM 1)
+     (SUM (+ X 10) :INTO #:TOTAL631)
+     (FOR AVG = (/ #:TOTAL631 #:COUNT630)))
+
+  
+
+## Package `LOSH.LICENSING`
+
+Utilities related to open source licenses.
+
+### `PRINT-LICENSES` (function)
+
+    (PRINT-LICENSES QUICKLISP-PROJECT-DESIGNATOR)
+
+Print the licenses used by the given project and its dependencies.
+
+  Note that in order to do this the project must be `quickload`ed, so you might
+  want to do this in a separate Lisp image if you don't want to clutter your
+  current one.
+
+  If the project does not specify its license in its ASDF system definition it
+  will be listed as 'Unspecified'.  You should manually figure out what license
+  it uses (and maybe send a pull request).
+
+  Example:
+
+    (print-licenses 'fast-io)
+    =>
+    alexandria           | Public Domain / 0-clause MIT
+    babel                | MIT
+    cffi                 | MIT
+    cffi-grovel          | MIT
+    cffi-toolchain       | MIT
+    fast-io              | NewBSD
+    static-vectors       | MIT
+    trivial-features     | MIT
+    trivial-gray-streams | MIT
+    uiop                 | Unspecified
 
   
 
@@ -494,11 +561,43 @@ Return a fresh list of the first `n` elements of `list`.
 
 Utilities related to math and numbers.
 
+### `1/2TAU` (variable)
+
+### `1/4TAU` (variable)
+
+### `1/8TAU` (variable)
+
+### `2/4TAU` (variable)
+
+### `2/8TAU` (variable)
+
+### `3/4TAU` (variable)
+
+### `3/8TAU` (variable)
+
+### `4/8TAU` (variable)
+
+### `5/8TAU` (variable)
+
+### `6/8TAU` (variable)
+
+### `7/8TAU` (variable)
+
 ### `CLAMP` (function)
 
     (CLAMP FROM TO VALUE)
 
 Clamp `value` between `from` and `to`.
+
+### `DEGREES` (function)
+
+    (DEGREES RADIANS)
+
+Convert `radians` into degrees.
+
+  The result will be the same type as `tau` and `pi`.
+
+  
 
 ### `DIVIDESP` (function)
 
@@ -556,11 +655,27 @@ Lerp together `from` and `to` by factor `n`, precisely.
 
   
 
+### `RADIANS` (function)
+
+    (RADIANS DEGREES)
+
+Convert `degrees` into radians.
+
+  The result will be the same type as `tau` and `pi`.
+
+  
+
 ### `SQUARE` (function)
 
     (SQUARE X)
 
 ### `TAU` (variable)
+
+### `TAU/2` (variable)
+
+### `TAU/4` (variable)
+
+### `TAU/8` (variable)
 
 ## Package `LOSH.MUTATION`
 
