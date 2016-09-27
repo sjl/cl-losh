@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -16,6 +16,8 @@
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
                                          :COMPOSE :CURRY :NON-ZERO-P :EMPTYP
                                          :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN
+                                         :MAPHASH-KEYS :HASH-TABLE-KEYS
+                                         :MAPHASH-VALUES :HASH-TABLE-VALUES
                                          :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY
                                          :SYMB :WEAVE :STRING-DESIGNATOR
                                          :WITH-GENSYMS))))
@@ -125,6 +127,42 @@ it is called with to `function`."
                      ((consp xs) (rec (car xs) (rec (cdr xs) acc)))
                      (t          (cons xs acc)))))
       (rec xs nil)))
+  
+
+  (declaim (inline maphash-keys))
+  (defun maphash-keys (function table)
+    "Like `maphash`, but calls `function` with each key in the hash table `table`."
+    (maphash (lambda (k v)
+               (declare (ignore v))
+               (funcall function k))
+             table))
+  
+
+  (defun hash-table-keys (table)
+    "Returns a list containing the keys of hash table `table`."
+    (let ((keys nil))
+      (maphash-keys (lambda (k)
+                      (push k keys))
+                    table)
+      keys))
+  
+
+  (declaim (inline maphash-values))
+  (defun maphash-values (function table)
+    "Like `maphash`, but calls `function` with each value in the hash table `table`."
+    (maphash (lambda (k v)
+               (declare (ignore k))
+               (funcall function v))
+             table))
+  
+
+  (defun hash-table-values (table)
+    "Returns a list containing the values of hash table `table`."
+    (let ((values nil))
+      (maphash-values (lambda (v)
+                        (push v values))
+                      table)
+      values))
   
 
   (defun map-tree (function tree)
@@ -256,7 +294,8 @@ unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(compose curry emptyp ensure-keyword ensure-list flatten map-tree
-            mkstr once-only rcurry symb weave with-gensyms with-unique-names)))
+  (export '(compose curry emptyp ensure-keyword ensure-list flatten
+            hash-table-keys hash-table-values map-tree mkstr once-only rcurry
+            symb weave with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

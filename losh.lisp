@@ -1,6 +1,17 @@
 (in-package #:losh)
 
 
+;;;; Sanity
+(defmacro -<> (&rest forms)
+  ;; I am going to lose my fucking mind if I have to program lisp without
+  ;; a threading macro, but I don't want to add another dep to this library, so
+  ;; here we are.
+  (if (null forms)
+    '<>
+    `(let ((<> ,(first forms)))
+       (-<> ,@(rest forms)))))
+
+
 ;;;; Chili Dogs
 (defmacro defun-inlineable (name &body body)
   `(progn
@@ -1328,6 +1339,31 @@
       (for row :in rows)
       (format t "~{~vA~^ | ~}~%" (weave column-sizes row))))
   (values))
+
+
+(defun print-hash-table (hash-table &optional (stream t))
+  "Print a pretty representation of `hash-table` to `stream.`"
+  (let* ((keys (hash-table-keys hash-table))
+         (vals (hash-table-values hash-table))
+         (count (hash-table-count hash-table))
+         (key-width (-<> keys
+                      (mapcar (compose #'length #'prin1-to-string) <>)
+                      (reduce #'max <> :initial-value 0)
+                      (clamp 0 20 <>))))
+    (print-unreadable-object (hash-table stream :type t :identity nil)
+      (format stream ":test ~A :count ~D {~%~{~{  ~vs ~s~}~%~}}"
+              (hash-table-test hash-table)
+              count
+              (loop
+                :with limit = 40
+                :for key :in keys
+                :for val :in vals
+                :for i :from 0 :to limit
+                :collect (if (= i limit)
+                           (list key-width 'too-many-items (list (- count i) 'more))
+                           (list key-width key val)))))))
+
+
 
 
 ;;;; Weightlists

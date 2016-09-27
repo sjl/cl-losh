@@ -170,7 +170,8 @@
     #:dis
     #:aesthetic-string
     #:structural-string
-    #:print-table))
+    #:print-table
+    #:print-hash-table))
 
 (defpackage #:losh.weightlists
   (:documentation

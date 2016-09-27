@@ -10,6 +10,8 @@
                :ensure-keyword
                :ensure-list
                :flatten
+               :hash-table-keys
+               :hash-table-values
                :map-tree
                :mkstr
                :once-only
