@@ -762,17 +762,17 @@
   (let ((timing-function (ecase time-type
                            ((real-time) #'get-internal-real-time)
                            ((run-time) #'get-internal-run-time)))
-        (since (or since-var (when (null per-var)
-                               iterate::*result-var*))))
+        (since-var (or since-var (when (null per-var)
+                                   iterate::*result-var*))))
     (with-gensyms (start-time current-time previous-time)
       `(progn
         (with ,start-time = (funcall ,timing-function))
         (for ,current-time = (funcall ,timing-function))
-        (for ,previous-time :previous ,current-time :initially ,start-time)
-        ,(when since
-           `(for ,since = (- ,current-time ,start-time)))
-        ,(when per-var
-           `(for ,per-var = (- ,current-time ,previous-time)))))))
+        ,@(when since-var
+            `((for ,since-var = (- ,current-time ,start-time))))
+        ,@(when per-var
+            `((for ,previous-time :previous ,current-time :initially ,start-time)
+              (for ,per-var = (- ,current-time ,previous-time))))))))
 
 
 (defmacro-driver (FOR var IN-LISTS lists)
@@ -1362,8 +1362,6 @@
                 :collect (if (= i limit)
                            (list key-width 'too-many-items (list (- count i) 'more))
                            (list key-width key val)))))))
-
-
 
 
 ;;;; Weightlists
