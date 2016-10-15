@@ -949,11 +949,11 @@
              (for x :cycling (print 'beep) :from 1 :downto 0 :by 0.5)
              (print x))
     =>
-    1
+    1.0
     0.5
     0.0
     BEEP
-    1
+    1.0
     0.5
 
   "
@@ -966,10 +966,12 @@
     (let ((kwd (if generate 'generate 'for)))
       (with-gensyms (%counter %start %end %increment)
         `(progn
-          (with ,%start = ,start)
           (with ,%end = ,end)
           (with ,%increment = ,increment)
           (with ,%counter)
+          ;; ugly hack to get numeric contagion right for the first val
+          ;; (borrowed from Alexandria)
+          (with ,%start = (- (+ ,start ,%increment) ,%increment))
           (,kwd ,var next
            (progn
              (setf ,%counter
