@@ -760,8 +760,8 @@
 
   "
   (let ((timing-function (ecase time-type
-                           ((real-time) 'get-internal-real-time)
-                           ((run-time) 'get-internal-run-time)))
+                           ((:real-time real-time) 'get-internal-real-time)
+                           ((:run-time run-time) 'get-internal-run-time)))
         (since-var (or since-var (when (null per-var)
                                    iterate::*result-var*))))
     (with-gensyms (start-time current-time previous-time)
