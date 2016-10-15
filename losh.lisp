@@ -760,14 +760,14 @@
 
   "
   (let ((timing-function (ecase time-type
-                           ((real-time) #'get-internal-real-time)
-                           ((run-time) #'get-internal-run-time)))
+                           ((real-time) 'get-internal-real-time)
+                           ((run-time) 'get-internal-run-time)))
         (since-var (or since-var (when (null per-var)
                                    iterate::*result-var*))))
     (with-gensyms (start-time current-time previous-time)
       `(progn
-        (with ,start-time = (funcall ,timing-function))
-        (for ,current-time = (funcall ,timing-function))
+        (with ,start-time = (,timing-function))
+        (for ,current-time = (,timing-function))
         ,@(when since-var
             `((for ,since-var = (- ,current-time ,start-time))))
         ,@(when per-var
