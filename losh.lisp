@@ -1353,17 +1353,24 @@
                       (reduce #'max <> :initial-value 0)
                       (clamp 0 20 <>))))
     (print-unreadable-object (hash-table stream :type t :identity nil)
-      (format stream ":test ~A :count ~D {~%~{~{  ~vs ~s~}~%~}}"
-              (hash-table-test hash-table)
-              count
-              (loop
-                :with limit = 40
-                :for key :in keys
-                :for val :in vals
-                :for i :from 0 :to limit
-                :collect (if (= i limit)
-                           (list key-width 'too-many-items (list (- count i) 'more))
-                           (list key-width key val)))))))
+      (princ
+        ;; Something shits the bed and output gets jumbled (in SBCL at least) if
+        ;; we try to print to `stream` directly in the format statement inside
+        ;; `print-unreadable-object`, so instead we can just render to a string
+        ;; and `princ` that.
+        (format nil ":test ~A :count ~D {~%~{~{  ~vs ~s~}~%~}}"
+                (hash-table-test hash-table)
+                count
+                (loop
+                  :with limit = (or *print-length* 40)
+                  :for key :in keys
+                  :for val :in vals
+                  :for i :from 0 :to limit
+                  :collect
+                  (if (= i limit)
+                    (list key-width :too-many-items (list (- count i) :more))
+                    (list key-width key val))))
+        stream))))
 
 
 ;;;; Weightlists
