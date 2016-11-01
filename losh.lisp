@@ -890,28 +890,28 @@
              (print val))
 
   "
-  (destructuring-bind (var &rest index-vars)
+  (destructuring-bind (var &rest index-vars
+                           &aux (kwd (if generate 'generate 'for)))
       (ensure-list binding-form)
-    (with-gensyms (%i i arr dims floors)
-      (let ((kwd (if generate 'generate 'for)))
-        `(progn
-          (with ,arr = ,array)
-          ,@(when (some #'identity index-vars)
-              `((with ,dims = (coerce (array-dimensions ,arr) 'vector))
-                (with ,floors = (calculate-array-floors ,arr))))
-          ,@(iterate (for index :in index-vars)
-                     (when index (collect `(with ,index = 0))))
-          (generate ,%i :from 0 :below (array-total-size ,arr))
-          (,kwd ,var next (progn
-                            (let ((,i (next ,%i)))
-                              ,@(iterate
-                                  (for index :in index-vars)
-                                  (for n :from 0)
-                                  (when index
-                                    (collect
-                                      `(setf ,index (mod (floor ,i (svref ,floors ,n))
-                                                         (svref ,dims ,n))))))
-                              (row-major-aref ,arr ,i)))))))))
+    (with-gensyms (i arr dims floors)
+      `(progn
+        (with ,arr = ,array)
+        ,@(when (some #'identity index-vars)
+            `((with ,dims = (coerce (array-dimensions ,arr) 'vector))
+              (with ,floors = (calculate-array-floors ,arr))))
+        (generate ,i :from 0 :below (array-total-size ,arr))
+        ,@(iterate (for index :in index-vars)
+                   (for dim-number :from 0)
+                   (when index
+                     (collect `(generate ,index :next
+                                (mod (floor ,i (svref ,floors ,dim-number))
+                                     (svref ,dims ,dim-number))))))
+        (,kwd ,var :next
+         (progn
+           (next ,i)
+           ,@(iterate (for index :in index-vars)
+                      (when index (collect `(next ,index))))
+           (row-major-aref ,arr ,i)))))))
 
 
 (defun parse-sequence-arguments
