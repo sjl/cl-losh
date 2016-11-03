@@ -1215,68 +1215,6 @@
     (finally (return result))))
 
 
-;;;; Hash Sets
-(defclass hash-set ()
-  ((data :initarg :data)))
-
-
-(defun make-set (&key (test #'eql) (initial-data nil))
-  (let ((set (make-instance 'hash-set
-                            :data (make-hash-table :test test))))
-    (mapcar (curry #'set-add set) initial-data)
-    set))
-
-
-(defun set-contains-p (set value)
-  (nth-value 1 (gethash value (slot-value set 'data))))
-
-(defun set-empty-p (set)
-  (zerop (hash-table-count (slot-value set 'data))))
-
-(defun set-add (set value)
-  (setf (gethash value (slot-value set 'data)) t)
-  value)
-
-(defun set-add-all (set seq)
-  (map nil (curry #'set-add set) seq))
-
-(defun set-remove (set value)
-  (remhash value (slot-value set 'data))
-  value)
-
-(defun set-remove-all (set seq)
-  (map nil (curry #'set-remove set) seq))
-
-(defun set-clear (set)
-  (clrhash (slot-value set 'data))
-  set)
-
-(defun set-random (set)
-  (if (set-empty-p set)
-    (values nil nil)
-    (loop :with data = (slot-value set 'data)
-          :with target = (random (hash-table-count data))
-          :for i :from 0
-          :for k :being :the :hash-keys :of data
-          :when (= i target)
-          :do (return (values k t)))))
-
-(defun set-pop (set)
-  (multiple-value-bind (val found) (set-random set)
-    (if found
-      (progn
-        (set-remove set val)
-        (values val t))
-      (values nil nil))))
-
-
-(defmethod print-object ((set hash-set) stream)
-  (print-unreadable-object (set stream :type t)
-    (format stream "~{~S~^ ~}"
-            (iterate (for (key nil) :in-hashtable (slot-value set 'data))
-                     (collect key)))))
-
-
 ;;;; Debugging & Logging
 (defun pr (&rest args)
   "Print `args` readably, separated by spaces and followed by a newline.

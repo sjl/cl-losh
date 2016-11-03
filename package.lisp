@@ -147,21 +147,6 @@
     #:prefix-sums
     #:frequencies))
 
-(defpackage #:losh.hash-sets
-  (:documentation "A simple hash set implementation.")
-  (:export
-    #:hash-set
-    #:make-set
-    #:set-contains-p
-    #:set-empty-p
-    #:set-add
-    #:set-add-all
-    #:set-remove
-    #:set-remove-all
-    #:set-clear
-    #:set-random
-    #:set-pop))
-
 (defpackage #:losh.debugging
   (:documentation "Utilities for figuring out what the hell is going on.")
   (:export
@@ -203,7 +188,6 @@
    #:losh.distributions
    #:losh.eldritch-horrors
    #:losh.functions
-   #:losh.hash-sets
    #:losh.iterate
    #:losh.lists
    #:losh.math

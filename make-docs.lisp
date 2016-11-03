@@ -9,7 +9,6 @@
         "LOSH.DISTRIBUTIONS"
         "LOSH.ELDRITCH-HORRORS"
         "LOSH.FUNCTIONS"
-        "LOSH.HASH-SETS"
         "LOSH.ITERATE"
         "LOSH.LICENSING"
         "LOSH.LISTS"

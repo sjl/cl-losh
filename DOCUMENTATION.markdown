@@ -450,57 +450,6 @@ Return a new function that acts as a nullary-patched version of `function`.
 
   
 
-## Package `LOSH.HASH-SETS`
-
-A simple hash set implementation.
-
-### `HASH-SET` (class)
-
-#### Slot `DATA`
-
-* Allocation: `:INSTANCE`
-* Initarg: `:DATA`
-
-### `MAKE-SET` (function)
-
-    (MAKE-SET &KEY (TEST #'EQL) (INITIAL-DATA NIL))
-
-### `SET-ADD` (function)
-
-    (SET-ADD SET VALUE)
-
-### `SET-ADD-ALL` (function)
-
-    (SET-ADD-ALL SET SEQ)
-
-### `SET-CLEAR` (function)
-
-    (SET-CLEAR SET)
-
-### `SET-CONTAINS-P` (function)
-
-    (SET-CONTAINS-P SET VALUE)
-
-### `SET-EMPTY-P` (function)
-
-    (SET-EMPTY-P SET)
-
-### `SET-POP` (function)
-
-    (SET-POP SET)
-
-### `SET-RANDOM` (function)
-
-    (SET-RANDOM SET)
-
-### `SET-REMOVE` (function)
-
-    (SET-REMOVE SET VALUE)
-
-### `SET-REMOVE-ALL` (function)
-
-    (SET-REMOVE-ALL SET SEQ)
-
 ## Package `LOSH.ITERATE`
 
 Custom `iterate` drivers and clauses.
