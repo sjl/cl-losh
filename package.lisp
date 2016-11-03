@@ -64,7 +64,8 @@
   (:documentation "Utilities for working with higher-order functions.")
   (:export
     #:juxt
-    #:nullary))
+    #:nullary
+    #:fixed-point))
 
 (defpackage #:losh.control-flow
   (:documentation "Utilities for managing control flow.")

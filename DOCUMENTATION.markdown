@@ -266,6 +266,12 @@ Print `args` readably, separated by spaces and followed by a newline.
 
   
 
+### `PRINT-HASH-TABLE` (function)
+
+    (PRINT-HASH-TABLE HASH-TABLE &OPTIONAL (STREAM T))
+
+Print a pretty representation of `hash-table` to `stream.`
+
 ### `PRINT-TABLE` (function)
 
     (PRINT-TABLE ROWS)
@@ -385,6 +391,22 @@ Define a with-`type` macro for the given `type` and `slots`.
 ## Package `LOSH.FUNCTIONS`
 
 Utilities for working with higher-order functions.
+
+### `FIXED-POINT` (function)
+
+    (FIXED-POINT FUNCTION DATA &KEY (TEST 'EQL) (LIMIT NIL))
+
+Find a fixed point of `function`, starting with `data`.
+
+  Successive runs of `function` will be compared with `test`.  Once `test`
+  returns true the last result will be returned.
+
+  `limit` can be an integer to limit the maximum number of iterations performed.
+
+  A second value is also returned: `t` if a fixed point was found or `nil` if
+  the iteration limit was reached.
+
+  
 
 ### `JUXT` (function)
 

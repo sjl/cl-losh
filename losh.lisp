@@ -264,6 +264,25 @@
   (lambda (&rest args)
     (if (null args) result (apply function args))))
 
+(defun fixed-point (function data &key (test 'eql) (limit nil))
+  "Find a fixed point of `function`, starting with `data`.
+
+  Successive runs of `function` will be compared with `test`.  Once `test`
+  returns true the last result will be returned.
+
+  `limit` can be an integer to limit the maximum number of iterations performed.
+
+  A second value is also returned: `t` if a fixed point was found or `nil` if
+  the iteration limit was reached.
+
+  "
+  (if (and limit (zerop limit))
+    (values data nil)
+    (let ((next (funcall function data)))
+      (if (funcall test data next)
+        (values next t)
+        (fixed-point function next :test test :limit (when limit (1- limit)))))))
+
 
 ;;;; Control Flow
 (defmacro recursively (bindings &body body)
