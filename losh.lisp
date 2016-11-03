@@ -1468,6 +1468,16 @@
         (ecase ,message
           ,@(mapcar #'parse-clause clauses))))))
 
+(defmacro with-flexible-accessors (slot-entries instance-form &rest body)
+  (with-gensyms (instance)
+    `(let ((,instance ,instance-form))
+      (declare (ignorable ,instance))
+      (symbol-macrolet
+          ,(iterate (for (symbol accessor) :in slot-entries)
+                    (collect `(,symbol (,accessor ,instance))))
+        ,@body))))
+
+
 (defmacro define-with-macro (type-and-options &rest slots)
   "Define a with-`type` macro for the given `type` and `slots`.
 
@@ -1521,7 +1531,7 @@
                                         :for accessor :in accessors
                                         :collect ``(,,arg ,',accessor))))
       `(defmacro ,macro-name ,macro-arglist
-        `(with-accessors ,,`(list ,@accessor-binding-list)
+        `(with-flexible-accessors ,,`(list ,@accessor-binding-list)
           ,,type
           ,@body)))))
 
