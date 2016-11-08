@@ -1181,9 +1181,9 @@
                            (keywordize-clause clause))))))
 
 
-;;;; Distributions
-(defun prefix-sums (list)
-  "Return a list of the prefix sums of the numbers in `list`.
+;;;; Sequences
+(defun prefix-sums (sequence)
+  "Return a list of the prefix sums of the numbers in `sequence`.
 
   Example:
 
@@ -1192,12 +1192,12 @@
 
   "
   (iterate
-    (for i :in list)
+    (for i :in-whatever sequence)
     (sum i :into s)
     (collect s)))
 
-(defun frequencies (seq &key (test 'eql))
-  "Return a hash table containing the frequencies of the items in `seq`.
+(defun frequencies (sequence &key (test 'eql))
+  "Return a hash table containing the frequencies of the items in `sequence`.
 
   Uses `test` for the `:test` of the hash table.
 
@@ -1210,8 +1210,47 @@
   "
   (iterate
     (with result = (make-hash-table :test test))
-    (for i :in-whatever seq)
+    (for i :in-whatever sequence)
     (incf (gethash i result 0))
+    (finally (return result))))
+
+(defun group-by (function sequence &key (test #'eql) (key #'identity))
+  "Return a hash table of the elements of `sequence` grouped by `function`.
+
+  This function groups the elements of `sequence` into buckets.  The bucket for
+  an element is determined by calling `function` on it.
+
+  The result is a hash table (with test `test`) whose keys are the bucket
+  identifiers and whose values are lists of the elements in each bucket.  The
+  order of these lists is unspecified.
+
+  If `key` is given it will be called on each element before passing it to
+  `function` to produce the bucket identifier.  This does not effect what is
+  stored in the lists.
+
+  Examples:
+
+    (defparameter *items* '((1 foo) (1 bar) (2 cats) (3 cats)))
+
+    (group-by #'first *items*)
+    ; => { 1 ((1 foo) (1 bar))
+    ;      2 ((2 cats))
+    ;      3 ((3 cats)) }
+
+    (group-by #'second *items*)
+    ; => { foo  ((1 foo))
+    ;      bar  ((1 bar))
+    ;      cats ((2 cats) (3 cats)) }
+
+    (group-by #'evenp *items* :key #'first)
+    ; => { t   ((2 cats))
+    ;      nil ((1 foo) (1 bar) (3 cats)) }
+
+  "
+  (iterate
+    (with result = (make-hash-table :test test))
+    (for i :in-whatever sequence)
+    (push i (gethash (funcall function (funcall key i)) result))
     (finally (return result))))
 
 
@@ -1354,6 +1393,58 @@
     (for item :in (weightlist-items weightlist))
     (for weight :in (weightlist-sums weightlist))
     (finding item :such-that (< n weight))))
+
+
+;;;; Bit Sets
+;;; Implementation of the sets-as-integers idea in the Common Lisp Recipes book.
+(deftype bset () '(integer 0))
+
+
+(defun bset-empty ()
+  0)
+
+(defun bset-contains-p (bset i)
+  (logbitp i bset))
+
+(defun bset-union (s1 s2)
+  (logior s1 s2))
+
+(defun bset-intersection (s1 s2)
+  (logand s1 s2))
+
+(defun bset-difference (s1 s2)
+  (logandc2 s1 s2))
+
+(defun bset-insert (bset i)
+  (dpb 1 (byte 1 i) bset))
+
+(defun bset-remove (bset i)
+  (dpb 0 (byte 1 i) bset))
+
+(defun bset-count (bset)
+  (logcount bset))
+
+(defun bset= (s1 s2)
+  (= s1 s2))
+
+(defun bset-empty-p (bset)
+  (zerop bset))
+
+
+(defun make-bset (&rest is)
+  (reduce #'bset-insert is :initial-value 0))
+
+
+(defun bset-to-list (bset)
+  (iterate
+    (for i :from 0)
+    (for s :first bset :then (ash s -1))
+    (until (zerop s))
+    (when (logbitp 0 s)
+      (collect i))))
+
+(defun list-to-bset (list)
+  (apply #'make-bset list))
 
 
 ;;;; Licensing

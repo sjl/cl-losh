@@ -6,7 +6,6 @@
         "LOSH.ARRAYS"
         "LOSH.CONTROL-FLOW"
         "LOSH.DEBUGGING"
-        "LOSH.DISTRIBUTIONS"
         "LOSH.ELDRITCH-HORRORS"
         "LOSH.FUNCTIONS"
         "LOSH.ITERATE"
@@ -16,6 +15,7 @@
         "LOSH.MUTATION"
         "LOSH.QUEUES"
         "LOSH.RANDOM"
+        "LOSH.SEQUENCES"
         "LOSH.WEIGHTLISTS"
 
         ))

@@ -141,11 +141,12 @@
     #:skip-origin
     #:macroexpand-iterate))
 
-(defpackage #:losh.distributions
-  (:documentation "Utilities for calculating statistical... things.")
+(defpackage #:losh.sequences
+  (:documentation "Utilities for operating on sequences.")
   (:export
     #:prefix-sums
-    #:frequencies))
+    #:frequencies
+    #:group-by))
 
 (defpackage #:losh.debugging
   (:documentation "Utilities for figuring out what the hell is going on.")
@@ -185,7 +186,7 @@
   (#:losh.arrays
    #:losh.control-flow
    #:losh.debugging
-   #:losh.distributions
+   #:losh.sequences
    #:losh.eldritch-horrors
    #:losh.functions
    #:losh.iterate

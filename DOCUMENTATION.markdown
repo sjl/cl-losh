@@ -306,39 +306,6 @@ Run `body` with stdout and stderr redirected to the void.
 
 Return the string used to represent `thing` when printing structurally.
 
-## Package `LOSH.DISTRIBUTIONS`
-
-Utilities for calculating statistical... things.
-
-### `FREQUENCIES` (function)
-
-    (FREQUENCIES SEQ &KEY (TEST 'EQL))
-
-Return a hash table containing the frequencies of the items in `seq`.
-
-  Uses `test` for the `:test` of the hash table.
-
-  Example:
-
-    (frequencies '(foo foo bar))
-    => {foo 2
-        bar 1}
-
-  
-
-### `PREFIX-SUMS` (function)
-
-    (PREFIX-SUMS LIST)
-
-Return a list of the prefix sums of the numbers in `list`.
-
-  Example:
-
-    (prefix-sums '(10 10 10 0 1))
-    => (10 20 30 30 31)
-
-  
-
 ## Package `LOSH.ELDRITCH-HORRORS`
 
 Abandon all hope, ye who enter here.
@@ -849,6 +816,76 @@ Return a random number between (`min`, `max`).
     (RANDOMP &OPTIONAL (CHANCE 0.5))
 
 Return a random boolean with `chance` probability of `t`.
+
+## Package `LOSH.SEQUENCES`
+
+Utilities for operating on sequences.
+
+### `FREQUENCIES` (function)
+
+    (FREQUENCIES SEQUENCE &KEY (TEST 'EQL))
+
+Return a hash table containing the frequencies of the items in `sequence`.
+
+  Uses `test` for the `:test` of the hash table.
+
+  Example:
+
+    (frequencies '(foo foo bar))
+    => {foo 2
+        bar 1}
+
+  
+
+### `GROUP-BY` (function)
+
+    (GROUP-BY FUNCTION SEQUENCE &KEY (TEST #'EQL) (KEY #'IDENTITY))
+
+Return a hash table of the elements of `sequence` grouped by `function`.
+
+  This function groups the elements of `sequence` into buckets.  The bucket for
+  an element is determined by calling `function` on it.
+
+  The result is a hash table (with test `test`) whose keys are the bucket
+  identifiers and whose values are lists of the elements in each bucket.  The
+  order of these lists is unspecified.
+
+  If `key` is given it will be called on each element before passing it to
+  `function` to produce the bucket identifier.  This does not effect what is
+  stored in the lists.
+
+  Examples:
+
+    (defparameter *items* '((1 foo) (1 bar) (2 cats) (3 cats)))
+
+    (group-by #'first *items*)
+    ; => { 1 ((1 foo) (1 bar))
+    ;      2 ((2 cats))
+    ;      3 ((3 cats)) }
+
+    (group-by #'second *items*)
+    ; => { foo  ((1 foo))
+    ;      bar  ((1 bar))
+    ;      cats ((2 cats) (3 cats)) }
+
+    (group-by #'evenp *items* :key #'first)
+    ; => { t   ((2 cats))
+    ;      nil ((1 foo) (1 bar) (3 cats)) }
+
+  
+
+### `PREFIX-SUMS` (function)
+
+    (PREFIX-SUMS SEQUENCE)
+
+Return a list of the prefix sums of the numbers in `sequence`.
+
+  Example:
+
+    (prefix-sums '(10 10 10 0 1))
+    => (10 20 30 30 31)
+
+  
 
 ## Package `LOSH.WEIGHTLISTS`
 
