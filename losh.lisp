@@ -1366,7 +1366,9 @@
                   (if (= i limit)
                     (list key-width :too-many-items (list (- count i) :more))
                     (list key-width key val))))
-        stream))))
+        stream)))
+  (terpri stream)
+  (values))
 
 
 ;;;; Weightlists
