@@ -1181,6 +1181,19 @@
                            (keywordize-clause clause))))))
 
 
+;;;; Hash Tables
+(defun mutate-hash-values (function hash-table)
+  "Replace each value in `hash-table` with the result of calling `function` on it.
+
+  Returns the hash table.
+
+  "
+  (iterate (for (key value) :in-hashtable hash-table)
+           (setf (gethash key hash-table)
+                 (funcall function value)))
+  hash-table)
+
+
 ;;;; Sequences
 (defun prefix-sums (sequence)
   "Return a list of the prefix sums of the numbers in `sequence`.
@@ -1213,6 +1226,31 @@
     (for i :in-whatever sequence)
     (incf (gethash i result 0))
     (finally (return result))))
+
+(defun proportions (sequence &key (test 'eql) (float t))
+  "Return a hash table containing the proportions of the items in `sequence`.
+
+  Uses `test` for the `:test` of the hash table.
+
+  If `float` is `t` the hash table values will be coerced to floats, otherwise
+  they will be left as rationals.
+
+  Example:
+
+    (proportions '(foo foo bar))
+    => {foo 0.66666
+        bar 0.33333}
+
+    (proportions '(foo foo bar) :float nil)
+    => {foo 2/3
+        bar 1/3}
+
+  "
+  (let* ((freqs (frequencies sequence :test test))
+         (total (reduce #'+ (hash-table-values freqs)
+                        :initial-value (if float 1.0 1))))
+    (mutate-hash-values (lambda (v) (/ v total))
+                        freqs)))
 
 (defun group-by (function sequence &key (test #'eql) (key #'identity))
   "Return a hash table of the elements of `sequence` grouped by `function`.

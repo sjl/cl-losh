@@ -141,11 +141,17 @@
     #:skip-origin
     #:macroexpand-iterate))
 
+(defpackage #:losh.hash-tables
+  (:documentation "Utilities for operating on hash tables.")
+  (:export
+    #:mutate-hash-values))
+
 (defpackage #:losh.sequences
   (:documentation "Utilities for operating on sequences.")
   (:export
     #:prefix-sums
     #:frequencies
+    #:proportions
     #:group-by))
 
 (defpackage #:losh.debugging
@@ -184,19 +190,23 @@
 
 (defpackage-inheriting #:losh
   (#:losh.arrays
+
    #:losh.control-flow
    #:losh.debugging
-   #:losh.sequences
    #:losh.eldritch-horrors
    #:losh.functions
+   #:losh.hash-tables
    #:losh.iterate
+   #:losh.licensing
    #:losh.lists
    #:losh.math
    #:losh.mutation
    #:losh.queues
    #:losh.random
+   #:losh.sequences
    #:losh.weightlists
-   #:losh.licensing)
+
+   )
   (:use
     #:cl
     #:iterate

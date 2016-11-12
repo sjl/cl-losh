@@ -417,6 +417,20 @@ Return a new function that acts as a nullary-patched version of `function`.
 
   
 
+## Package `LOSH.HASH-TABLES`
+
+Utilities for operating on hash tables.
+
+### `MUTATE-HASH-VALUES` (function)
+
+    (MUTATE-HASH-VALUES FUNCTION HASH-TABLE)
+
+Replace each value in `hash-table` with the result of calling `function` on it.
+
+  Returns the hash table.
+
+  
+
 ## Package `LOSH.ITERATE`
 
 Custom `iterate` drivers and clauses.
@@ -884,6 +898,29 @@ Return a list of the prefix sums of the numbers in `sequence`.
 
     (prefix-sums '(10 10 10 0 1))
     => (10 20 30 30 31)
+
+  
+
+### `PROPORTIONS` (function)
+
+    (PROPORTIONS SEQUENCE &KEY (TEST 'EQL) (FLOAT T))
+
+Return a hash table containing the proportions of the items in `sequence`.
+
+  Uses `test` for the `:test` of the hash table.
+
+  If `float` is `t` the hash table values will be coerced to floats, otherwise
+  they will be left as rationals.
+
+  Example:
+
+    (proportions '(foo foo bar))
+    => {foo 0.66666
+        bar 0.33333}
+
+    (proportions '(foo foo bar) :float nil)
+    => {foo 2/3
+        bar 1/3}
 
   
 
