@@ -1,7 +1,6 @@
 (in-package #:losh)
 
-
-;;;; Sanity
+;;;; Sanity -------------------------------------------------------------------
 (defmacro -<> (&rest forms)
   ;; I am going to lose my fucking mind if I have to program lisp without
   ;; a threading macro, but I don't want to add another dep to this library, so
@@ -12,7 +11,7 @@
        (-<> ,@(rest forms)))))
 
 
-;;;; Chili Dogs
+;;;; Chili Dogs ---------------------------------------------------------------
 (defmacro defun-inlineable (name &body body)
   `(progn
      (declaim (inline ,name))
@@ -27,7 +26,7 @@
      ',name))
 
 
-;;;; Math
+;;;; Math ---------------------------------------------------------------------
 (defconstant tau (* pi 2)) ; fuck a pi
 
 (defconstant tau/2 (* tau 1/2))
@@ -138,7 +137,7 @@
       (t value))))
 
 
-;;;; Random
+;;;; Random -------------------------------------------------------------------
 (defun-inlineable randomp (&optional (chance 0.5))
   "Return a random boolean with `chance` probability of `t`."
   (< (random 1.0) chance))
@@ -223,7 +222,7 @@
      plus))
 
 
-;;;; Functions
+;;;; Functions ----------------------------------------------------------------
 (defun juxt (&rest functions)
   "Return a function that will juxtapose the results of `functions`.
 
@@ -284,7 +283,7 @@
         (fixed-point function next :test test :limit (when limit (1- limit)))))))
 
 
-;;;; Control Flow
+;;;; Control Flow -------------------------------------------------------------
 (defmacro recursively (bindings &body body)
   "Execute `body` recursively, like Clojure's `loop`/`recur`.
 
@@ -414,7 +413,7 @@
       (queue-contents ,result))))
 
 
-;;;; Mutation
+;;;; Mutation -----------------------------------------------------------------
 (defun build-zap (place expr env)
   (multiple-value-bind (temps exprs stores store-expr access-expr)
       (get-setf-expansion place env)
@@ -498,7 +497,7 @@
              :collect `(%callf ,place ,function))))
 
 
-;;;; Lists
+;;;; Lists --------------------------------------------------------------------
 (defun take (n list)
   "Return a fresh list of the first `n` elements of `list`.
 
@@ -518,7 +517,7 @@
            (collect item)))
 
 
-;;;; Arrays
+;;;; Arrays -------------------------------------------------------------------
 (declaim
   (ftype (function ((array * *) t)) fill-multidimensional-array)
   (ftype (function ((array t *) t)) fill-multidimensional-array-t)
@@ -610,7 +609,7 @@
 (defun-fmda single-float)
 
 
-;;;; Queues
+;;;; Queues -------------------------------------------------------------------
 ;;; Based on the PAIP queues (thanks, Norvig), but beefed up a little bit to add
 ;;; tracking of the queue size.
 
@@ -670,7 +669,7 @@
         :finally (return size)))
 
 
-;;;; Iterate
+;;;; Iterate ------------------------------------------------------------------
 (defmacro-driver (FOR var PAIRS-OF-LIST list)
   "Iterate over the all pairs of the (including (last . first)).
 
@@ -1181,7 +1180,7 @@
                            (keywordize-clause clause))))))
 
 
-;;;; Hash Tables
+;;;; Hash Tables --------------------------------------------------------------
 (defun mutate-hash-values (function hash-table)
   "Replace each value in `hash-table` with the result of calling `function` on it.
 
@@ -1194,7 +1193,7 @@
   hash-table)
 
 
-;;;; Sequences
+;;;; Sequences ----------------------------------------------------------------
 (defun prefix-sums (sequence)
   "Return a list of the prefix sums of the numbers in `sequence`.
 
@@ -1292,7 +1291,7 @@
     (finally (return result))))
 
 
-;;;; Debugging & Logging
+;;;; Debugging & Logging ------------------------------------------------------
 (defun pr (&rest args)
   "Print `args` readably, separated by spaces and followed by a newline.
 
@@ -1409,7 +1408,7 @@
   (values))
 
 
-;;;; Weightlists
+;;;; Weightlists --------------------------------------------------------------
 (defstruct (weightlist (:constructor %make-weightlist))
   weights sums items total)
 
@@ -1435,7 +1434,7 @@
     (finding item :such-that (< n weight))))
 
 
-;;;; Bit Sets
+;;;; Bit Sets -----------------------------------------------------------------
 ;;; Implementation of the sets-as-integers idea in the Common Lisp Recipes book.
 (deftype bset () '(integer 0))
 
@@ -1487,7 +1486,7 @@
   (apply #'make-bset list))
 
 
-;;;; Licensing
+;;;; Licensing ----------------------------------------------------------------
 ;;; Original code from @dk_jackdaniel:
 ;;; http://paste.lisp.org/display/327154
 (defun license-tree (quicklisp-project-designator)
@@ -1544,7 +1543,7 @@
                      :key #'car)))
 
 
-;;;; Eldritch Horrors
+;;;; Eldritch Horrors ---------------------------------------------------------
 (defmacro dlambda (&rest clauses)
   ;;; From Let Over Lambda.
   (with-gensyms (message arguments)

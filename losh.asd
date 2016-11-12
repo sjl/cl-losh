@@ -1,4 +1,4 @@
-(asdf:defsystem #:losh
+(asdf:defsystem :losh
   :name "losh"
   :description "My personal utility belt library."
 
@@ -7,7 +7,7 @@
   :license "MIT/X11"
   :version "0.0.1"
 
-  :depends-on (#:iterate)
+  :depends-on (:iterate)
 
   :serial t
   :components
