@@ -161,8 +161,11 @@
     :bits
     :shut-up
     :dis
+    :comment
     :aesthetic-string
     :structural-string
+    #+sbcl :start-profiling
+    #+sbcl :stop-profiling
     :print-table
     :print-hash-table))
 

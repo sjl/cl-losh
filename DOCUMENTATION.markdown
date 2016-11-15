@@ -240,6 +240,18 @@ Print the bits of the `size`-bit two's complement integer `n` to `stream`.
 
   
 
+### `COMMENT` (macro)
+
+    (COMMENT
+      &BODY
+      BODY)
+
+Do nothing with a bunch of forms.
+
+  Handy for block-commenting multiple expressions.
+
+  
+
 ### `DIS` (macro)
 
     (DIS ARGLIST
@@ -299,6 +311,24 @@ Print `rows` as a nicely-formatted table.
       BODY)
 
 Run `body` with stdout and stderr redirected to the void.
+
+### `START-PROFILING` (function)
+
+    (START-PROFILING &OPTIONAL CALL-COUNT-PACKAGES)
+
+Start profiling performance.  SBCL only.
+
+  `call-count-packages` should be a list of package designators.  Functions in
+  these packages will have their call counts recorded via
+  `sb-sprof::profile-call-counts`.
+
+  
+
+### `STOP-PROFILING` (function)
+
+    (STOP-PROFILING &OPTIONAL (FILENAME lisp.prof))
+
+Stop profiling performance and dump a report to `filename`.  SBCL only.
 
 ### `STRUCTURAL-STRING` (function)
 

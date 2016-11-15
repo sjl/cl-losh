@@ -1340,6 +1340,14 @@
                                    (declare (optimize speed))
                                    ,@body)))))
 
+(defmacro comment (&body body)
+  "Do nothing with a bunch of forms.
+
+  Handy for block-commenting multiple expressions.
+
+  "
+  nil)
+
 
 (defun aesthetic-string (thing)
   "Return the string used to represent `thing` when printing aesthetically."
@@ -1406,6 +1414,45 @@
         stream)))
   (terpri stream)
   (values))
+
+
+
+#+sbcl
+(defun dump-profile (filename)
+  (with-open-file (*standard-output* filename
+                                     :direction :output
+                                     :if-exists :supersede)
+    (sb-sprof:report :type :graph
+                     :sort-by :cumulative-samples
+                     :sort-order :ascending)
+    (sb-sprof:report :type :flat
+                     :min-percent 0.5)))
+
+#+sbcl
+(defun start-profiling (&optional call-count-packages)
+  "Start profiling performance.  SBCL only.
+
+  `call-count-packages` should be a list of package designators.  Functions in
+  these packages will have their call counts recorded via
+  `sb-sprof::profile-call-counts`.
+
+  "
+  (sb-sprof::reset)
+  (-<> call-count-packages
+    (mapcar #'mkstr <>)
+    (mapcar #'string-upcase <>)
+    (mapc #'sb-sprof::profile-call-counts <>))
+  (sb-sprof::start-profiling :max-samples 50000
+                             ; :mode :cpu
+                             :mode :time
+                             :sample-interval 0.01
+                             :threads :all))
+
+#+sbcl
+(defun stop-profiling (&optional (filename "lisp.prof"))
+  "Stop profiling performance and dump a report to `filename`.  SBCL only."
+  (sb-sprof::stop-profiling)
+  (dump-profile))
 
 
 ;;;; Weightlists --------------------------------------------------------------

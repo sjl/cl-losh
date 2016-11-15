@@ -7,7 +7,9 @@
   :license "MIT/X11"
   :version "0.0.1"
 
-  :depends-on (:iterate)
+  :depends-on (:iterate
+               #+sbcl :sb-sprof
+               )
 
   :serial t
   :components
