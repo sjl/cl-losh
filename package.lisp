@@ -75,7 +75,8 @@
     :when-found
     :if-found
     :gathering
-    :gather))
+    :gather
+    :when-let*))
 
 (defpackage :losh.mutation
   (:documentation "Utilities for mutating places in-place.")

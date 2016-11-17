@@ -412,6 +412,43 @@
         ,@body)
       (queue-contents ,result))))
 
+(defmacro when-let* (binding-forms &body body)
+  "Bind the forms in `binding-forms` in order, short-circuiting on `nil`.
+
+  This is like Clojure's `when-let`.  It takes a list of binding and binds them
+  like `let*`, but if any of the expressions evaluate to `nil` the process stops
+  there and `nil` is immediately returned.
+
+  Examples:
+
+    (when-let* ((a (progn (print :a) 1))
+                (b (progn (print :b) 2))
+                (c (progn (print :c) 3)))
+      (list a b c))
+    ; =>
+    :A
+    :B
+    :C
+    (1 2 3)
+
+    (when-let* ((a (progn (print :a) 1))
+                (b (progn (print :b) nil))
+                (c (progn (print :c) 3)))
+      (list a b c))
+    ; =>
+    :A
+    :B
+    NIL
+
+  "
+  (if (null binding-forms)
+    `(progn ,@body)
+    (destructuring-bind ((symbol expr) . remaining-bindings)
+      binding-forms
+      `(let ((,symbol ,expr))
+         (when ,symbol
+           (when-let* ,remaining-bindings ,@body))))))
+
 
 ;;;; Mutation -----------------------------------------------------------------
 (defun build-zap (place expr env)
@@ -1414,7 +1451,6 @@
         stream)))
   (terpri stream)
   (values))
-
 
 
 #+sbcl
