@@ -1342,6 +1342,30 @@
   (finish-output)
   (first args))
 
+(defmacro prl (&rest args)
+  "Print `args` labeled and readably.
+
+  Each argument form will be printed, then evaluated and the result printed.
+  One final newline will be printed after everything.
+
+  Returns the last result.
+
+  Examples:
+
+    (let ((i 1)
+          (l (list 1 2 3)))
+      (prl i (second l)))
+    ; =>
+    i 1
+    (second l) 2
+
+  "
+  `(prog1
+     (progn ,@(mapcar (lambda (arg) `(pr ',arg ,arg)) args))
+     (terpri)
+     (finish-output)))
+
+
 (defun bits (n size &optional (stream t))
   "Print the bits of the `size`-bit two's complement integer `n` to `stream`.
 

@@ -159,6 +159,7 @@
   (:documentation "Utilities for figuring out what the hell is going on.")
   (:export
     :pr
+    :prl
     :bits
     :shut-up
     :dis

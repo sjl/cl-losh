@@ -339,6 +339,28 @@ Print `rows` as a nicely-formatted table.
 
   
 
+### `PRL` (macro)
+
+    (PRL &REST ARGS)
+
+Print `args` labeled and readably.
+
+  Each argument form will be printed, then evaluated and the result printed.
+  One final newline will be printed after everything.
+
+  Returns the last result.
+
+  Examples:
+
+    (let ((i 1)
+          (l (list 1 2 3)))
+      (prl i (second l)))
+    ; =>
+    i 1
+    (second l) 2
+
+  
+
 ### `SHUT-UP` (macro)
 
     (SHUT-UP
