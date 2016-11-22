@@ -125,6 +125,7 @@
     :across-flat-array
     :averaging
     :cycling
+    :every-nth
     :for-nested
     :in-array
     :in-lists

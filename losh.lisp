@@ -1210,6 +1210,56 @@
         (next ,control)))))
 
 
+(defmacro-driver (FOR var EVERY-NTH n DO form)
+  "Iterate `var` numerically modulo `n` and run `form` every `n`th iteration.
+
+  The driver can be used to perform an action every N times through the loop.
+
+  `var` itself will be a counter that counts up from to to `n - 1`.
+
+  `generate` is supported.
+
+  Example:
+
+    (iterate (for i :from 1 :to 7)
+             (print `(iteration ,i))
+             (for tick :every-nth 3 :do (print 'beep))
+             (print `(tick ,tick)) (terpri))
+    ; =>
+    (ITERATION 1)
+    (TICK 0)
+
+    (ITERATION 2)
+    (TICK 1)
+
+    (ITERATION 3)
+    BEEP
+    (TICK 2)
+
+    (ITERATION 4)
+    (TICK 0)
+
+    (ITERATION 5)
+    (TICK 1)
+
+    (ITERATION 6)
+    BEEP
+    (TICK 2)
+
+    (ITERATION 7)
+    (TICK 0)
+
+  "
+  (let ((kwd (if generate 'generate 'for)))
+    (with-gensyms (counter limit)
+      `(progn
+        (with ,limit = ,n)
+        (generate ,counter :modulo ,limit :from 0)
+        (,kwd ,var :next (prog1 (next ,counter)
+                           (when (= ,counter (1- ,limit))
+                             ,form)))))))
+
+
 (defun keywordize-clause (clause)
   (iterate
     (for (k v . nil) :on clause :by #'cddr)
