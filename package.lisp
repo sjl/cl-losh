@@ -122,25 +122,27 @@
   (:use :iterate) ; need this for iterate's `for` symbol fuckery
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
-    :pairs-of-list
+    :across-flat-array
     :averaging
-    :into
-    :timing
-    :since-start-into
-    :per-iteration-into
-    :real-time
-    :run-time
+    :cycling
+    :for-nested
+    :in-array
     :in-lists
     :in-sequences
     :in-whatever
-    :in-array
-    :across-flat-array
     :index-of-flat-array
-    :cycling
-    :for-nested
-    :within-radius
+    :into
+    :macroexpand-iterate
+    :modulo
+    :pairs-of-list
+    :per-iteration-into
+    :real-time
+    :run-time
+    :since-start-into
     :skip-origin
-    :macroexpand-iterate))
+    :timing
+    :within-radius
+    ))
 
 (defpackage :losh.hash-tables
   (:documentation "Utilities for operating on hash tables.")

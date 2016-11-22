@@ -707,6 +707,48 @@
 
 
 ;;;; Iterate ------------------------------------------------------------------
+(defmacro expand-iterate-sequence-keywords ()
+  '(list
+    :from iterate::from
+    :upfrom iterate::upfrom
+    :downfrom iterate::downfrom
+    :to iterate::to
+    :downto iterate::downto
+    :above iterate::above
+    :below iterate::below
+    :by iterate::by
+    :with-index iterate::with-index))
+
+
+(defmacro-driver (FOR var MODULO divisor &sequence)
+  "Iterate numerically modulo `divisor`.
+
+  This driver iterates just like the vanilla `for`, but each resulting value
+  will be modulo'ed by `divisor` before being bound to `var`.
+
+  Note that the modulo doesn't affect the *iteration*, it just affects the
+  variable you *see*.  It is as if you had written two clauses:
+
+    (for temp :from foo :to bar)
+    (for var = (mod temp divisor))
+
+  Example:
+
+    (iterate (for i            :from 0 :to 20 :by 3) (collect i))
+    (0 3 6 9 12 15 18)
+
+    (iterate (for i :modulo 10 :from 0 :to 20 :by 3) (collect i))
+    (0 3 6 9  2  5  8)
+
+  "
+  (let ((kwd (if generate 'generate 'for)))
+    (with-gensyms (i d)
+      `(progn
+        (with ,d = ,divisor)
+        (generate ,i ,@(expand-iterate-sequence-keywords))
+        (,kwd ,var next (mod (next ,i) ,d))))))
+
+
 (defmacro-driver (FOR var PAIRS-OF-LIST list)
   "Iterate over the all pairs of the (including (last . first)).
 
