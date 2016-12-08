@@ -5,6 +5,7 @@
   :utilities '(
 
                :compose
+               :copy-hash-table
                :curry
                :emptyp
                :ensure-keyword

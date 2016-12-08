@@ -8,6 +8,7 @@
         "LOSH.DEBUGGING"
         "LOSH.ELDRITCH-HORRORS"
         "LOSH.FUNCTIONS"
+        "LOSH.HASH-SETS"
         "LOSH.HASH-TABLES"
         "LOSH.ITERATE"
         "LOSH.LICENSING"

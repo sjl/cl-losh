@@ -150,6 +150,36 @@
   (:export
     :mutate-hash-values))
 
+(defpackage :losh.hash-sets
+  (:documentation "Simple hash set implementation.")
+  (:export
+    :hash-set
+    :make-hash-set
+    :copy-hash-set
+
+    :hset-empty-p
+    :hset-contains-p
+    :hset-elements
+    :hset-count
+
+    :hset-insert!
+    :hset-remove!
+    :hset-pop!
+    :hset-clear!
+
+    :hset=
+
+    :hset-union
+    :hset-union!
+    :hset-intersection
+    :hset-intersection!
+    :hset-difference
+    :hset-difference!
+    :hset-filter
+    :hset-filter!
+    :hset-map
+    :hset-map!))
+
 (defpackage :losh.sequences
   (:documentation "Utilities for operating on sequences.")
   (:export
@@ -203,6 +233,7 @@
    :losh.debugging
    :losh.eldritch-horrors
    :losh.functions
+   :losh.hash-sets
    :losh.hash-tables
    :losh.iterate
    :losh.licensing

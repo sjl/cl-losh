@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-HASH-TABLE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -14,13 +14,13 @@
 
 (when (boundp '*utilities*)
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
-                                         :COMPOSE :CURRY :NON-ZERO-P :EMPTYP
-                                         :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN
-                                         :MAPHASH-KEYS :HASH-TABLE-KEYS
-                                         :MAPHASH-VALUES :HASH-TABLE-VALUES
-                                         :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY
-                                         :SYMB :WEAVE :STRING-DESIGNATOR
-                                         :WITH-GENSYMS))))
+                                         :COMPOSE :COPY-HASH-TABLE :CURRY
+                                         :NON-ZERO-P :EMPTYP :ENSURE-KEYWORD
+                                         :ENSURE-LIST :FLATTEN :MAPHASH-KEYS
+                                         :HASH-TABLE-KEYS :MAPHASH-VALUES
+                                         :HASH-TABLE-VALUES :MAP-TREE :MKSTR
+                                         :ONCE-ONLY :RCURRY :SYMB :WEAVE
+                                         :STRING-DESIGNATOR :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -72,6 +72,29 @@ and then calling the next one with the primary value of the last."
            (lambda (&rest arguments)
              (declare (dynamic-extent arguments))
              ,(compose-1 funs))))))
+  
+
+  (defun copy-hash-table (table &key key test size
+                                     rehash-size rehash-threshold)
+    "Returns a copy of hash table `table`, with the same keys and values
+as the `table`. The copy has the same properties as the original, unless
+overridden by the keyword arguments.
+
+Before each of the original values is set into the new hash-table, `key`
+is invoked on the value. As `key` defaults to `cl:identity`, a shallow
+copy is returned by default."
+    (setf key (or key 'identity))
+    (setf test (or test (hash-table-test table)))
+    (setf size (or size (hash-table-size table)))
+    (setf rehash-size (or rehash-size (hash-table-rehash-size table)))
+    (setf rehash-threshold (or rehash-threshold (hash-table-rehash-threshold table)))
+    (let ((copy (make-hash-table :test test :size size
+                                 :rehash-size rehash-size
+                                 :rehash-threshold rehash-threshold)))
+      (maphash (lambda (k v)
+                 (setf (gethash k copy) (funcall key v)))
+               table)
+      copy))
   
 
   (defun curry (function &rest arguments)
@@ -294,8 +317,8 @@ unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(compose curry emptyp ensure-keyword ensure-list flatten
-            hash-table-keys hash-table-values map-tree mkstr once-only rcurry
-            symb weave with-gensyms with-unique-names)))
+  (export '(compose copy-hash-table curry emptyp ensure-keyword ensure-list
+            flatten hash-table-keys hash-table-values map-tree mkstr once-only
+            rcurry symb weave with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

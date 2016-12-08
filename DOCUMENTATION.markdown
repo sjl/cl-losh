@@ -504,6 +504,177 @@ Return a new function that acts as a nullary-patched version of `function`.
 
   
 
+## Package `LOSH.HASH-SETS`
+
+Simple hash set implementation.
+
+### `COPY-HASH-SET` (function)
+
+    (COPY-HASH-SET INSTANCE)
+
+### `HASH-SET` (struct)
+
+Slots: `STORAGE`
+
+### `HSET-CLEAR!` (function)
+
+    (HSET-CLEAR! HSET)
+
+Remove all elements from `hset`.
+
+  Returns nothing.
+
+  
+
+### `HSET-CONTAINS-P` (function)
+
+    (HSET-CONTAINS-P HSET ELEMENT)
+
+Return whether `hset` contains `element`.
+
+### `HSET-COUNT` (function)
+
+    (HSET-COUNT HSET)
+
+Return the number of elements in `hset`.
+
+### `HSET-DIFFERENCE` (function)
+
+    (HSET-DIFFERENCE HSET &REST OTHERS)
+
+Return a fresh hash set containing the difference of the given hash sets.
+
+### `HSET-DIFFERENCE!` (function)
+
+    (HSET-DIFFERENCE! HSET &REST OTHERS)
+
+Destructively update `hset` to contain the difference of itself with `others`.
+
+### `HSET-ELEMENTS` (function)
+
+    (HSET-ELEMENTS HSET)
+
+Return a fresh list containing the elements of `hset`.
+
+### `HSET-EMPTY-P` (function)
+
+    (HSET-EMPTY-P HSET)
+
+Return whether `hset` is empty.
+
+### `HSET-FILTER` (function)
+
+    (HSET-FILTER HSET PREDICATE)
+
+Return a fresh hash set containing elements of `hset` satisfying `predicate`.
+
+### `HSET-FILTER!` (function)
+
+    (HSET-FILTER! HSET PREDICATE)
+
+Destructively update `hset` to contain only elements satisfying `predicate`.
+
+### `HSET-INSERT!` (function)
+
+    (HSET-INSERT! HSET &REST ELEMENTS)
+
+Insert each element in `elements` into `hset`.
+
+  Returns nothing.
+
+  
+
+### `HSET-INTERSECTION` (function)
+
+    (HSET-INTERSECTION HSET &REST OTHERS)
+
+Return a fresh hash set containing the intersection of the given hash sets.
+
+### `HSET-INTERSECTION!` (function)
+
+    (HSET-INTERSECTION! HSET &REST OTHERS)
+
+Destructively update `hset` to contain the intersection of itself with `others`.
+
+### `HSET-MAP` (function)
+
+    (HSET-MAP HSET FUNCTION &KEY NEW-TEST)
+
+Return a fresh hash set containing the results of calling `function` on elements of `hset`.
+
+  If `new-test` is given, the new hash set will use this as it's `test`.
+
+  
+
+### `HSET-MAP!` (function)
+
+    (HSET-MAP! HSET FUNCTION &KEY NEW-TEST)
+
+Destructively update `hset` by calling `function` on each element.
+
+   If `new-test` is given the hash set's `test` will be updated.
+
+   
+
+### `HSET-POP!` (function)
+
+    (HSET-POP! HSET)
+
+Remove and return an arbitrarily-chosen element from `hset`.
+
+  An error will be signaled if the hash set is empty.
+
+  
+
+### `HSET-REMOVE!` (function)
+
+    (HSET-REMOVE! HSET &REST ELEMENTS)
+
+Remove each element in `elements` from `hset`.
+
+  If an element is not in `hset`, it will be ignored.
+
+  Returns nothing.
+
+  
+
+### `HSET-UNION` (function)
+
+    (HSET-UNION HSET &REST OTHERS)
+
+Return a fresh hash set containing the union of the given hash sets.
+
+### `HSET-UNION!` (function)
+
+    (HSET-UNION! HSET &REST OTHERS)
+
+Destructively update `hset` to contain the union of itself with `others`.
+
+### `HSET=` (function)
+
+    (HSET= HSET &REST OTHERS)
+
+Return whether all the given hash sets contain exactly the same elements.
+
+  All the hash sets are assumed to use the same `test` -- the consequences are
+  undefined if this is not the case.
+
+  
+
+### `MAKE-HASH-SET` (function)
+
+    (MAKE-HASH-SET &KEY (TEST 'EQL) (SIZE 16) (INITIAL-CONTENTS 'NIL))
+
+Create a fresh hash set.
+
+  `size` should be a hint as to how many elements this set is expected to
+  contain.
+
+  `initial-contents` should be a sequence of initial elements for the set
+  (duplicates are fine).
+
+  
+
 ## Package `LOSH.HASH-TABLES`
 
 Utilities for operating on hash tables.
