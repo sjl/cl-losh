@@ -1843,7 +1843,7 @@
 (define-hset-op hset-map (hset function &key new-test)
   "Return a fresh hash set containing the results of calling `function` on elements of `hset`.
 
-  If `new-test` is given, the new hash set will use this as it's `test`.
+  If `new-test` is given, the new hash set will use this as its `test`.
 
   "
   (let ((new (copy-hash-set hset)))
