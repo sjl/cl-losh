@@ -1,4 +1,4 @@
-(in-package #:losh)
+(in-package :losh)
 
 ;;;; Sanity -------------------------------------------------------------------
 (defmacro -<> (&rest forms)
@@ -11,8 +11,24 @@
        (-<> ,@(rest forms)))))
 
 
+;;;; Types --------------------------------------------------------------------
+(deftype array-index (&optional (length (1- array-dimension-limit)))
+  "An integer in the range `[0, length)`.
+
+  From Alexandria.
+
+  "
+  `(integer 0 (,length)))
+
+
 ;;;; Chili Dogs ---------------------------------------------------------------
 (defmacro defun-inlineable (name &body body)
+  "Like `defun-inline`, but declaims `name` to be `notinline` afterword.
+
+  This is useful when you don't want to inline a function everywhere, but *do*
+  want to have the ability to inline it on demand with (declare (inline ...)).
+
+  "
   `(progn
      (declaim (inline ,name))
      (defun ,name ,@body)
@@ -20,6 +36,7 @@
      ',name))
 
 (defmacro defun-inline (name &body body)
+  "Like `defun`, but declaims `name` to be `inline`."
   `(progn
      (declaim (inline ,name))
      (defun ,name ,@body)
@@ -537,26 +554,6 @@
   `(progn
      ,@(loop :for (place function . nil) :on place-function-pairs :by #'cddr
              :collect `(%callf ,place ,function))))
-
-
-;;;; Lists --------------------------------------------------------------------
-(defun take (n list)
-  "Return a fresh list of the first `n` elements of `list`.
-
-  If `list` is shorter than `n` a shorter result will be returned.
-
-  Example:
-
-    (take 2 '(a b c))
-    => (a b)
-
-    (take 4 '(1))
-    => (1)
-
-  "
-  (iterate (repeat n)
-           (for item :in list)
-           (collect item)))
 
 
 ;;;; Arrays -------------------------------------------------------------------
@@ -1425,6 +1422,69 @@
     (finally (return result))))
 
 
+(defun-inline take-list (n list)
+  (iterate (declare (iterate:declare-variables))
+           (repeat n)
+           (for item :in list)
+           (collect item)))
+
+(defun-inline take-seq (n seq)
+  (subseq seq 0 (min n (length seq))))
+
+(defun take (n seq)
+  "Return a fresh sequence of the first `n` elements of `seq`.
+
+  The result will be of the same type as `seq`.
+
+  If `seq` is shorter than `n` a shorter result will be returned.
+
+  Example:
+
+    (take 2 '(a b c))
+    => (a b)
+
+    (take 4 #(1))
+    => #(1)
+
+  From Serapeum.
+
+  "
+  (check-type n array-index)
+  (etypecase seq
+    (list (take-list n seq))
+    (sequence (take-seq n seq))))
+
+
+(defun-inline drop-list (n list)
+  (copy-list (nthcdr n list)))
+
+(defun-inline drop-seq (n seq)
+  (subseq seq (min n (length seq))))
+
+(defun drop (n seq)
+  "Return a fresh copy of the `seq` without the first `n` elements.
+
+  The result will be of the same type as `seq`.
+
+  If `seq` is shorter than `n` an empty sequence will be returned.
+
+  Example:
+
+    (drop 2 '(a b c))
+    => (c)
+
+    (drop 4 #(1))
+    => #()
+
+  From Serapeum.
+
+  "
+  (check-type n array-index)
+  (etypecase seq
+    (list (drop-list n seq))
+    (sequence (drop-seq n seq))))
+
+
 ;;;; Debugging & Logging ------------------------------------------------------
 (defun pr (&rest args)
   "Print `args` readably, separated by spaces and followed by a newline.
@@ -1458,9 +1518,9 @@
 
   "
   `(prog1
-     (progn ,@(mapcar (lambda (arg) `(pr ',arg ,arg)) args))
-     (terpri)
-     (finish-output)))
+    (progn ,@(mapcar (lambda (arg) `(pr ',arg ,arg)) args))
+    (terpri)
+    (finish-output)))
 
 
 (defun bits (n size &optional (stream t))
@@ -1485,7 +1545,7 @@
          (*error-output* (make-broadcast-stream)))
     ,@body))
 
-(defmacro dis (arglist &body body)
+(defmacro dis (&body body)
   "Disassemble the code generated for a `lambda` with `arglist` and `body`.
 
   It will also spew compiler notes so you can see why the garbage box isn't
@@ -1494,9 +1554,13 @@
   "
   (let ((%disassemble #+sbcl 'sb-disassem:disassemble-code-component
                       #-sbcl 'disassemble))
-    `(,%disassemble (compile nil '(lambda ,arglist
-                                   (declare (optimize speed))
-                                   ,@body)))))
+    (destructuring-bind (arglist &body body)
+        (iterate (for b :first body :then (cdr b))
+                 (while (symbolp (car b)))
+                 (finally (return b)))
+      `(,%disassemble (compile nil '(lambda ,arglist
+                                     (declare (optimize speed))
+                                     ,@body))))))
 
 (defmacro comment (&body body)
   "Do nothing with a bunch of forms.

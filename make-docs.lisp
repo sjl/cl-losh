@@ -4,6 +4,7 @@
   (list "LOSH"
 
         "LOSH.ARRAYS"
+        "LOSH.CHILI-DOGS"
         "LOSH.CONTROL-FLOW"
         "LOSH.DEBUGGING"
         "LOSH.ELDRITCH-HORRORS"
@@ -12,7 +13,6 @@
         "LOSH.HASH-TABLES"
         "LOSH.ITERATE"
         "LOSH.LICENSING"
-        "LOSH.LISTS"
         "LOSH.MATH"
         "LOSH.MUTATION"
         "LOSH.QUEUES"

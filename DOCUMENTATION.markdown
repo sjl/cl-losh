@@ -90,6 +90,31 @@ Fill `array` (which must be of type `(array T *)`) with `item`.
 
   
 
+## Package `LOSH.CHILI-DOGS`
+
+Gotta go FAST.
+
+### `DEFUN-INLINE` (macro)
+
+    (DEFUN-INLINE NAME
+      &BODY
+      BODY)
+
+Like `defun`, but declaims `name` to be `inline`.
+
+### `DEFUN-INLINEABLE` (macro)
+
+    (DEFUN-INLINEABLE NAME
+      &BODY
+      BODY)
+
+Like `defun-inline`, but declaims `name` to be `notinline` afterword.
+
+  This is useful when you don't want to inline a function everywhere, but *do*
+  want to have the ability to inline it on demand with (declare (inline ...)).
+
+  
+
 ## Package `LOSH.CONTROL-FLOW`
 
 Utilities for managing control flow.
@@ -289,7 +314,7 @@ Do nothing with a bunch of forms.
 
 ### `DIS` (macro)
 
-    (DIS ARGLIST
+    (DIS
       &BODY
       BODY)
 
@@ -745,28 +770,6 @@ Print the licenses used by the given project and its dependencies.
 
   
 
-## Package `LOSH.LISTS`
-
-Utilities related to lists.
-
-### `TAKE` (function)
-
-    (TAKE N LIST)
-
-Return a fresh list of the first `n` elements of `list`.
-
-  If `list` is shorter than `n` a shorter result will be returned.
-
-  Example:
-
-    (take 2 '(a b c))
-    => (a b)
-
-    (take 4 '(1))
-    => (1)
-
-  
-
 ## Package `LOSH.MATH`
 
 Utilities related to math and numbers.
@@ -1093,6 +1096,28 @@ Return a random boolean with `chance` probability of `t`.
 
 Utilities for operating on sequences.
 
+### `DROP` (function)
+
+    (DROP N SEQ)
+
+Return a fresh copy of the `seq` without the first `n` elements.
+
+  The result will be of the same type as `seq`.
+
+  If `seq` is shorter than `n` an empty sequence will be returned.
+
+  Example:
+
+    (drop 2 '(a b c))
+    => (c)
+
+    (drop 4 #(1))
+    => #()
+
+  From Serapeum.
+
+  
+
 ### `FREQUENCIES` (function)
 
     (FREQUENCIES SEQUENCE &KEY (TEST 'EQL))
@@ -1179,6 +1204,28 @@ Return a hash table containing the proportions of the items in `sequence`.
     (proportions '(foo foo bar) :float nil)
     => {foo 2/3
         bar 1/3}
+
+  
+
+### `TAKE` (function)
+
+    (TAKE N SEQ)
+
+Return a fresh sequence of the first `n` elements of `seq`.
+
+  The result will be of the same type as `seq`.
+
+  If `seq` is shorter than `n` a shorter result will be returned.
+
+  Example:
+
+    (take 2 '(a b c))
+    => (a b)
+
+    (take 4 #(1))
+    => #(1)
+
+  From Serapeum.
 
   
 

@@ -92,11 +92,6 @@
     :notf
     :callf))
 
-(defpackage :losh.lists
-  (:documentation "Utilities related to lists.")
-  (:export
-    :take))
-
 (defpackage :losh.arrays
   (:documentation "Utilities related to arrays.")
   (:export
@@ -186,7 +181,9 @@
     :prefix-sums
     :frequencies
     :proportions
-    :group-by))
+    :group-by
+    :take
+    :drop))
 
 (defpackage :losh.debugging
   (:documentation "Utilities for figuring out what the hell is going on.")
@@ -225,10 +222,17 @@
     :dlambda
     :define-with-macro))
 
+(defpackage :losh.chili-dogs
+  (:documentation "Gotta go FAST.")
+  (:export
+    :defun-inline
+    :defun-inlineable))
+
 
 (defpackage-inheriting :losh
   (:losh.arrays
 
+   :losh.chili-dogs
    :losh.control-flow
    :losh.debugging
    :losh.eldritch-horrors
@@ -237,7 +241,6 @@
    :losh.hash-tables
    :losh.iterate
    :losh.licensing
-   :losh.lists
    :losh.math
    :losh.mutation
    :losh.queues
