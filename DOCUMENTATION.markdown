@@ -184,6 +184,27 @@ Perform `then` or `else` depending on the results of `lookup-expr`.
 
   
 
+### `MULTIPLE-VALUE-BIND*` (macro)
+
+    (MULTIPLE-VALUE-BIND* BINDINGS
+      &BODY
+      BODY)
+
+Bind each pair in `bindings` with `multiple-value-bind` sequentially.
+
+  Example:
+
+    (multiple-value-bind*
+        (((a b) (values 0 1))
+         ((c) (values (1+ b)))
+      (list a b c))
+    ; =>
+    ; (0 1 2)
+
+  From https://github.com/phoe/m-m-v-b
+
+  
+
 ### `RECURSIVELY` (macro)
 
     (RECURSIVELY BINDINGS

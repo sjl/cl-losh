@@ -471,6 +471,27 @@
          (when ,symbol
            (when-let* ,remaining-bindings ,@body))))))
 
+(defmacro multiple-value-bind* (bindings &body body)
+  "Bind each pair in `bindings` with `multiple-value-bind` sequentially.
+
+  Example:
+
+    (multiple-value-bind*
+        (((a b) (values 0 1))
+         ((c) (values (1+ b)))
+      (list a b c))
+    ; =>
+    ; (0 1 2)
+
+  From https://github.com/phoe/m-m-v-b
+
+  "
+  (if (null bindings)
+    `(progn ,@body)
+    (destructuring-bind ((vars form) &rest bindings) bindings
+      `(multiple-value-bind ,vars ,form
+         (multiple-value-bind* ,bindings ,@body)))))
+
 
 ;;;; Mutation -----------------------------------------------------------------
 (defun build-zap (place expr env)
