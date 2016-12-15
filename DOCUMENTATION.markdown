@@ -238,7 +238,7 @@ Execute `body` recursively, like Clojure's `loop`/`recur`.
       &BODY
       BODY)
 
-Perform `body` with `var` to the results of `lookup-expr`, when valid.
+Perform `body` with `var` bound to the result of `lookup-expr`, when valid.
 
   `lookup-expr` should be an expression that returns two values, the first being
   the result (which will be bound to `var`) and the second indicating whether
@@ -536,17 +536,17 @@ Return a new function that acts as a nullary-patched version of `function`.
 
   Examples:
 
-    (max 1 10 2)                     => 10
-    (max)                            => invalid number of arguments
+    (max 1 10 2) ; => 10
+    (max)        ; => invalid number of arguments
 
-    (funcall (nullary #'max))          => nil
-    (funcall (nullary #'max 0))        => 0
-    (funcall (nullary #'max 0) 1 10 2) => 10
+    (funcall (nullary #'max))          ; => nil
+    (funcall (nullary #'max 0))        ; => 0
+    (funcall (nullary #'max 0) 1 10 2) ; => 10
 
-    (reduce #'max nil)                  => invalid number of arguments
-    (reduce (nullary #'max) nil)        => nil
-    (reduce (nullary #'max :empty) nil) => :empty
-    (reduce (nullary #'max) '(1 10 2))  => 10
+    (reduce #'max nil)                  ; => invalid number of arguments
+    (reduce (nullary #'max) nil)        ; => nil
+    (reduce (nullary #'max :empty) nil) ; => :empty
+    (reduce (nullary #'max) '(1 10 2))  ; => 10
 
   
 
