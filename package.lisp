@@ -46,7 +46,10 @@
     :lerp
     :precise-lerp
     :map-range
-    :clamp))
+    :clamp
+
+    :gnuplot
+    :gnuplot-function))
 
 (defpackage :losh.random
   (:documentation "Utilities related to randomness.")

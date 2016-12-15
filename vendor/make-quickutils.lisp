@@ -16,6 +16,7 @@
                :map-tree
                :mkstr
                :once-only
+               :range
                :rcurry
                :symb
                :weave

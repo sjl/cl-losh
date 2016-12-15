@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-HASH-TABLE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-HASH-TABLE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RANGE :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -19,7 +19,7 @@
                                          :ENSURE-LIST :FLATTEN :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :MAPHASH-VALUES
                                          :HASH-TABLE-VALUES :MAP-TREE :MKSTR
-                                         :ONCE-ONLY :RCURRY :SYMB :WEAVE
+                                         :ONCE-ONLY :RANGE :RCURRY :SYMB :WEAVE
                                          :STRING-DESIGNATOR :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
@@ -248,6 +248,14 @@ Example:
                ,@forms)))))
   
 
+  (defun range (start end &key (step 1) (key 'identity))
+    "Return the list of numbers `n` such that `start <= n < end` and
+`n = start + k*step` for suitable integers `k`. If a function `key` is
+provided, then apply it to each number."
+    (assert (<= start end))
+    (loop :for i :from start :below end :by step :collecting (funcall key i)))
+  
+
   (defun rcurry (function &rest arguments)
     "Returns a function that applies the arguments it is called
 with and `arguments` to `function`."
@@ -319,6 +327,6 @@ unique symbol the named variable will be bound to."
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(compose copy-hash-table curry emptyp ensure-keyword ensure-list
             flatten hash-table-keys hash-table-values map-tree mkstr once-only
-            rcurry symb weave with-gensyms with-unique-names)))
+            range rcurry symb weave with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

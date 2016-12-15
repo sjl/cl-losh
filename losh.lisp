@@ -159,6 +159,48 @@
       (t value))))
 
 
+(defun gnuplot (data &key
+                (filename "plot.png")
+                (x #'car)
+                (y #'cdr))
+  "Plot `data` to `filename` with gnuplot.
+
+  This will (silently) quickload the `external-program` system to handle the
+  communication with gnuplot.
+
+  "
+  (uiop/package:symbol-call :ql :quickload 'external-program :silent t)
+  (let* ((process (uiop/package:symbol-call
+                    :external-program :start
+                    "gnuplot"
+                    `("-e" "set terminal png"
+                      "-e" ,(format nil "set output '~A'" filename)
+                      "-e" "plot '-' using 1:2 title 'DATA' with linespoints")
+                    :input :stream
+                    :output nil))
+         (in (uiop/package:symbol-call
+               :external-program :process-input-stream
+               process)))
+    (unwind-protect
+        (progn
+          (iterate (for item :in data)
+                   (format in "~A ~A~%" (funcall x item) (funcall y item)))
+          (finish-output in))
+      (close in))
+    process))
+
+(defun gnuplot-function (function &key (start 0.0) (end 1.0) (step 0.1))
+  "Plot `function` with gnuplot.
+
+  See `plot` for more information.
+
+  "
+  (let* ((x (range start end :step step))
+         (y (mapcar function x))
+         (data (mapcar #'cons x y)))
+    (gnuplot data)))
+
+
 ;;;; Random -------------------------------------------------------------------
 (defun-inlineable randomp (&optional (chance 0.5))
   "Return a random boolean with `chance` probability of `t`."

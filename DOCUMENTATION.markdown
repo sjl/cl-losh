@@ -839,6 +839,27 @@ Convert `radians` into degrees.
 
 Return whether `n` is evenly divisible by `divisor`.
 
+### `GNUPLOT` (function)
+
+    (GNUPLOT DATA &KEY (FILENAME plot.png) (X #'CAR) (Y #'CDR))
+
+Plot `data` to `filename` with gnuplot.
+
+  This will (silently) quickload the `external-program` system to handle the
+  communication with gnuplot.
+
+  
+
+### `GNUPLOT-FUNCTION` (function)
+
+    (GNUPLOT-FUNCTION FUNCTION &KEY (START 0.0) (END 1.0) (STEP 0.1))
+
+Plot `function` with gnuplot.
+
+  See `plot` for more information.
+
+  
+
 ### `LERP` (function)
 
     (LERP FROM TO N)
