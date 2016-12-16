@@ -158,6 +158,11 @@
       ((< value min) min)
       (t value))))
 
+(defun-inline in-range-p (low value high)
+  "Return whether `low` <= `value` < `high`."
+  (and (<= low value)
+       (< value high)))
+
 
 (defun gnuplot (data &key
                 (filename "plot.png")

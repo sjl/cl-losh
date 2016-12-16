@@ -38,15 +38,16 @@
     :6/8tau
     :7/8tau
 
-    :radians
-    :degrees
-    :square
-    :dividesp
-    :norm
-    :lerp
-    :precise-lerp
-    :map-range
     :clamp
+    :degrees
+    :dividesp
+    :in-range-p
+    :lerp
+    :map-range
+    :norm
+    :precise-lerp
+    :radians
+    :square
 
     :gnuplot
     :gnuplot-function))

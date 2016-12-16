@@ -860,6 +860,12 @@ Plot `function` with gnuplot.
 
   
 
+### `IN-RANGE-P` (function)
+
+    (IN-RANGE-P LOW VALUE HIGH)
+
+Return whether `low` <= `value` < `high`.
+
 ### `LERP` (function)
 
     (LERP FROM TO N)
