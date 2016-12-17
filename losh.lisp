@@ -180,7 +180,7 @@
                     "gnuplot"
                     `("-e" "set terminal png"
                       "-e" ,(format nil "set output '~A'" filename)
-                      "-e" "plot '-' using 1:2 title 'DATA' with linespoints")
+                      "-e" "plot '-' using 1:2 title 'DATA' with lines linewidth 2")
                     :input :stream
                     :output nil))
          (in (uiop/package:symbol-call
@@ -1733,8 +1733,8 @@
     (mapcar #'string-upcase <>)
     (mapc #'sb-sprof::profile-call-counts <>))
   (sb-sprof::start-profiling :max-samples 50000
-                             ; :mode :cpu
-                             :mode :time
+                             :mode :cpu
+                             ; :mode :time
                              :sample-interval 0.01
                              :threads :all))
 
