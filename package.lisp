@@ -48,9 +48,7 @@
     :precise-lerp
     :radians
     :square
-
-    :gnuplot
-    :gnuplot-function))
+    :digit))
 
 (defpackage :losh.random
   (:documentation "Utilities related to randomness.")
@@ -221,6 +219,15 @@
   (:export
     :print-licenses))
 
+(defpackage :losh.gnuplot
+  (:documentation "Utilities for plotting data with gnuplot.")
+  (:export
+    :gnuplot
+    :gnuplot-args
+    :gnuplot-expr
+    :gnuplot-function
+    :x))
+
 (defpackage :losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")
   (:export
@@ -242,6 +249,7 @@
    :losh.debugging
    :losh.eldritch-horrors
    :losh.functions
+   :losh.gnuplot
    :losh.hash-sets
    :losh.hash-tables
    :losh.iterate

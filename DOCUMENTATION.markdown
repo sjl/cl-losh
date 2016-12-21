@@ -550,6 +550,65 @@ Return a new function that acts as a nullary-patched version of `function`.
 
   
 
+## Package `LOSH.GNUPLOT`
+
+Utilities for plotting data with gnuplot.
+
+### `GNUPLOT` (function)
+
+    (GNUPLOT DATA &REST ARGS &KEY (X #'CAR) (Y #'CDR) &ALLOW-OTHER-KEYS)
+
+Plot `data` to `filename` with gnuplot.
+
+  This will (silently) quickload the `external-program` system to handle the
+  communication with gnuplot.
+
+  `data` should be a sequence of data points to plot.
+
+  `x` should be a function to pull the x-values from each item in data.
+
+  `y` should be a function to pull the y-values from each item in data.
+
+  See the docstring of `gnuplot-args` for other keyword arguments.
+
+  
+
+### `GNUPLOT-ARGS` (function)
+
+    (GNUPLOT-ARGS &KEY (FILENAME plot.png) (SIZE-X 1200) (SIZE-Y 800) (LABEL-X)
+                  (LABEL-Y) (LINE-TITLE 'DATA) (LINE-WIDTH 4) (AXIS-X NIL)
+                  (AXIS-Y NIL) (GRAPH-TITLE) &ALLOW-OTHER-KEYS)
+
+Return the formatted command line arguments for the given gnuplot arguments.
+
+  You shouldn't call this function directly — it's exposed just so you can see
+  the list of possible gnuplot arguments all in one place.
+
+  
+
+### `GNUPLOT-EXPR` (macro)
+
+    (GNUPLOT-EXPR EXPR &REST ARGS)
+
+Plot `expr` (an expression involving `x`) with gnuplot.
+
+  See the docstring of `gnuplot-args` for other keyword arguments.
+
+  
+
+### `GNUPLOT-FUNCTION` (function)
+
+    (GNUPLOT-FUNCTION FUNCTION &REST ARGS &KEY (START 0.0) (END 1.0) (STEP 0.1)
+                      (INCLUDE-END NIL) &ALLOW-OTHER-KEYS)
+
+Plot `function` over [`start`, `end`) by `step` with gnuplot.
+
+  If `include-end` is `t` the `end` value will also be plotted.
+
+  See the docstring of `gnuplot-args` for other keyword arguments.
+
+  
+
 ## Package `LOSH.HASH-SETS`
 
 Simple hash set implementation.
@@ -833,32 +892,28 @@ Convert `radians` into degrees.
 
   
 
+### `DIGIT` (function)
+
+    (DIGIT POSITION INTEGER &OPTIONAL (BASE 10))
+
+Return the value of the digit at `position` in `integer`.
+
+  Examples:
+
+    (digit 0 135) ; => 5
+    (digit 1 135) ; => 3
+    (digit 2 135) ; => 1
+
+    (digit 0 #xD4 16) ; => 4
+    (digit 1 #xD4 16) ; => 13
+
+  
+
 ### `DIVIDESP` (function)
 
     (DIVIDESP N DIVISOR)
 
 Return whether `n` is evenly divisible by `divisor`.
-
-### `GNUPLOT` (function)
-
-    (GNUPLOT DATA &KEY (FILENAME plot.png) (X #'CAR) (Y #'CDR))
-
-Plot `data` to `filename` with gnuplot.
-
-  This will (silently) quickload the `external-program` system to handle the
-  communication with gnuplot.
-
-  
-
-### `GNUPLOT-FUNCTION` (function)
-
-    (GNUPLOT-FUNCTION FUNCTION &KEY (START 0.0) (END 1.0) (STEP 0.1))
-
-Plot `function` with gnuplot.
-
-  See `plot` for more information.
-
-  
 
 ### `IN-RANGE-P` (function)
 

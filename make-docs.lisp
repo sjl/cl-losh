@@ -9,6 +9,7 @@
         "LOSH.DEBUGGING"
         "LOSH.ELDRITCH-HORRORS"
         "LOSH.FUNCTIONS"
+        "LOSH.GNUPLOT"
         "LOSH.HASH-SETS"
         "LOSH.HASH-TABLES"
         "LOSH.ITERATE"

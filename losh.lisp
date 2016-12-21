@@ -164,46 +164,22 @@
        (< value high)))
 
 
-(defun gnuplot (data &key
-                (filename "plot.png")
-                (x #'car)
-                (y #'cdr))
-  "Plot `data` to `filename` with gnuplot.
+(defun-inline digit (position integer &optional (base 10))
+  "Return the value of the digit at `position` in `integer`.
 
-  This will (silently) quickload the `external-program` system to handle the
-  communication with gnuplot.
+  Examples:
 
-  "
-  (uiop/package:symbol-call :ql :quickload 'external-program :silent t)
-  (let* ((process (uiop/package:symbol-call
-                    :external-program :start
-                    "gnuplot"
-                    `("-e" "set terminal png"
-                      "-e" ,(format nil "set output '~A'" filename)
-                      "-e" "plot '-' using 1:2 title 'DATA' with lines linewidth 2")
-                    :input :stream
-                    :output nil))
-         (in (uiop/package:symbol-call
-               :external-program :process-input-stream
-               process)))
-    (unwind-protect
-        (progn
-          (iterate (for item :in data)
-                   (format in "~A ~A~%" (funcall x item) (funcall y item)))
-          (finish-output in))
-      (close in))
-    process))
+    (digit 0 135) ; => 5
+    (digit 1 135) ; => 3
+    (digit 2 135) ; => 1
 
-(defun gnuplot-function (function &key (start 0.0) (end 1.0) (step 0.1))
-  "Plot `function` with gnuplot.
-
-  See `plot` for more information.
+    (digit 0 #xD4 16) ; => 4
+    (digit 1 #xD4 16) ; => 13
 
   "
-  (let* ((x (range start end :step step))
-         (y (mapcar function x))
-         (data (mapcar #'cons x y)))
-    (gnuplot data)))
+  (-<> integer
+    (floor <> (expt base position))
+    (mod <> base)))
 
 
 ;;;; Random -------------------------------------------------------------------
@@ -791,7 +767,7 @@
 
 
 (defmacro-driver (FOR var MODULO divisor &sequence)
-  "Iterate numerically modulo `divisor`.
+  "Iterate numerically with `var` bound modulo `divisor`.
 
   This driver iterates just like the vanilla `for`, but each resulting value
   will be modulo'ed by `divisor` before being bound to `var`.
@@ -845,10 +821,9 @@
                 (cons (first ,current) (car ,l))
               (setf ,current nil)))
 
-           (t
-            (prog1
-                (cons (first ,current) (second ,current))
-              (setf ,current (cdr ,current))))))))))
+           (t (prog1
+                  (cons (first ,current) (second ,current))
+                (setf ,current (cdr ,current))))))))))
 
 
 (defmacro-clause (AVERAGING expr &optional INTO var)
@@ -2038,6 +2013,119 @@
 
 (defun list-to-bset (list)
   (apply #'make-bset list))
+
+
+;;;; Gnuplot ------------------------------------------------------------------
+(defun gnuplot-args% (&rest args)
+  (mapcan (lambda (arg) (list "-e" arg))
+          (remove nil args)))
+
+(defun gnuplot-args (&key
+                     (filename "plot.png")
+                     (size-x 1200)
+                     (size-y 800)
+                     (label-x)
+                     (label-y)
+                     (line-title 'data)
+                     (line-width 4)
+                     (axis-x nil)
+                     (axis-y nil)
+                     (graph-title)
+                     &allow-other-keys)
+  "Return the formatted command line arguments for the given gnuplot arguments.
+
+  You shouldn't call this function directly — it's exposed just so you can see
+  the list of possible gnuplot arguments all in one place.
+
+  "
+  (flet ((esc (string) (remove #\' (aesthetic-string string)))
+         (f (&rest args) (apply #'format nil args)))
+    (gnuplot-args%
+      (f "set terminal pngcairo dashed size ~D,~D font \"Lucida Grande,20\""
+         size-x size-y)
+      (f "set output '~A'" (esc filename))
+      (f "set border linewidth 1")
+      (f "set style line 10 dashtype 2 linewidth 3 linecolor \"#666666\"")
+      (when axis-x (f "set xzeroaxis linestyle 10"))
+      (when axis-y (f "set yzeroaxis linestyle 10"))
+      (when graph-title (f "set title '~A'" (esc graph-title)))
+      (when label-x (f "set xlabel '~A'" (esc label-x)))
+      (when label-y (f "set ylabel '~A'" (esc label-y)))
+      (f "plot '-' using 1:2 title '~A' with lines linewidth ~D"
+         (esc line-title) line-width))))
+
+
+(defun gnuplot (data
+                &rest args
+                &key
+                (x #'car)
+                (y #'cdr)
+                &allow-other-keys)
+  "Plot `data` to `filename` with gnuplot.
+
+  This will (silently) quickload the `external-program` system to handle the
+  communication with gnuplot.
+
+  `data` should be a sequence of data points to plot.
+
+  `x` should be a function to pull the x-values from each item in data.
+
+  `y` should be a function to pull the y-values from each item in data.
+
+  See the docstring of `gnuplot-args` for other keyword arguments.
+
+  "
+  (uiop/package:symbol-call :ql :quickload 'external-program :silent t)
+  (let* ((process (uiop/package:symbol-call
+                    :external-program :start
+                    "gnuplot"
+                    (apply #'gnuplot-args args)
+                    :input :stream
+                    :output nil))
+         (in (uiop/package:symbol-call
+               :external-program :process-input-stream
+               process)))
+    (unwind-protect
+        (progn
+          (iterate (for item :in-whatever data)
+                   (format in "~F ~F~%" (funcall x item) (funcall y item)))
+          (finish-output in))
+      (close in))
+    process))
+
+(defun gnuplot-function (function
+                         &rest args
+                         &key
+                         (start 0.0)
+                         (end 1.0)
+                         (step 0.1)
+                         (include-end nil)
+                         &allow-other-keys)
+  "Plot `function` over [`start`, `end`) by `step` with gnuplot.
+
+  If `include-end` is `t` the `end` value will also be plotted.
+
+  See the docstring of `gnuplot-args` for other keyword arguments.
+
+  "
+  (let* ((x (range start end :step step))
+         (x (append x
+                    (when (and include-end
+                               (not= (car (last x)) end))
+                      (list end))))
+         (y (mapcar function x))
+         (data (mapcar #'cons x y)))
+    (apply #'gnuplot data args)))
+
+(defmacro gnuplot-expr (expr &rest args)
+  "Plot `expr` (an expression involving `x`) with gnuplot.
+
+  See the docstring of `gnuplot-args` for other keyword arguments.
+
+  "
+  `(gnuplot-function (lambda (x) ,expr)
+    :line-title ',expr
+    ,@args))
 
 
 ;;;; Licensing ----------------------------------------------------------------
