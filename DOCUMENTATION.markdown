@@ -90,6 +90,98 @@ Fill `array` (which must be of type `(array T *)`) with `item`.
 
   
 
+## Package `LOSH.BITS`
+
+Utilities for low-level bit stuff.
+
+### `+/16` (function)
+
+    (+/16 X Y)
+
+Perform 16-bit signed addition of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
+### `+/32` (function)
+
+    (+/32 X Y)
+
+Perform 32-bit signed addition of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
+### `+/64` (function)
+
+    (+/64 X Y)
+
+Perform 64-bit signed addition of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
+### `+/8` (function)
+
+    (+/8 X Y)
+
+Perform 8-bit signed addition of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
+### `-/16` (function)
+
+    (-/16 X Y)
+
+Perform 16-bit signed subtraction of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
+### `-/32` (function)
+
+    (-/32 X Y)
+
+Perform 32-bit signed subtraction of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
+### `-/64` (function)
+
+    (-/64 X Y)
+
+Perform 64-bit signed subtraction of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
+### `-/8` (function)
+
+    (-/8 X Y)
+
+Perform 8-bit signed subtraction of `x` and `y`.
+
+  Returns two values: the result and a boolean specifying whether
+  underflow/overflow occurred.
+
+  
+
 ## Package `LOSH.CHILI-DOGS`
 
 Gotta go FAST.

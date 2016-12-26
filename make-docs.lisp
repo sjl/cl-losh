@@ -4,6 +4,7 @@
   (list "LOSH"
 
         "LOSH.ARRAYS"
+        "LOSH.BITS"
         "LOSH.CHILI-DOGS"
         "LOSH.CONTROL-FLOW"
         "LOSH.DEBUGGING"

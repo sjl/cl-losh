@@ -19,55 +19,32 @@
              `(:export ,@(external-symbols parent-package)))))
 
 
-(defpackage :losh.math
-  (:documentation "Utilities related to math and numbers.")
+(defpackage :losh.arrays
+  (:documentation "Utilities related to arrays.")
   (:export
-    :tau
-    :tau/2
-    :1/2tau
-    :tau/4
-    :1/4tau
-    :2/4tau
-    :3/4tau
-    :tau/8
-    :1/8tau
-    :2/8tau
-    :3/8tau
-    :4/8tau
-    :5/8tau
-    :6/8tau
-    :7/8tau
+    :do-array
+    :fill-multidimensional-array
+    :fill-multidimensional-array-t
+    :fill-multidimensional-array-fixnum
+    :fill-multidimensional-array-single-float))
 
-    :clamp
-    :degrees
-    :dividesp
-    :in-range-p
-    :lerp
-    :map-range
-    :norm
-    :precise-lerp
-    :radians
-    :square
-    :digit))
-
-(defpackage :losh.random
-  (:documentation "Utilities related to randomness.")
+(defpackage :losh.bits
+  (:documentation "Utilities for low-level bit stuff.")
   (:export
-    :randomp
-    :random-elt
-    :random-range
-    :random-range-exclusive
-    :random-around
-    :random-gaussian
-    :random-gaussian-integer
-    :d))
+    :+/8
+    :-/8
+    :+/16
+    :-/16
+    :+/32
+    :-/32
+    :+/64
+    :-/64))
 
-(defpackage :losh.functions
-  (:documentation "Utilities for working with higher-order functions.")
+(defpackage :losh.chili-dogs
+  (:documentation "Gotta go FAST.")
   (:export
-    :juxt
-    :nullary
-    :fixed-point))
+    :defun-inline
+    :defun-inlineable))
 
 (defpackage :losh.control-flow
   (:documentation "Utilities for managing control flow.")
@@ -81,72 +58,43 @@
     :when-let*
     :multiple-value-bind*))
 
-(defpackage :losh.mutation
-  (:documentation "Utilities for mutating places in-place.")
+(defpackage :losh.debugging
+  (:documentation "Utilities for figuring out what the hell is going on.")
   (:export
-    :zapf
-    :%
-    :mulf
-    :divf
-    :modf
-    :remainderf
-    :clampf
-    :negatef
-    :notf
-    :callf))
+    :pr
+    :prl
+    :bits
+    :shut-up
+    :dis
+    :comment
+    :aesthetic-string
+    :structural-string
+    #+sbcl :start-profiling
+    #+sbcl :stop-profiling
+    :print-table
+    :print-hash-table))
 
-(defpackage :losh.arrays
-  (:documentation "Utilities related to arrays.")
+(defpackage :losh.eldritch-horrors
+  (:documentation "Abandon all hope, ye who enter here.")
   (:export
-    :do-array
-    :fill-multidimensional-array
-    :fill-multidimensional-array-t
-    :fill-multidimensional-array-fixnum
-    :fill-multidimensional-array-single-float))
+    :dlambda
+    :define-with-macro))
 
-(defpackage :losh.queues
-  (:documentation "A simple queue implementation.")
+(defpackage :losh.functions
+  (:documentation "Utilities for working with higher-order functions.")
   (:export
-    :queue
-    :make-queue
-    :queue-contents
-    :queue-size
-    :queue-empty-p
-    :enqueue
-    :dequeue
-    :queue-append))
+    :juxt
+    :nullary
+    :fixed-point))
 
-(defpackage :losh.iterate
-  (:use :iterate) ; need this for iterate's `for` symbol fuckery
-  (:documentation "Custom `iterate` drivers and clauses.")
+(defpackage :losh.gnuplot
+  (:documentation "Utilities for plotting data with gnuplot.")
   (:export
-    :across-flat-array
-    :averaging
-    :cycling
-    :every-nth
-    :for-nested
-    :in-array
-    :in-lists
-    :in-sequences
-    :in-whatever
-    :index-of-flat-array
-    :into
-    :macroexpand-iterate
-    :modulo
-    :pairs-of-list
-    :per-iteration-into
-    :real-time
-    :run-time
-    :since-start-into
-    :skip-origin
-    :timing
-    :within-radius
-    ))
-
-(defpackage :losh.hash-tables
-  (:documentation "Utilities for operating on hash tables.")
-  (:export
-    :mutate-hash-values))
+    :gnuplot
+    :gnuplot-args
+    :gnuplot-expr
+    :gnuplot-function
+    :x))
 
 (defpackage :losh.hash-sets
   (:documentation "Simple hash set implementation.")
@@ -178,6 +126,112 @@
     :hset-map
     :hset-map!))
 
+(defpackage :losh.hash-tables
+  (:documentation "Utilities for operating on hash tables.")
+  (:export
+    :mutate-hash-values))
+
+(defpackage :losh.iterate
+  (:use :iterate) ; need this for iterate's `for` symbol fuckery
+  (:documentation "Custom `iterate` drivers and clauses.")
+  (:export
+    :across-flat-array
+    :averaging
+    :cycling
+    :every-nth
+    :for-nested
+    :in-array
+    :in-lists
+    :in-sequences
+    :in-whatever
+    :index-of-flat-array
+    :into
+    :macroexpand-iterate
+    :modulo
+    :pairs-of-list
+    :per-iteration-into
+    :real-time
+    :run-time
+    :since-start-into
+    :skip-origin
+    :timing
+    :within-radius
+    ))
+
+(defpackage :losh.licensing
+  (:documentation "Utilities related to open source licenses.")
+  (:export
+    :print-licenses))
+
+(defpackage :losh.math
+  (:documentation "Utilities related to math and numbers.")
+  (:export
+    :tau
+    :tau/2
+    :1/2tau
+    :tau/4
+    :1/4tau
+    :2/4tau
+    :3/4tau
+    :tau/8
+    :1/8tau
+    :2/8tau
+    :3/8tau
+    :4/8tau
+    :5/8tau
+    :6/8tau
+    :7/8tau
+
+    :clamp
+    :degrees
+    :dividesp
+    :in-range-p
+    :lerp
+    :map-range
+    :norm
+    :precise-lerp
+    :radians
+    :square
+    :digit))
+
+(defpackage :losh.mutation
+  (:documentation "Utilities for mutating places in-place.")
+  (:export
+    :zapf
+    :%
+    :mulf
+    :divf
+    :modf
+    :remainderf
+    :clampf
+    :negatef
+    :notf
+    :callf))
+
+(defpackage :losh.queues
+  (:documentation "A simple queue implementation.")
+  (:export
+    :queue
+    :make-queue
+    :queue-contents
+    :queue-size
+    :queue-empty-p
+    :enqueue
+    :dequeue
+    :queue-append))
+
+(defpackage :losh.random
+  (:documentation "Utilities related to randomness.")
+  (:export
+    :randomp
+    :random-elt
+    :random-range
+    :random-range-exclusive
+    :random-around
+    :random-gaussian
+    :random-gaussian-integer
+    :d))
+
 (defpackage :losh.sequences
   (:documentation "Utilities for operating on sequences.")
   (:export
@@ -187,22 +241,6 @@
     :group-by
     :take
     :drop))
-
-(defpackage :losh.debugging
-  (:documentation "Utilities for figuring out what the hell is going on.")
-  (:export
-    :pr
-    :prl
-    :bits
-    :shut-up
-    :dis
-    :comment
-    :aesthetic-string
-    :structural-string
-    #+sbcl :start-profiling
-    #+sbcl :stop-profiling
-    :print-table
-    :print-hash-table))
 
 (defpackage :losh.weightlists
   (:documentation
@@ -214,36 +252,11 @@
     :make-weightlist
     :weightlist-random))
 
-(defpackage :losh.licensing
-  (:documentation "Utilities related to open source licenses.")
-  (:export
-    :print-licenses))
-
-(defpackage :losh.gnuplot
-  (:documentation "Utilities for plotting data with gnuplot.")
-  (:export
-    :gnuplot
-    :gnuplot-args
-    :gnuplot-expr
-    :gnuplot-function
-    :x))
-
-(defpackage :losh.eldritch-horrors
-  (:documentation "Abandon all hope, ye who enter here.")
-  (:export
-    :dlambda
-    :define-with-macro))
-
-(defpackage :losh.chili-dogs
-  (:documentation "Gotta go FAST.")
-  (:export
-    :defun-inline
-    :defun-inlineable))
-
 
 (defpackage-inheriting :losh
   (:losh.arrays
 
+   :losh.bits
    :losh.chili-dogs
    :losh.control-flow
    :losh.debugging
