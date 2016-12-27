@@ -229,6 +229,14 @@
 
 
 ;;;; Random -------------------------------------------------------------------
+(defun-inline epsilon (val)
+  (etypecase val
+    (integer 1)
+    (short-float short-float-epsilon)
+    (long-float long-float-epsilon)
+    (single-float single-float-epsilon)
+    (double-float double-float-epsilon)))
+
 (defun-inlineable randomp (&optional (chance 0.5))
   "Return a random boolean with `chance` probability of `t`."
   (< (random 1.0) chance))
@@ -260,11 +268,11 @@
 
 (defun-inlineable random-range-inclusive (min max)
   "Return a random number in [`min`, `max`]."
-  (+ min (random (1+ (- max min)))))
+  (+ min (random (+ (- max min) (epsilon min)))))
 
 (defun-inlineable random-range-exclusive (min max)
   "Return a random number in (`min`, `max`)."
-  (+ 1 min (random (- max min 1))))
+  (+ (epsilon min) min (random (- max min (epsilon min)))))
 
 (defun random-around (value spread)
   "Return a random number within `spread` of `value`."
