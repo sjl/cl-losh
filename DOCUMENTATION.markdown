@@ -1273,13 +1273,19 @@ Return a random integer from a gaussian distribution.  NOT THREAD-SAFE (yet)!
 
     (RANDOM-RANGE MIN MAX)
 
-Return a random number between [`min`, `max`).
+Return a random number in [`min`, `max`).
 
 ### `RANDOM-RANGE-EXCLUSIVE` (function)
 
     (RANDOM-RANGE-EXCLUSIVE MIN MAX)
 
-Return a random number between (`min`, `max`).
+Return a random number in (`min`, `max`).
+
+### `RANDOM-RANGE-INCLUSIVE` (function)
+
+    (RANDOM-RANGE-INCLUSIVE MIN MAX)
+
+Return a random number in [`min`, `max`].
 
 ### `RANDOMP` (function)
 

@@ -227,6 +227,7 @@
     :random-elt
     :random-range
     :random-range-exclusive
+    :random-range-inclusive
     :random-around
     :random-gaussian
     :random-gaussian-integer

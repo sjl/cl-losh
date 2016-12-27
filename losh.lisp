@@ -255,11 +255,15 @@
       (values (elt seq (random length)) t))))
 
 (defun-inlineable random-range (min max)
-  "Return a random number between [`min`, `max`)."
+  "Return a random number in [`min`, `max`)."
   (+ min (random (- max min))))
 
+(defun-inlineable random-range-inclusive (min max)
+  "Return a random number in [`min`, `max`]."
+  (+ min (random (1+ (- max min)))))
+
 (defun-inlineable random-range-exclusive (min max)
-  "Return a random number between (`min`, `max`)."
+  "Return a random number in (`min`, `max`)."
   (+ 1 min (random (- max min 1))))
 
 (defun random-around (value spread)
