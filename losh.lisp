@@ -274,13 +274,10 @@
   "Return a random number in (`min`, `max`)."
   (+ (epsilon min) min (random (- max min (epsilon min)))))
 
-(defun random-around (value spread)
-  "Return a random number within `spread` of `value`."
-  (etypecase spread
-    (integer (random-range (- value spread)
-                           (+ value spread 1)))
-    (real (random-range (- value spread)
-                        (+ value spread)))))
+(defun-inlineable random-around (value spread)
+  "Return a random number within `spread` of `value` (inclusive)."
+  (random-range-inclusive (- value spread)
+                          (+ value spread)))
 
 
 (let (spare)
