@@ -851,7 +851,7 @@
 
 
 (defmacro-driver (FOR var PAIRS-OF-LIST list)
-  "Iterate over the all pairs of the (including (last . first)).
+  "Iterate over the all pairs of `list` (including `(last . first)`).
 
   Examples:
 

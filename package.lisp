@@ -13,10 +13,8 @@
   `(defpackage ,name
      ,@args
      ,@(loop :for parent-package :in parent-packages
-             :collect
-             `(:use ,parent-package)
-             :collect
-             `(:export ,@(external-symbols parent-package)))))
+             :collect `(:use ,parent-package)
+             :collect `(:export ,@(external-symbols parent-package)))))
 
 
 (defpackage :losh.arrays
@@ -255,8 +253,9 @@
 
 
 (defpackage-inheriting :losh
-  (:losh.arrays
+  (
 
+   :losh.arrays
    :losh.bits
    :losh.chili-dogs
    :losh.control-flow
