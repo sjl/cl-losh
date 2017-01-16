@@ -21,6 +21,8 @@
   (:documentation "Utilities related to arrays.")
   (:export
     :do-array
+    :bisect-left
+    :bisect-right
     :fill-multidimensional-array
     :fill-multidimensional-array-t
     :fill-multidimensional-array-fixnum

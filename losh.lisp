@@ -747,6 +747,99 @@
 (defun-fmda single-float)
 
 
+(defun-inlineable bisect-left (predicate vector target)
+  "Bisect `vector` based on `(predicate el target)` and return the LEFT element
+
+  `vector` must be sorted (with `predicate`) before this function is called
+  (this is not checked).
+
+  You can think of this function as partitioning the elements into two halves:
+  those that satisfy `(predicate el target)` and those that don't, and then
+  selecting the element on the LEFT side of the split:
+
+      satisfying  not statisfying
+    #(..........  ...............)
+               ^
+               |
+          result
+
+  Two values will be returned: the element and its index.  If no element
+  satisfies the predicate `nil` will be returned for both values.
+
+  Examples:
+
+    ;                 index
+    ;              0 1 2 3 4 5          val  index
+    (bisect #'<  #(1 3 5 7 7 9) 5) ; =>   3, 1
+    (bisect #'<= #(1 3 5 7 7 9) 5) ; =>   5, 2
+    (bisect #'<= #(1 3 5 7 7 9) 7) ; =>   7, 4
+    (bisect #'<  #(1 3 5 7 7 9) 1) ; => nil, nil
+    (bisect #'>  #(9 8 8 8 1 0) 5) ; =>   8, 3
+
+  "
+  (if (zerop (length vector))
+    (values nil nil)
+    (iterate
+      (with bottom = 0)
+      (with top = (length vector))
+      (for index = (truncate (+ bottom top) 2))
+      (for value = (aref vector index))
+      (for result = (funcall predicate value target))
+      (if (= bottom index)
+        (return (if result
+                  (values value index)
+                  (values nil nil)))
+        (if result
+          (setf bottom index)
+          (setf top index))))))
+
+(defun-inlineable bisect-right (predicate vector target)
+  "Bisect `vector` based on `(predicate el target)` and return the RIGHT element
+
+  `vector` must be sorted (with `predicate`) before this function is called
+  (this is not checked).
+
+  You can think of this function as partitioning the elements into two halves:
+  those that satisfy `(predicate el target)` and those that don't, and then
+  selecting the element on the RIGHT side of the split:
+
+      satisfying  not statisfying
+    #(..........  ...............)
+                  ^
+                  |
+                  result
+
+  Two values will be returned: the element and its index.  If every element
+  satisfies the predicate `nil` will be returned for both values.
+
+  Examples:
+
+    ;                 index
+    ;               0 1 2 3 4 5           val  index
+    (rbisect #'<  #(1 3 5 7 7 9) 5)  ; =>   5, 2
+    (rbisect #'<= #(1 3 5 7 7 9) 5)  ; =>   7, 3
+    (rbisect #'<= #(1 3 5 7 7 9) 7)  ; =>   9, 5
+    (rbisect #'<  #(1 3 5 7 7 9) 10) ; => nil, nil
+    (rbisect #'>  #(9 8 8 8 1 0) 5)  ; =>   1, 4
+
+  "
+  (if (zerop (length vector))
+    (values nil nil)
+    (iterate
+      (with bottom = -1)
+      (with top = (1- (length vector)))
+      (for index = (ceiling (+ bottom top) 2))
+      (for value = (aref vector index))
+      (for result = (funcall predicate value target))
+      (if (= top index)
+        (return (if result
+                  (values nil nil)
+                  (values value index)))
+        (if result
+          (setf bottom index)
+          (setf top index))))))
+
+
 ;;;; Queues -------------------------------------------------------------------
 ;;; Based on the PAIP queues (thanks, Norvig), but beefed up a little bit to add
 ;;; tracking of the queue size.
@@ -2077,6 +2170,7 @@
 
 (defun gnuplot-args (&key
                      (filename "plot.png")
+                     (style :lines)
                      (size-x 1200)
                      (size-y 800)
                      (label-x)
@@ -2086,6 +2180,8 @@
                      (axis-x nil)
                      (axis-y nil)
                      (graph-title)
+                     (logscale-x nil)
+                     (logscale-y nil)
                      &allow-other-keys)
   "Return the formatted command line arguments for the given gnuplot arguments.
 
@@ -2106,8 +2202,10 @@
       (when graph-title (f "set title '~A'" (esc graph-title)))
       (when label-x (f "set xlabel '~A'" (esc label-x)))
       (when label-y (f "set ylabel '~A'" (esc label-y)))
-      (f "plot '-' using 1:2 title '~A' with lines linewidth ~D"
-         (esc line-title) line-width))))
+      (when logscale-x (f "set logscale x"))
+      (when logscale-y (f "set logscale y"))
+      (f "plot '-' using 1:2 title '~A' with ~(~A~) linewidth ~D"
+         (esc line-title) style line-width))))
 
 
 (defun gnuplot (data
@@ -2171,6 +2269,7 @@
          (y (mapcar function x))
          (data (mapcar #'cons x y)))
     (apply #'gnuplot data args)))
+
 
 (defmacro gnuplot-expr (expr &rest args)
   "Plot `expr` (an expression involving `x`) with gnuplot.

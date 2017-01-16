@@ -22,6 +22,74 @@ This package exports all of the symbols in the other packages.
 
 Utilities related to arrays.
 
+### `BISECT-LEFT` (function)
+
+    (BISECT-LEFT PREDICATE VECTOR TARGET)
+
+Bisect `vector` based on `(predicate el target)` and return the LEFT element
+
+  `vector` must be sorted (with `predicate`) before this function is called
+  (this is not checked).
+
+  You can think of this function as partitioning the elements into two halves:
+  those that satisfy `(predicate el target)` and those that don't, and then
+  selecting the element on the LEFT side of the split:
+
+      satisfying  not statisfying
+    #(..........  ...............)
+               ^
+               |
+          result
+
+  Two values will be returned: the element and its index.  If no element
+  satisfies the predicate `nil` will be returned for both values.
+
+  Examples:
+
+    ;                 index
+    ;              0 1 2 3 4 5          val  index
+    (bisect #'<  #(1 3 5 7 7 9) 5) ; =>   3, 1
+    (bisect #'<= #(1 3 5 7 7 9) 5) ; =>   5, 2
+    (bisect #'<= #(1 3 5 7 7 9) 7) ; =>   7, 4
+    (bisect #'<  #(1 3 5 7 7 9) 1) ; => nil, nil
+    (bisect #'>  #(9 8 8 8 1 0) 5) ; =>   8, 3
+
+  
+
+### `BISECT-RIGHT` (function)
+
+    (BISECT-RIGHT PREDICATE VECTOR TARGET)
+
+Bisect `vector` based on `(predicate el target)` and return the RIGHT element
+
+  `vector` must be sorted (with `predicate`) before this function is called
+  (this is not checked).
+
+  You can think of this function as partitioning the elements into two halves:
+  those that satisfy `(predicate el target)` and those that don't, and then
+  selecting the element on the RIGHT side of the split:
+
+      satisfying  not statisfying
+    #(..........  ...............)
+                  ^
+                  |
+                  result
+
+  Two values will be returned: the element and its index.  If every element
+  satisfies the predicate `nil` will be returned for both values.
+
+  Examples:
+
+    ;                 index
+    ;               0 1 2 3 4 5           val  index
+    (rbisect #'<  #(1 3 5 7 7 9) 5)  ; =>   5, 2
+    (rbisect #'<= #(1 3 5 7 7 9) 5)  ; =>   7, 3
+    (rbisect #'<= #(1 3 5 7 7 9) 7)  ; =>   9, 5
+    (rbisect #'<  #(1 3 5 7 7 9) 10) ; => nil, nil
+    (rbisect #'>  #(9 8 8 8 1 0) 5)  ; =>   1, 4
+
+  
+
 ### `DO-ARRAY` (macro)
 
     (DO-ARRAY (VALUE ARRAY)
@@ -667,9 +735,10 @@ Plot `data` to `filename` with gnuplot.
 
 ### `GNUPLOT-ARGS` (function)
 
-    (GNUPLOT-ARGS &KEY (FILENAME plot.png) (SIZE-X 1200) (SIZE-Y 800) (LABEL-X)
-                  (LABEL-Y) (LINE-TITLE 'DATA) (LINE-WIDTH 4) (AXIS-X NIL)
-                  (AXIS-Y NIL) (GRAPH-TITLE) &ALLOW-OTHER-KEYS)
+    (GNUPLOT-ARGS &KEY (FILENAME plot.png) (STYLE :LINES) (SIZE-X 1200)
+                  (SIZE-Y 800) (LABEL-X) (LABEL-Y) (LINE-TITLE 'DATA)
+                  (LINE-WIDTH 4) (AXIS-X NIL) (AXIS-Y NIL) (GRAPH-TITLE)
+                  (LOGSCALE-X NIL) (LOGSCALE-Y NIL) &ALLOW-OTHER-KEYS)
 
 Return the formatted command line arguments for the given gnuplot arguments.
 
@@ -1235,7 +1304,7 @@ Roll some dice.
 
     (RANDOM-AROUND VALUE SPREAD)
 
-Return a random number within `spread` of `value`.
+Return a random number within `spread` of `value` (inclusive).
 
 ### `RANDOM-ELT` (function)
 
