@@ -6,6 +6,7 @@
         "LOSH.ARRAYS"
         "LOSH.BITS"
         "LOSH.CHILI-DOGS"
+        "LOSH.CLOS"
         "LOSH.CONTROL-FLOW"
         "LOSH.DEBUGGING"
         "LOSH.ELDRITCH-HORRORS"

@@ -275,6 +275,21 @@ Like `defun-inline`, but declaims `name` to be `notinline` afterword.
 
   
 
+## Package `LOSH.CLOS`
+
+Utilities for working with CLOS.
+
+### `DEFCLASS*` (macro)
+
+    (DEFCLASS* NAME-AND-OPTIONS DIRECT-SUPERCLASSES SLOTS &REST OPTIONS)
+
+`defclass` without the tedium.
+
+  This is like `defclass`, but the `:initarg` and `:accessor` slot options will
+  automatically be filled in with sane values if they aren't given.
+
+  
+
 ## Package `LOSH.CONTROL-FLOW`
 
 Utilities for managing control flow.

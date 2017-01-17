@@ -46,6 +46,11 @@
     :defun-inline
     :defun-inlineable))
 
+(defpackage :losh.clos
+  (:documentation "Utilities for working with CLOS.")
+  (:export
+    :defclass*))
+
 (defpackage :losh.control-flow
   (:documentation "Utilities for managing control flow.")
   (:export
@@ -260,6 +265,7 @@
    :losh.arrays
    :losh.bits
    :losh.chili-dogs
+   :losh.clos
    :losh.control-flow
    :losh.debugging
    :losh.eldritch-horrors
