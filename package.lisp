@@ -241,6 +241,7 @@
 (defpackage :losh.sequences
   (:documentation "Utilities for operating on sequences.")
   (:export
+    :extrema
     :prefix-sums
     :frequencies
     :proportions

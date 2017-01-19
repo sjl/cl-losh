@@ -1403,6 +1403,19 @@ Return a fresh copy of the `seq` without the first `n` elements.
 
   
 
+### `EXTREMA` (function)
+
+    (EXTREMA PREDICATE SEQUENCE)
+
+Return the smallest and largest elements of `sequence` according to `predicate`
+
+  `predicate` should be a strict ordering predicate (e.g. `<`).
+
+  Returns the smallest and largest elements in the sequence as two values,
+  respectively.
+
+  
+
 ### `FREQUENCIES` (function)
 
     (FREQUENCIES SEQUENCE &KEY (TEST 'EQL))

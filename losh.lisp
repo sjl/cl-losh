@@ -1676,6 +1676,23 @@
     (sequence (drop-seq n seq))))
 
 
+(defun extrema (predicate sequence)
+  "Return the smallest and largest elements of `sequence` according to `predicate`
+
+  `predicate` should be a strict ordering predicate (e.g. `<`).
+
+  Returns the smallest and largest elements in the sequence as two values,
+  respectively.
+
+  "
+  (iterate (with min = (elt sequence 0))
+           (with max = (elt sequence 0))
+           (for el :in-whatever sequence)
+           (when (funcall predicate el min) (setf min el))
+           (when (funcall predicate max el) (setf max el))
+           (finally (return (values min max)))))
+
+
 ;;;; Debugging & Logging ------------------------------------------------------
 (defun pr (&rest args)
   "Print `args` readably, separated by spaces and followed by a newline.
