@@ -1053,7 +1053,7 @@
      (2.005 1.004))
 
   "
-  (let ((timing-function (ecase time-type
+  (let ((timing-function (ccase time-type
                            ((:real-time real-time) 'get-internal-real-time)
                            ((:run-time run-time) 'get-internal-run-time)))
         (since-var (or since-var (when (null per-var)
@@ -1645,7 +1645,7 @@
 
   "
   (check-type n array-index)
-  (etypecase seq
+  (ctypecase seq
     (list (take-list n seq))
     (sequence (take-seq n seq))))
 
@@ -1675,7 +1675,7 @@
 
   "
   (check-type n array-index)
-  (etypecase seq
+  (ctypecase seq
     (list (drop-list n seq))
     (sequence (drop-seq n seq))))
 
@@ -2269,7 +2269,7 @@
   (flet ((esc (string) (remove #\' (aesthetic-string string)))
          (f (&rest args) (apply #'format nil args)))
     (gnuplot-args%
-      (ecase output
+      (ccase output
         ((:x :x11) (f "set terminal x11 persist"))
         (:qt (f "set terminal qt persist"))
         (:png
@@ -2421,17 +2421,6 @@
 
 
 ;;;; Eldritch Horrors ---------------------------------------------------------
-(defmacro dlambda (&rest clauses)
-  ;;; From Let Over Lambda.
-  (with-gensyms (message arguments)
-    (flet ((parse-clause (clause)
-             (destructuring-bind (key arglist &rest body)
-                 clause
-               `(,key (apply (lambda ,arglist ,@body) ,arguments)))))
-      `(lambda (,message &rest ,arguments)
-        (ecase ,message
-          ,@(mapcar #'parse-clause clauses))))))
-
 (defmacro with-flexible-accessors (slot-entries instance-form &rest body)
   (with-gensyms (instance)
     `(let ((,instance ,instance-form))
@@ -2440,7 +2429,6 @@
           ,(iterate (for (symbol accessor) :in slot-entries)
                     (collect `(,symbol (,accessor ,instance))))
         ,@body))))
-
 
 (defmacro define-with-macro (type-and-options &rest slots)
   "Define a with-`type` macro for the given `type` and `slots`.

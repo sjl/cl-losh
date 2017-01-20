@@ -84,7 +84,6 @@
 (defpackage :losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")
   (:export
-    :dlambda
     :define-with-macro))
 
 (defpackage :losh.functions

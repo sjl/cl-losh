@@ -665,10 +665,6 @@ Define a with-`type` macro for the given `type` and `slots`.
 
   
 
-### `DLAMBDA` (macro)
-
-    (DLAMBDA &REST CLAUSES)
-
 ## Package `LOSH.FUNCTIONS`
 
 Utilities for working with higher-order functions.
