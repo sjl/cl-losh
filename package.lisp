@@ -54,6 +54,8 @@
 (defpackage :losh.control-flow
   (:documentation "Utilities for managing control flow.")
   (:export
+    :-<>
+    :<>
     :recursively
     :recur
     :when-found
@@ -242,6 +244,7 @@
   (:documentation "Utilities for operating on sequences.")
   (:export
     :extrema
+    :enumerate
     :prefix-sums
     :frequencies
     :proportions

@@ -2,13 +2,17 @@
 
 ;;;; Sanity -------------------------------------------------------------------
 (defmacro -<> (&rest forms)
+  "Thread the given forms, with `<>` as a placeholder."
   ;; I am going to lose my fucking mind if I have to program lisp without
   ;; a threading macro, but I don't want to add another dep to this library, so
   ;; here we are.
   (if (null forms)
     '<>
-    `(let ((<> ,(first forms)))
-       (-<> ,@(rest forms)))))
+    (destructuring-bind (form . remaining) forms
+      `(let ((<> ,(if (symbolp form)
+                    `(,form <>)
+                    form)))
+         (-<> ,@remaining)))))
 
 
 ;;;; Types --------------------------------------------------------------------
@@ -1677,7 +1681,7 @@
 
 
 (defun extrema (predicate sequence)
-  "Return the smallest and largest elements of `sequence` according to `predicate`
+  "Return the smallest and largest elements of `sequence` according to `predicate`.
 
   `predicate` should be a strict ordering predicate (e.g. `<`).
 
@@ -1691,6 +1695,31 @@
            (when (funcall predicate el min) (setf min el))
            (when (funcall predicate max el) (setf max el))
            (finally (return (values min max)))))
+
+
+(defun enumerate (sequence &key (start 0) (step 1) key)
+  "Return an alist of `(n . element)` for each element of `sequence`.
+
+  `start` and `step` control the values generated for `n`, NOT which elements of
+  the sequence are enumerated.
+
+  Examples:
+
+    (enumerate '(a b c))
+    ; => ((0 . A) (1 . B) (2 . C))
+
+    (enumerate '(a b c) :start 1)
+    ; => ((1 . A) (2 . B) (3 . C))
+
+    (enumerate '(a b c) :key #'ensure-keyword)
+    ; => ((0 . :A) (1 . :B) (2 . :C))
+
+  "
+  (iterate (for el :in-whatever sequence)
+           (for n :from start :by step)
+           (collect (cons n (if key
+                              (funcall key el)
+                              el)))))
 
 
 ;;;; Debugging & Logging ------------------------------------------------------
@@ -2216,6 +2245,7 @@
           (remove nil args)))
 
 (defun gnuplot-args (&key
+                     (output :qt)
                      (filename "plot.png")
                      (style :lines)
                      (size-x 1200)
@@ -2239,9 +2269,13 @@
   (flet ((esc (string) (remove #\' (aesthetic-string string)))
          (f (&rest args) (apply #'format nil args)))
     (gnuplot-args%
-      (f "set terminal pngcairo dashed size ~D,~D font \"Lucida Grande,20\""
-         size-x size-y)
-      (f "set output '~A'" (esc filename))
+      (ecase output
+        ((:x :x11) (f "set terminal x11 persist"))
+        (:qt (f "set terminal qt persist"))
+        (:png
+         (f "set terminal pngcairo dashed size ~D,~D font \"Lucida Grande,20\""
+            size-x size-y)
+         (f "set output '~A'" (esc filename))))
       (f "set border linewidth 1")
       (f "set style line 10 dashtype 2 linewidth 3 linecolor \"#666666\"")
       (when axis-x (f "set xzeroaxis linestyle 10"))

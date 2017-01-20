@@ -294,6 +294,12 @@ Utilities for working with CLOS.
 
 Utilities for managing control flow.
 
+### `-<>` (macro)
+
+    (-<> &REST FORMS)
+
+Thread the given forms, with `<>` as a placeholder.
+
 ### `GATHERING` (macro)
 
     (GATHERING
@@ -750,10 +756,11 @@ Plot `data` to `filename` with gnuplot.
 
 ### `GNUPLOT-ARGS` (function)
 
-    (GNUPLOT-ARGS &KEY (FILENAME plot.png) (STYLE :LINES) (SIZE-X 1200)
-                  (SIZE-Y 800) (LABEL-X) (LABEL-Y) (LINE-TITLE 'DATA)
-                  (LINE-WIDTH 4) (AXIS-X NIL) (AXIS-Y NIL) (GRAPH-TITLE)
-                  (LOGSCALE-X NIL) (LOGSCALE-Y NIL) &ALLOW-OTHER-KEYS)
+    (GNUPLOT-ARGS &KEY (OUTPUT :QT) (FILENAME plot.png) (STYLE :LINES)
+                  (SIZE-X 1200) (SIZE-Y 800) (LABEL-X) (LABEL-Y)
+                  (LINE-TITLE 'DATA) (LINE-WIDTH 4) (AXIS-X NIL) (AXIS-Y NIL)
+                  (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL)
+                  &ALLOW-OTHER-KEYS)
 
 Return the formatted command line arguments for the given gnuplot arguments.
 
@@ -1403,11 +1410,33 @@ Return a fresh copy of the `seq` without the first `n` elements.
 
   
 
+### `ENUMERATE` (function)
+
+    (ENUMERATE SEQUENCE &KEY (START 0) (STEP 1) KEY)
+
+Return an alist of `(n . element)` for each element of `sequence`.
+
+  `start` and `step` control the values generated for `n`, NOT which elements of
+  the sequence are enumerated.
+
+  Examples:
+
+    (enumerate '(a b c))
+    ; => ((0 . A) (1 . B) (2 . C))
+
+    (enumerate '(a b c) :start 1)
+    ; => ((1 . A) (2 . B) (3 . C))
+
+    (enumerate '(a b c) :key #'ensure-keyword)
+    ; => ((0 . :A) (1 . :B) (2 . :C))
+
+  
+
 ### `EXTREMA` (function)
 
     (EXTREMA PREDICATE SEQUENCE)
 
-Return the smallest and largest elements of `sequence` according to `predicate`
+Return the smallest and largest elements of `sequence` according to `predicate`.
 
   `predicate` should be a strict ordering predicate (e.g. `<`).
 
