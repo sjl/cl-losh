@@ -1,18 +1,18 @@
 (in-package :losh)
 
 ;;;; Sanity -------------------------------------------------------------------
-(defmacro -<> (&rest forms)
+(defmacro -<> (expr &rest forms)
   "Thread the given forms, with `<>` as a placeholder."
   ;; I am going to lose my fucking mind if I have to program lisp without
   ;; a threading macro, but I don't want to add another dep to this library, so
   ;; here we are.
-  (if (null forms)
-    '<>
-    (destructuring-bind (form . remaining) forms
-      `(let ((<> ,(if (symbolp form)
-                    `(,form <>)
-                    form)))
-         (-<> ,@remaining)))))
+  `(let* ((<> ,expr)
+          ,@(mapcar (lambda (form)
+                      (if (symbolp form)
+                        `(<> (,form <>))
+                        `(<> ,form)))
+                    forms))
+     <>))
 
 
 ;;;; Types --------------------------------------------------------------------
