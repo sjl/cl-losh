@@ -1518,6 +1518,10 @@
                  (funcall function value)))
   hash-table)
 
+(defun hash-table-contents (hash-table)
+  "Return a fresh list of `(key value)` elements of `hash-table`."
+  (gathering (maphash (compose #'gather #'list) hash-table)))
+
 
 ;;;; Sequences ----------------------------------------------------------------
 (defun prefix-sums (sequence)
@@ -1845,7 +1849,11 @@
 
 
 (defun print-hash-table (hash-table &optional (stream t))
-  "Print a pretty representation of `hash-table` to `stream.`"
+  "Print a pretty representation of `hash-table` to `stream.`
+
+  Respects `*print-length*` when printing the elements.
+
+  "
   (let* ((keys (hash-table-keys hash-table))
          (vals (hash-table-values hash-table))
          (count (hash-table-count hash-table))
@@ -1853,7 +1861,7 @@
                       (mapcar (compose #'length #'prin1-to-string) <>)
                       (reduce #'max <> :initial-value 0)
                       (clamp 0 20 <>))))
-    (print-unreadable-object (hash-table stream :type t :identity nil)
+    (print-unreadable-object (hash-table stream :type t)
       (princ
         ;; Something shits the bed and output gets jumbled (in SBCL at least) if
         ;; we try to print to `stream` directly in the format statement inside
@@ -1874,6 +1882,20 @@
         stream)))
   (terpri stream)
   (values))
+
+(defun print-hash-table-concisely (hash-table &optional (stream t))
+  "Print a concise representation of `hash-table` to `stream.`
+
+  Should respect `*print-length*` when printing the elements.
+
+  "
+  (print-unreadable-object (hash-table stream :type t)
+    (prin1 (hash-table-test hash-table))
+    (write-char #\space stream)
+    (prin1 (hash-table-contents hash-table) stream)))
+
+(defmethod print-object ((object hash-table) stream)
+  (print-hash-table-concisely object stream))
 
 
 #+sbcl

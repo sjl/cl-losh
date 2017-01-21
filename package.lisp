@@ -79,7 +79,8 @@
     #+sbcl :start-profiling
     #+sbcl :stop-profiling
     :print-table
-    :print-hash-table))
+    :print-hash-table
+    :print-concisely))
 
 (defpackage :losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")
@@ -135,6 +136,7 @@
 (defpackage :losh.hash-tables
   (:documentation "Utilities for operating on hash tables.")
   (:export
+    :hash-table-contents
     :mutate-hash-values))
 
 (defpackage :losh.iterate

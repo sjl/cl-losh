@@ -546,6 +546,10 @@ Print `args` readably, separated by spaces and followed by a newline.
 
 Print a pretty representation of `hash-table` to `stream.`
 
+  Respects `*print-length*` when printing the elements.
+
+  
+
 ### `PRINT-TABLE` (function)
 
     (PRINT-TABLE ROWS)
@@ -962,6 +966,12 @@ Create a fresh hash set.
 ## Package `LOSH.HASH-TABLES`
 
 Utilities for operating on hash tables.
+
+### `HASH-TABLE-CONTENTS` (function)
+
+    (HASH-TABLE-CONTENTS HASH-TABLE)
+
+Return a fresh list of `(key value)` elements of `hash-table`.
 
 ### `MUTATE-HASH-VALUES` (function)
 
