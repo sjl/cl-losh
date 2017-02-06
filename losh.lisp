@@ -2517,3 +2517,7 @@
           ,,type
           ,@body)))))
 
+(defmacro eval-dammit (&body body)
+  "Just evaluate `body` all the time, jesus christ lisp."
+  `(eval-when (:compile-toplevel :load-toplevel :execute) ,@body))
+

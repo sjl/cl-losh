@@ -296,7 +296,7 @@ Utilities for managing control flow.
 
 ### `-<>` (macro)
 
-    (-<> &REST FORMS)
+    (-<> EXPR &REST FORMS)
 
 Thread the given forms, with `<>` as a placeholder.
 
@@ -669,6 +669,14 @@ Define a with-`type` macro for the given `type` and `slots`.
 
   
 
+### `EVAL-DAMMIT` (macro)
+
+    (EVAL-DAMMIT
+      &BODY
+      BODY)
+
+Just evaluate `body` all the time, jesus christ lisp.
+
 ## Package `LOSH.FUNCTIONS`
 
 Utilities for working with higher-order functions.
@@ -758,7 +766,8 @@ Plot `data` to `filename` with gnuplot.
 
     (GNUPLOT-ARGS &KEY (OUTPUT :QT) (FILENAME plot.png) (STYLE :LINES)
                   (SIZE-X 1200) (SIZE-Y 800) (LABEL-X) (LABEL-Y)
-                  (LINE-TITLE 'DATA) (LINE-WIDTH 4) (AXIS-X NIL) (AXIS-Y NIL)
+                  (LINE-TITLE 'DATA) (LINE-WIDTH 4) (SMOOTH NIL) (AXIS-X NIL)
+                  (AXIS-Y NIL) (MIN-X NIL) (MAX-X NIL) (MIN-Y NIL) (MAX-Y NIL)
                   (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL)
                   &ALLOW-OTHER-KEYS)
 
