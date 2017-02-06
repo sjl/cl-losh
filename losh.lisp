@@ -2276,8 +2276,13 @@
                      (label-y)
                      (line-title 'data)
                      (line-width 4)
+                     (smooth nil)
                      (axis-x nil)
                      (axis-y nil)
+                     (min-x nil)
+                     (max-x nil)
+                     (min-y nil)
+                     (max-y nil)
                      (graph-title)
                      (logscale-x nil)
                      (logscale-y nil)
@@ -2289,7 +2294,7 @@
 
   "
   (flet ((esc (string) (remove #\' (aesthetic-string string)))
-         (f (&rest args) (apply #'format nil args)))
+         (f (&rest args) (apply #'format nil (substitute "" nil args))))
     (gnuplot-args%
       (ccase output
         ((:x :x11) (f "set terminal x11 persist"))
@@ -2307,8 +2312,11 @@
       (when label-y (f "set ylabel '~A'" (esc label-y)))
       (when logscale-x (f "set logscale x"))
       (when logscale-y (f "set logscale y"))
-      (f "plot '-' using 1:2 title '~A' with ~(~A~) linewidth ~D"
-         (esc line-title) style line-width))))
+      (f "set xrange [~A:~A]" min-x max-x)
+      (f "set yrange [~A:~A]" min-y max-y)
+      (f "plot '-' using 1:2 title '~A' with ~(~A~) linewidth ~D ~A"
+         (esc line-title) style line-width
+         (when smooth (f "smooth ~(~A~)" smooth))))))
 
 
 (defun gnuplot (data
