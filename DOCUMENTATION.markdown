@@ -527,6 +527,12 @@ Disassemble the code generated for a `lambda` with `arglist` and `body`.
 
   
 
+### `PHT` (function)
+
+    (PHT HASH-TABLE &OPTIONAL (STREAM T))
+
+Synonym for `print-hash-table` for less typing at the REPL.
+
 ### `PR` (function)
 
     (PR &REST ARGS)
@@ -547,6 +553,16 @@ Print `args` readably, separated by spaces and followed by a newline.
 Print a pretty representation of `hash-table` to `stream.`
 
   Respects `*print-length*` when printing the elements.
+
+  
+
+### `PRINT-HASH-TABLE-CONCISELY` (function)
+
+    (PRINT-HASH-TABLE-CONCISELY HASH-TABLE &OPTIONAL (STREAM T))
+
+Print a concise representation of `hash-table` to `stream.`
+
+  Should respect `*print-length*` when printing the elements.
 
   
 
