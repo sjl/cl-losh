@@ -80,7 +80,8 @@
     #+sbcl :stop-profiling
     :print-table
     :print-hash-table
-    :print-concisely))
+    :print-hash-table-concisely
+    :pht))
 
 (defpackage :losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")
@@ -144,8 +145,10 @@
   (:use :iterate) ; need this for iterate's `for` symbol fuckery
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
+
     :across-flat-array
     :averaging
+    :collect-hash
     :cycling
     :every-nth
     :for-nested
@@ -163,8 +166,10 @@
     :run-time
     :since-start-into
     :skip-origin
+    :test
     :timing
     :within-radius
+
     ))
 
 (defpackage :losh.licensing

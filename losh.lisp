@@ -1457,6 +1457,34 @@
                              ,form)))))))
 
 
+(defmacro-clause (COLLECT-HASH key-and-value &optional
+                  INTO var
+                  TEST (test #'eql))
+  "Collect keys and values into a hash table at `var`.
+
+  `key-and-value` should be a `(key-expr . value-expr)` pair.
+
+  If `var` is omitted the hash table will be returned instead.
+
+  `test` specifies the test used for the hash table.
+
+  Example:
+
+    (iterate (for x :from 0)
+             (for y :in '(a b c))
+             (collect-hash ((1+ x) . y)))
+    ; => {1 a
+    ;     2 b
+    ;     3 c}
+
+  "
+  (destructuring-bind (key . value) key-and-value
+    (let ((hash-table (or var iterate::*result-var*)))
+      `(progn
+         (with ,hash-table = (make-hash-table :test ,test))
+         (setf (gethash ,key ,hash-table) ,value)))))
+
+
 (defun keywordize-clause (clause)
   (iterate
     (for (k v . nil) :on clause :by #'cddr)
@@ -1504,6 +1532,7 @@
                              (iterate::get-clause-info
                                (keywordize-some-of-clause clause)))
                            (keywordize-clause clause))))))
+
 
 
 ;;;; Hash Tables --------------------------------------------------------------
@@ -1882,6 +1911,10 @@
         stream)))
   (terpri stream)
   (values))
+
+(defun pht (hash-table &optional (stream t))
+  "Synonym for `print-hash-table` for less typing at the REPL."
+  (print-hash-table hash-table stream))
 
 (defun print-hash-table-concisely (hash-table &optional (stream t))
   "Print a concise representation of `hash-table` to `stream.`
