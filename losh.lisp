@@ -1826,7 +1826,7 @@
                       #-sbcl 'disassemble))
     (destructuring-bind (arglist &body body)
         (iterate (for b :first body :then (cdr b))
-                 (while (symbolp (car b)))
+                 (while (not (listp (car b))))
                  (finally (return b)))
       `(,%disassemble (compile nil '(lambda ,arglist
                                      (declare (optimize speed))
