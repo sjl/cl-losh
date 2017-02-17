@@ -196,6 +196,7 @@
     :6/8tau
     :7/8tau
 
+    :not=
     :clamp
     :degrees
     :dividesp

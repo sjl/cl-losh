@@ -1173,6 +1173,12 @@ Normalize `val` to a number between `0` and `1` (maybe).
 
   
 
+### `NOT=` (function)
+
+    (NOT= NUMBER &REST MORE-NUMBERS)
+
+Return `nil` if all arguments are numerically equal, `t` otherwise.
+
 ### `PRECISE-LERP` (function)
 
     (PRECISE-LERP FROM TO N)
