@@ -141,6 +141,12 @@
     :hash-table-contents
     :mutate-hash-values))
 
+(defpackage :losh.io
+  (:documentation "Utilities for input/output/reading/etc.")
+  (:export
+    :read-all-from-file
+    :read-all-from-string))
+
 (defpackage :losh.iterate
   (:use :iterate) ; need this for iterate's `for` symbol fuckery
   (:documentation "Custom `iterate` drivers and clauses.")
@@ -285,6 +291,7 @@
    :losh.gnuplot
    :losh.hash-sets
    :losh.hash-tables
+   :losh.io
    :losh.iterate
    :losh.licensing
    :losh.math

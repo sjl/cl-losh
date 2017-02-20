@@ -14,6 +14,7 @@
         "LOSH.GNUPLOT"
         "LOSH.HASH-SETS"
         "LOSH.HASH-TABLES"
+        "LOSH.IO"
         "LOSH.ITERATE"
         "LOSH.LICENSING"
         "LOSH.MATH"

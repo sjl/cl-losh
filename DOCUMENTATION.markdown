@@ -1008,6 +1008,22 @@ Replace each value in `hash-table` with the result of calling `function` on it.
 
   
 
+## Package `LOSH.IO`
+
+Utilities for input/output/reading/etc.
+
+### `READ-ALL-FROM-FILE` (function)
+
+    (READ-ALL-FROM-FILE PATH)
+
+Read all forms from the file at `path` and return them as a fresh list.
+
+### `READ-ALL-FROM-STRING` (function)
+
+    (READ-ALL-FROM-STRING STRING)
+
+Read all forms from `string` and return them as a fresh list.
+
 ## Package `LOSH.ITERATE`
 
 Custom `iterate` drivers and clauses.
