@@ -1968,6 +1968,14 @@
   (sb-sprof::stop-profiling)
   (dump-profile filename))
 
+#+sbcl
+(defmacro profile (&body body)
+  `(progn
+     (start-profiling)
+     (unwind-protect
+         (time (progn ,@body))
+       (stop-profiling))))
+
 
 ;;;; CLOS ---------------------------------------------------------------------
 (defun build-slot-definition (conc-name slot-spec)

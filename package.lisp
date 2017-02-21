@@ -78,6 +78,7 @@
     :structural-string
     #+sbcl :start-profiling
     #+sbcl :stop-profiling
+    #+sbcl :profile
     :print-table
     :print-hash-table
     :print-hash-table-concisely
