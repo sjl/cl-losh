@@ -1534,6 +1534,10 @@
                            (keywordize-clause clause))))))
 
 
+(defmacro-driver (FOR var IN-HASHSET hset)
+  (let ((kwd (if generate 'generate 'for)))
+    `(,kwd (,var) :in-hashtable (hash-set-storage ,hset))))
+
 
 ;;;; Hash Tables --------------------------------------------------------------
 (defun mutate-hash-values (function hash-table)
@@ -1970,6 +1974,7 @@
 
 #+sbcl
 (defmacro profile (&body body)
+  "Profile `body` and dump the report to `lisp.prof`."
   `(progn
      (start-profiling)
      (unwind-protect
@@ -2248,6 +2253,7 @@
 (define-hset-op hset-elements (hset)
   "Return a fresh list containing the elements of `hset`."
   (hash-table-keys storage))
+
 
 
 ;;;; Bit Sets -----------------------------------------------------------------

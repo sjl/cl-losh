@@ -134,7 +134,8 @@
     :hset-filter
     :hset-filter!
     :hset-map
-    :hset-map!))
+    :hset-map!
+    ))
 
 (defpackage :losh.hash-tables
   (:documentation "Utilities for operating on hash tables.")
@@ -160,6 +161,7 @@
     :every-nth
     :for-nested
     :in-array
+    :in-hashset
     :in-lists
     :in-sequences
     :in-whatever
