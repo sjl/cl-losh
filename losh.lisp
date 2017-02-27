@@ -480,7 +480,7 @@
         ,else))))
 
 (defmacro gathering (&body body)
-  "Run `body` to gather some things and return them.
+  "Run `body` to gather some things and return a fresh list of them.
 
   `body` will be executed with the symbol `gather` bound to a function of one
   argument.  Once `body` has finished, a list of everything `gather` was called
@@ -515,6 +515,46 @@
         (declare (dynamic-extent #'gather))
         ,@body)
       (queue-contents ,result))))
+
+(defmacro gathering-vector (options &body body)
+  "Run `body` to gather some things and return a fresh vector of them.
+
+  `body` will be executed with the symbol `gather` bound to a function of one
+  argument.  Once `body` has finished, a vector of everything `gather` was
+  called on will be returned.  This vector will be adjustable and have a fill
+  pointer.
+
+  It's handy for pulling results out of code that executes procedurally and
+  doesn't return anything, like `maphash` or Alexandria's `map-permutations`.
+
+  The `gather` function can be passed to other functions, but should not be
+  retained once the `gathering` form has returned (it would be useless to do so
+  anyway).
+
+  Examples:
+
+    (gathering-vector ()
+      (dotimes (i 5)
+        (gather i))
+    =>
+    #(0 1 2 3 4)
+
+    (gathering-vector ()
+      (mapc #'gather '(1 2 3))
+      (mapc #'gather '(a b)))
+    =>
+    #(1 2 3 a b)
+
+  "
+  (destructuring-bind (&key (size 16))
+      options
+    (with-gensyms (result)
+      `(let ((,result (make-array ,size :adjustable t :fill-pointer 0)))
+         (flet ((gather (item)
+                  (vector-push-extend item ,result)))
+           (declare (dynamic-extent #'gather))
+           ,@body)
+         ,result))))
 
 (defmacro when-let* (binding-forms &body body)
   "Bind the forms in `binding-forms` in order, short-circuiting on `nil`.

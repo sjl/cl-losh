@@ -61,6 +61,7 @@
     :when-found
     :if-found
     :gathering
+    :gathering-vector
     :gather
     :when-let*
     :multiple-value-bind*))
