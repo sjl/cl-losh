@@ -306,7 +306,7 @@ Thread the given forms, with `<>` as a placeholder.
       &BODY
       BODY)
 
-Run `body` to gather some things and return them.
+Run `body` to gather some things and return a fresh list of them.
 
   `body` will be executed with the symbol `gather` bound to a function of one
   argument.  Once `body` has finished, a list of everything `gather` was called
@@ -332,6 +332,42 @@ Run `body` to gather some things and return them.
       (mapc #'gather '(a b)))
     =>
     (1 2 3 a b)
+
+  
+
+### `GATHERING-VECTOR` (macro)
+
+    (GATHERING-VECTOR OPTIONS
+      &BODY
+      BODY)
+
+Run `body` to gather some things and return a fresh vector of them.
+
+  `body` will be executed with the symbol `gather` bound to a function of one
+  argument.  Once `body` has finished, a vector of everything `gather` was
+  called on will be returned.  This vector will be adjustable and have a fill
+  pointer.
+
+  It's handy for pulling results out of code that executes procedurally and
+  doesn't return anything, like `maphash` or Alexandria's `map-permutations`.
+
+  The `gather` function can be passed to other functions, but should not be
+  retained once the `gathering` form has returned (it would be useless to do so
+  anyway).
+
+  Examples:
+
+    (gathering-vector ()
+      (dotimes (i 5)
+        (gather i))
+    =>
+    #(0 1 2 3 4)
+
+    (gathering-vector ()
+      (mapc #'gather '(1 2 3))
+      (mapc #'gather '(a b)))
+    =>
+    #(1 2 3 a b)
 
   
 
@@ -607,6 +643,14 @@ Print `args` labeled and readably.
     (second l) 2
 
   
+
+### `PROFILE` (macro)
+
+    (PROFILE
+      &BODY
+      BODY)
+
+Profile `body` and dump the report to `lisp.prof`.
 
 ### `SHUT-UP` (macro)
 
@@ -1463,6 +1507,24 @@ Return a fresh copy of the `seq` without the first `n` elements.
 
   
 
+### `DROP-WHILE` (function)
+
+    (DROP-WHILE PREDICATE SEQ)
+
+Drop elements from `seq` as long as `predicate` remains true.
+
+  The result will be a fresh sequence of the same type as `seq`.
+
+  Example:
+
+    (drop-while #'evenp '(2 4 5 6 7 8))
+    ; => (5 6 7 8)
+
+    (drop-while #'evenp #(2))
+    ; => #(2)
+
+  
+
 ### `ENUMERATE` (function)
 
     (ENUMERATE SEQUENCE &KEY (START 0) (STEP 1) KEY)
@@ -1606,6 +1668,24 @@ Return a fresh sequence of the first `n` elements of `seq`.
     => #(1)
 
   From Serapeum.
+
+  
+
+### `TAKE-WHILE` (function)
+
+    (TAKE-WHILE PREDICATE SEQ)
+
+Take elements from `seq` as long as `predicate` remains true.
+
+  The result will be a fresh sequence of the same type as `seq`.
+
+  Example:
+
+    (take-while #'evenp '(2 4 5 6 7 8))
+    ; => (2 4)
+
+    (take-while #'evenp #(1))
+    ; => #()
 
   
 

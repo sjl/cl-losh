@@ -268,7 +268,9 @@
     :proportions
     :group-by
     :take
-    :drop))
+    :take-while
+    :drop
+    :drop-while))
 
 (defpackage :losh.weightlists
   (:documentation

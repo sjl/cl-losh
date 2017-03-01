@@ -1727,6 +1727,33 @@
     (sequence (take-seq n seq))))
 
 
+(defun-inline take-while-list (predicate list)
+  (iterate (for item :in list)
+           (while (funcall predicate item))
+           (collect item)))
+
+(defun-inline take-while-seq (predicate seq)
+  (subseq seq 0 (position-if-not predicate seq)))
+
+(defun take-while (predicate seq)
+  "Take elements from `seq` as long as `predicate` remains true.
+
+  The result will be a fresh sequence of the same type as `seq`.
+
+  Example:
+
+    (take-while #'evenp '(2 4 5 6 7 8))
+    ; => (2 4)
+
+    (take-while #'evenp #(1))
+    ; => #()
+
+  "
+  (ctypecase seq
+    (list (take-while-list predicate seq))
+    (sequence (take-while-seq predicate seq))))
+
+
 (defun-inline drop-list (n list)
   (copy-list (nthcdr n list)))
 
@@ -1755,6 +1782,36 @@
   (ctypecase seq
     (list (drop-list n seq))
     (sequence (drop-seq n seq))))
+
+
+(defun-inline drop-while-list (predicate list)
+  (iterate (for tail :on list)
+           (while (funcall predicate (first tail)))
+           (finally (return (copy-list tail)))))
+
+(defun-inline drop-while-seq (predicate seq)
+  (let ((start (position-if-not predicate seq)))
+    (if start
+      (subseq seq start)
+      (subseq seq 0 0))))
+
+(defun drop-while (predicate seq)
+  "Drop elements from `seq` as long as `predicate` remains true.
+
+  The result will be a fresh sequence of the same type as `seq`.
+
+  Example:
+
+    (drop-while #'evenp '(2 4 5 6 7 8))
+    ; => (5 6 7 8)
+
+    (drop-while #'evenp #(2))
+    ; => #(2)
+
+  "
+  (ctypecase seq
+    (list (drop-while-list predicate seq))
+    (sequence (drop-while-seq predicate seq))))
 
 
 (defun extrema (predicate sequence)
