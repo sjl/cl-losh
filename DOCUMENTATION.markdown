@@ -1355,6 +1355,63 @@ Update each `place` by evaluating `expr` with `%` bound to the current value.
 
   
 
+## Package `LOSH.PRIORITY-QUEUES`
+
+Jankass priority queue implementation.
+
+### `MAKE-PRIORITY-QUEUE` (function)
+
+    (MAKE-PRIORITY-QUEUE &KEY (PRIORITY-PREDICATE #'<) (ELEMENT-TEST #'EQL))
+
+Create and return a fresh priority queue.
+
+  `priority-predicate` is the comparison function used to compare priorities,
+  and should be a `<`-like predicate.
+
+  `element-test` should be the equality predicate for elements.
+
+  
+
+### `PQ-DEQUEUE` (function)
+
+    (PQ-DEQUEUE PQ)
+
+Remove and return the element in `pq` with the lowest-numbered priority.
+
+  If `pq` is empty `nil` will be returned.
+
+  A second value is also returned, which will be `t` if an element was present
+  or `nil` if the priority queue was empty.
+
+  
+
+### `PQ-ENSURE` (function)
+
+    (PQ-ENSURE PQ ELEMENT PRIORITY)
+
+Ensure `element` is in `pq` with `priority`.
+
+  If `element` is already in `pq` its priority will be set to `priority`.
+  Otherwise it will be inserted as if by calling `pq-insert`.
+
+  Returns `pq` (which may have been modified).
+
+  
+
+### `PQ-INSERT` (function)
+
+    (PQ-INSERT PQ ELEMENT PRIORITY)
+
+Insert `element` into `pq` with `priority`.
+
+  Returns `pq` (which has been modified).
+
+  
+
+### `PRIORITY-QUEUE` (struct)
+
+Slots: `CONTENTS`, `PREDICATE`, `TEST`
+
 ## Package `LOSH.QUEUES`
 
 A simple queue implementation.

@@ -19,6 +19,7 @@
         "LOSH.LICENSING"
         "LOSH.MATH"
         "LOSH.MUTATION"
+        "LOSH.PRIORITY-QUEUES"
         "LOSH.QUEUES"
         "LOSH.RANDOM"
         "LOSH.SEQUENCES"

@@ -233,6 +233,16 @@
     :notf
     :callf))
 
+(defpackage :losh.priority-queues
+  (:documentation "Jankass priority queue implementation.")
+  (:export
+    :priority-queue
+    :make-priority-queue
+
+    :pq-insert
+    :pq-ensure
+    :pq-dequeue))
+
 (defpackage :losh.queues
   (:documentation "A simple queue implementation.")
   (:export
@@ -302,6 +312,7 @@
    :losh.licensing
    :losh.math
    :losh.mutation
+   :losh.priority-queues
    :losh.queues
    :losh.random
    :losh.sequences
