@@ -1438,12 +1438,12 @@
       (with ,r = ,radius)
       (with ,-r = (- ,r))
       (with ,skip = ,should-skip-origin)
-      (generate-nested ,(iterate (for var :in delta-vars)
+      (generate-nested ,(iterate (for var :in (ensure-list delta-vars))
                                  (collect `(,var :from ,-r :to ,r)))
                        :control-var ,control)
       (next ,control)
       (when (and ,skip
-                 ,@(iterate (for var :in delta-vars)
+                 ,@(iterate (for var :in (ensure-list delta-vars))
                             (collect `(zerop ,var))))
         (next ,control)))))
 
@@ -2574,6 +2574,7 @@
                 &key
                 (x #'car)
                 (y #'cdr)
+                (spew-output nil)
                 &allow-other-keys)
   "Plot `data` to `filename` with gnuplot.
 
@@ -2595,7 +2596,7 @@
                     "gnuplot"
                     (apply #'gnuplot-args args)
                     :input :stream
-                    :output nil))
+                    :output (if spew-output *standard-output* nil)))
          (in (uiop/package:symbol-call
                :external-program :process-input-stream
                process)))
