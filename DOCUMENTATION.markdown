@@ -805,7 +805,8 @@ Utilities for plotting data with gnuplot.
 
 ### `GNUPLOT` (function)
 
-    (GNUPLOT DATA &REST ARGS &KEY (X #'CAR) (Y #'CDR) &ALLOW-OTHER-KEYS)
+    (GNUPLOT DATA &REST ARGS &KEY (X #'CAR) (Y #'CDR) (SPEW-OUTPUT NIL)
+             &ALLOW-OTHER-KEYS)
 
 Plot `data` to `filename` with gnuplot.
 

@@ -1525,6 +1525,14 @@
          (with ,hash-table = (make-hash-table :test ,test))
          (setf (gethash ,key ,hash-table) ,value)))))
 
+(defmacro-clause (ORING expr &optional INTO var)
+  (let ((result (or var iterate::*result-var*)))
+    `(reducing ,expr :by #'or :into ,var :initial-value nil)))
+
+(defmacro-clause (ANDING expr &optional INTO var)
+  (let ((result (or var iterate::*result-var*)))
+    `(reducing ,expr :by #'and :into ,var :initial-value t)))
+
 
 (defun keywordize-clause (clause)
   (iterate

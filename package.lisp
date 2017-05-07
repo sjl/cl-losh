@@ -156,6 +156,7 @@
   (:export
 
     :across-flat-array
+    :anding
     :averaging
     :collect-hash
     :cycling
@@ -170,6 +171,7 @@
     :into
     :macroexpand-iterate
     :modulo
+    :oring
     :pairs-of-list
     :per-iteration-into
     :real-time
