@@ -17,6 +17,10 @@
              :collect `(:export ,@(external-symbols parent-package)))))
 
 
+(defpackage :losh.base
+  (:export :recursively))
+
+
 (defpackage :losh.arrays
   (:documentation "Utilities related to arrays.")
   (:export
@@ -52,6 +56,7 @@
     :defclass*))
 
 (defpackage :losh.control-flow
+  (:use :losh.base)
   (:documentation "Utilities for managing control flow.")
   (:export
     :-<>
@@ -77,6 +82,7 @@
     :comment
     :aesthetic-string
     :structural-string
+    :gimme
     #+sbcl :start-profiling
     #+sbcl :stop-profiling
     #+sbcl :profile
@@ -105,6 +111,7 @@
     :gnuplot-args
     :gnuplot-expr
     :gnuplot-function
+    :gnuplot-histogram
     :x))
 
 (defpackage :losh.hash-sets
@@ -151,7 +158,7 @@
     :read-all-from-string))
 
 (defpackage :losh.iterate
-  (:use :iterate) ; need this for iterate's `for` symbol fuckery
+  (:use :iterate :losh.base) ; need this for iterate's `for` symbol fuckery
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
 
@@ -168,6 +175,7 @@
     :in-sequences
     :in-whatever
     :index-of-flat-array
+    :initially
     :into
     :macroexpand-iterate
     :modulo
@@ -175,6 +183,7 @@
     :pairs-of-list
     :per-iteration-into
     :real-time
+    :recursively
     :run-time
     :since-start-into
     :skip-origin

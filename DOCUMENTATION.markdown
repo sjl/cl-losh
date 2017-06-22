@@ -422,32 +422,6 @@ Bind each pair in `bindings` with `multiple-value-bind` sequentially.
 
   
 
-### `RECURSIVELY` (macro)
-
-    (RECURSIVELY BINDINGS
-      &BODY
-      BODY)
-
-Execute `body` recursively, like Clojure's `loop`/`recur`.
-
-  `bindings` should contain a list of symbols and (optional) starting values.
-
-  In `body` the symbol `recur` will be bound to the function for recurring.
-
-  This macro doesn't perform an explicit tail-recursion check like Clojure's
-  `loop`.  You know what you're doing, right?
-
-  Example:
-
-      (defun length (some-list)
-        (recursively ((list some-list)
-                      (n 0))
-          (if (null list)
-            n
-            (recur (cdr list) (1+ n)))))
-
-  
-
 ### `WHEN-FOUND` (macro)
 
     (WHEN-FOUND VAR
@@ -563,6 +537,12 @@ Disassemble the code generated for a `lambda` with `arglist` and `body`.
 
   
 
+### `GIMME` (macro)
+
+    (GIMME N
+      &BODY
+      BODY)
+
 ### `PHT` (function)
 
     (PHT HASH-TABLE &OPTIONAL (STREAM T))
@@ -662,7 +642,7 @@ Run `body` with stdout and stderr redirected to the void.
 
 ### `START-PROFILING` (function)
 
-    (START-PROFILING &OPTIONAL CALL-COUNT-PACKAGES)
+    (START-PROFILING &KEY CALL-COUNT-PACKAGES (MODE :CPU))
 
 Start profiling performance.  SBCL only.
 
@@ -829,8 +809,8 @@ Plot `data` to `filename` with gnuplot.
                   (SIZE-X 1200) (SIZE-Y 800) (LABEL-X) (LABEL-Y)
                   (LINE-TITLE 'DATA) (LINE-WIDTH 4) (SMOOTH NIL) (AXIS-X NIL)
                   (AXIS-Y NIL) (MIN-X NIL) (MAX-X NIL) (MIN-Y NIL) (MAX-Y NIL)
-                  (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL)
-                  &ALLOW-OTHER-KEYS)
+                  (TICS-X NIL) (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL)
+                  (BOX-WIDTH NIL) &ALLOW-OTHER-KEYS)
 
 Return the formatted command line arguments for the given gnuplot arguments.
 
@@ -859,6 +839,18 @@ Plot `function` over [`start`, `end`) by `step` with gnuplot.
   If `include-end` is `t` the `end` value will also be plotted.
 
   See the docstring of `gnuplot-args` for other keyword arguments.
+
+  
+
+### `GNUPLOT-HISTOGRAM` (function)
+
+    (GNUPLOT-HISTOGRAM DATA &KEY (BIN-WIDTH 1))
+
+Plot `data` as a histogram with gnuplot.
+
+  `bin-width` should be the desired width of the bins.  The bins will be
+  centered on multiples of this number, and data will be rounded to the nearest
+  bin.
 
   
 

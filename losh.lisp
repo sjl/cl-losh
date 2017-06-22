@@ -1587,6 +1587,12 @@
   (let ((kwd (if generate 'generate 'for)))
     `(,kwd (,var) :in-hashtable (hash-set-storage ,hset))))
 
+(defmacro-driver (FOR var RECURSIVELY expr INITIALLY init)
+  (let ((kwd (if generate 'generate 'for)))
+    `(progn
+       (initially (setf ,var ,init))
+       (,kwd ,var = ,expr))))
+
 
 ;;;; Hash Tables --------------------------------------------------------------
 (defun mutate-hash-values (function hash-table)
@@ -2053,7 +2059,7 @@
                      :min-percent 0.5)))
 
 #+sbcl
-(defun start-profiling (&optional call-count-packages)
+(defun start-profiling (&key call-count-packages (mode :cpu))
   "Start profiling performance.  SBCL only.
 
   `call-count-packages` should be a list of package designators.  Functions in
@@ -2067,7 +2073,7 @@
     (mapcar #'string-upcase <>)
     (mapc #'sb-sprof::profile-call-counts <>))
   (sb-sprof::start-profiling :max-samples 50000
-                             :mode :cpu
+                             :mode mode
                              ; :mode :time
                              :sample-interval 0.01
                              :threads :all))
@@ -2086,6 +2092,11 @@
      (unwind-protect
          (time (progn ,@body))
        (stop-profiling))))
+
+
+(defmacro gimme (n &body body)
+  `(iterate (repeat ,n)
+     (collect (progn ,@body))))
 
 
 ;;;; CLOS ---------------------------------------------------------------------
@@ -2541,9 +2552,11 @@
                      (max-x nil)
                      (min-y nil)
                      (max-y nil)
+                     (tics-x nil)
                      (graph-title)
                      (logscale-x nil)
                      (logscale-y nil)
+                     (box-width nil)
                      &allow-other-keys)
   "Return the formatted command line arguments for the given gnuplot arguments.
 
@@ -2564,7 +2577,9 @@
       (f "set border linewidth 1")
       (f "set style line 10 dashtype 2 linewidth 3 linecolor \"#666666\"")
       (when axis-x (f "set xzeroaxis linestyle 10"))
+      (when tics-x (f "set xtics ~A" tics-x))
       (when axis-y (f "set yzeroaxis linestyle 10"))
+      (when box-width (f "set boxwidth ~A" box-width))
       (when graph-title (f "set title '~A'" (esc graph-title)))
       (when label-x (f "set xlabel '~A'" (esc label-x)))
       (when label-y (f "set ylabel '~A'" (esc label-y)))
@@ -2650,6 +2665,26 @@
   `(gnuplot-function (lambda (x) ,expr)
     :line-title ',expr
     ,@args))
+
+
+(defun gnuplot-histogram (data &key (bin-width 1))
+  "Plot `data` as a histogram with gnuplot.
+
+  `bin-width` should be the desired width of the bins.  The bins will be
+  centered on multiples of this number, and data will be rounded to the nearest
+  bin.
+
+  "
+  (-<> data
+    (mapcar (lambda (y)
+              (* bin-width (round y bin-width)))
+            <>)
+    frequencies
+    hash-table-alist
+    (gnuplot <> :style :boxes
+             :min-y 0
+             :line-width 1
+             :box-width (* bin-width 1.0))))
 
 
 ;;;; Licensing ----------------------------------------------------------------
