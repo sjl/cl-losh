@@ -889,8 +889,6 @@
 ;;; Based on the PAIP queues (thanks, Norvig), but beefed up a little bit to add
 ;;; tracking of the queue size.
 
-(declaim (inline make-queue enqueue dequeue queue-empty-p))
-
 (defstruct (queue (:constructor make-queue%))
   (contents nil :type list)
   (last nil :type list)
@@ -915,30 +913,30 @@
          queue-append))
 
 
-(defun make-queue ()
+(defun-inlineable make-queue ()
   "Allocate and return a fresh queue."
   (make-queue%))
 
-(defun queue-empty-p (queue)
+(defun-inlineable queue-empty-p (queue)
   "Return whether `queue` is empty."
   (zerop (queue-size queue)))
 
-(defun enqueue (item queue)
+(defun-inlineable enqueue (item queue)
   "Enqueue `item` in `queue`, returning the new size of the queue."
   (let ((cell (cons item nil)))
-    (setf (queue-last queue)
-          (if (queue-empty-p queue)
-            (setf (queue-contents queue) cell)
-            (setf (cdr (queue-last queue)) cell))))
+    (if (queue-empty-p queue)
+      (setf (queue-contents queue) cell)
+      (setf (cdr (queue-last queue)) cell))
+    (setf (queue-last queue) cell))
   (incf (queue-size queue)))
 
-(defun dequeue (queue)
+(defun-inlineable dequeue (queue)
   "Dequeue an item from `queue` and return it."
   (when (zerop (decf (queue-size queue)))
     (setf (queue-last queue) nil))
   (pop (queue-contents queue)))
 
-(defun queue-append (queue list)
+(defun-inlineable queue-append (queue list)
   "Enqueue each element of `list` in `queue` and return the queue's final size."
   (loop :for item :in list
         :for size = (enqueue item queue)
