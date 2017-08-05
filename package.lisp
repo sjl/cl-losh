@@ -30,7 +30,8 @@
     :fill-multidimensional-array
     :fill-multidimensional-array-t
     :fill-multidimensional-array-fixnum
-    :fill-multidimensional-array-single-float))
+    :fill-multidimensional-array-single-float
+    :vector-last))
 
 (defpackage :losh.bits
   (:documentation "Utilities for low-level bit stuff.")
@@ -69,7 +70,9 @@
     :gathering-vector
     :gather
     :when-let*
-    :multiple-value-bind*))
+    :multiple-value-bind*
+    :do-repeat
+    :do-range))
 
 (defpackage :losh.debugging
   (:documentation "Utilities for figuring out what the hell is going on.")

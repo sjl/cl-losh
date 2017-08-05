@@ -241,6 +241,7 @@
     (single-float single-float-epsilon)
     (double-float double-float-epsilon)))
 
+
 (defun-inlineable randomp (&optional (chance 0.5))
   "Return a random boolean with `chance` probability of `t`."
   (< (random 1.0) chance))
@@ -416,7 +417,8 @@
                 ,@body))
       (recur ,@(mapcar #'extract-val bindings)))))
 
-(defmacro when-found (var lookup-expr &body body)
+
+(defmacro when-found ((var lookup-expr) &body body)
   "Perform `body` with `var` bound to the result of `lookup-expr`, when valid.
 
   `lookup-expr` should be an expression that returns two values, the first being
@@ -434,7 +436,7 @@
 
     ; becomes
 
-    (when-found val (gethash :foo hash)
+    (when-found (val (gethash :foo hash))
       body)
 
   "
@@ -446,7 +448,7 @@
        (when ,found
          ,@body))))
 
-(defmacro if-found (var lookup-expr then else)
+(defmacro if-found ((var lookup-expr) then else)
   "Perform `then` or `else` depending on the results of `lookup-expr`.
 
   `lookup-expr` should be an expression that returns two values, the first being
@@ -467,7 +469,7 @@
 
     ; becomes
 
-    (if-found val (gethash :foo hash)
+    (if-found (val (gethash :foo hash))
       'yes
       'no)
 
@@ -478,6 +480,7 @@
         (let ((,var ,result))
           ,then)
         ,else))))
+
 
 (defmacro gathering (&body body)
   "Run `body` to gather some things and return a fresh list of them.
@@ -556,6 +559,7 @@
            ,@body)
          ,result))))
 
+
 (defmacro when-let* (binding-forms &body body)
   "Bind the forms in `binding-forms` in order, short-circuiting on `nil`.
 
@@ -593,6 +597,7 @@
          (when ,symbol
            (when-let* ,remaining-bindings ,@body))))))
 
+
 (defmacro multiple-value-bind* (bindings &body body)
   "Bind each pair in `bindings` with `multiple-value-bind` sequentially.
 
@@ -613,6 +618,41 @@
     (destructuring-bind ((vars form) &rest bindings) bindings
       `(multiple-value-bind ,vars ,form
          (multiple-value-bind* ,bindings ,@body)))))
+
+
+(defmacro do-repeat (n &body body)
+  "Perform `body` `n` times."
+  `(dotimes (,(gensym) ,n)
+     ,@body))
+
+(defmacro do-range (ranges &body body)
+  "Perform `body` on the given `ranges`.
+
+  Each range in `ranges` should be of the form `(variable from below)`.  During
+  iteration `body` will be executed with `variable` bound to successive values
+  in the range [`from`, `below`).
+
+  If multiple ranges are given they will be iterated in a nested fashion.
+
+  Example:
+
+    (do-range ((x  0  3)
+               (y 10 12))
+      (pr x y))
+    ; =>
+    ; 0 10
+    ; 0 11
+    ; 1 10
+    ; 1 11
+    ; 2 10
+    ; 2 11
+
+  "
+  (if (null ranges)
+    `(progn ,@body)
+    (destructuring-bind (var from below) (first ranges)
+      `(loop :for ,var :from ,from :below ,below
+             :do (do-range ,(rest ranges) ,@body)))))
 
 
 ;;;; Mutation -----------------------------------------------------------------
@@ -793,7 +833,7 @@
 
 
 (defun-inlineable bisect-left (predicate vector target)
-  "Bisect `vector` based on `(predicate el target)` and return the LEFT element
+  "Bisect `vector` based on `(predicate el target)` and return the LEFT element.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
@@ -839,7 +879,7 @@
           (setf top index))))))
 
 (defun-inlineable bisect-right (predicate vector target)
-  "Bisect `vector` based on `(predicate el target)` and return the RIGHT element
+  "Bisect `vector` based on `(predicate el target)` and return the RIGHT element.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
@@ -883,6 +923,21 @@
         (if result
           (setf bottom index)
           (setf top index))))))
+
+
+(defun vector-last (vector)
+  "Return the last element of `vector`, or `nil` if it is empty.
+
+  A second value is returned, which will be `t` if the vector was not empty and
+  `nil` if it was.
+
+  The vector's fill-pointer will be respected.
+
+  "
+  (let ((length (length vector)))
+    (if (zerop length)
+      (values nil nil)
+      (values (aref vector (1- length)) t))))
 
 
 ;;;; Queues -------------------------------------------------------------------
@@ -2131,18 +2186,22 @@
 (defstruct (weightlist (:constructor %make-weightlist))
   weights sums items total)
 
-(defun make-weightlist (items weights)
+(defun make-weightlist (weights-and-items)
   "Make a weightlist of the given items and weights.
+
+  `weights-and-items` should be an alist of `(weight . item)` pairs.
 
   Weights can be any `real` numbers.  Weights of zero are fine, as long as at
   least one of the weights is nonzero (otherwise there's nothing to choose).
 
   "
-  (%make-weightlist
-    :items items
-    :weights weights
-    :sums (prefix-sums weights)
-    :total (apply #'+ weights)))
+  (let ((weights (mapcar #'car weights-and-items))
+        (items (mapcar #'cdr weights-and-items)))
+    (%make-weightlist
+      :items items
+      :weights weights
+      :sums (prefix-sums weights)
+      :total (apply #'+ weights))))
 
 (defun weightlist-random (weightlist)
   "Return a random item from the weightlist, taking the weights into account."
@@ -2222,6 +2281,7 @@
              (pq-resort pq))
       (pq-insert pq element priority)))
   pq)
+
 
 (defun pq-dequeue (pq)
   "Remove and return the element in `pq` with the lowest-numbered priority.

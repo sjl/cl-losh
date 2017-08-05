@@ -26,7 +26,7 @@ Utilities related to arrays.
 
     (BISECT-LEFT PREDICATE VECTOR TARGET)
 
-Bisect `vector` based on `(predicate el target)` and return the LEFT element
+Bisect `vector` based on `(predicate el target)` and return the LEFT element.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
@@ -60,7 +60,7 @@ Bisect `vector` based on `(predicate el target)` and return the LEFT element
 
     (BISECT-RIGHT PREDICATE VECTOR TARGET)
 
-Bisect `vector` based on `(predicate el target)` and return the RIGHT element
+Bisect `vector` based on `(predicate el target)` and return the RIGHT element.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
@@ -155,6 +155,19 @@ Fill `array` (which must be of type `(array T *)`) with `item`.
 
   Unlike `fill`, this works on multidimensional arrays.  It won't cons on SBCL,
   but it may in other implementations.
+
+  
+
+### `VECTOR-LAST` (function)
+
+    (VECTOR-LAST VECTOR)
+
+Return the last element of `vector`, or `nil` if it is empty.
+
+  A second value is returned, which will be `t` if the vector was not empty and
+  `nil` if it was.
+
+  The vector's fill-pointer will be respected.
 
   
 
@@ -300,6 +313,43 @@ Utilities for managing control flow.
 
 Thread the given forms, with `<>` as a placeholder.
 
+### `DO-RANGE` (macro)
+
+    (DO-RANGE RANGES
+      &BODY
+      BODY)
+
+Perform `body` on the given `ranges`.
+
+  Each range in `ranges` should be of the form `(variable from below)`.  During
+  iteration `body` will be executed with `variable` bound to successive values
+  in the range [`from`, `below`).
+
+  If multiple ranges are given they will be iterated in a nested fashion.
+
+  Example:
+
+    (do-range ((x  0  3)
+               (y 10 12))
+      (pr x y))
+    ; =>
+    ; 0 10
+    ; 0 11
+    ; 1 10
+    ; 1 11
+    ; 2 10
+    ; 2 11
+
+  
+
+### `DO-REPEAT` (macro)
+
+    (DO-REPEAT N
+      &BODY
+      BODY)
+
+Perform `body` `n` times.
+
 ### `GATHERING` (macro)
 
     (GATHERING
@@ -373,7 +423,7 @@ Run `body` to gather some things and return a fresh vector of them.
 
 ### `IF-FOUND` (macro)
 
-    (IF-FOUND VAR LOOKUP-EXPR THEN ELSE)
+    (IF-FOUND (VAR LOOKUP-EXPR) THEN ELSE)
 
 Perform `then` or `else` depending on the results of `lookup-expr`.
 
@@ -395,7 +445,7 @@ Perform `then` or `else` depending on the results of `lookup-expr`.
 
     ; becomes
 
-    (if-found val (gethash :foo hash)
+    (if-found (val (gethash :foo hash))
       'yes
       'no)
 
@@ -424,8 +474,7 @@ Bind each pair in `bindings` with `multiple-value-bind` sequentially.
 
 ### `WHEN-FOUND` (macro)
 
-    (WHEN-FOUND VAR
-        LOOKUP-EXPR
+    (WHEN-FOUND (VAR LOOKUP-EXPR)
       &BODY
       BODY)
 
@@ -446,7 +495,7 @@ Perform `body` with `var` bound to the result of `lookup-expr`, when valid.
 
     ; becomes
 
-    (when-found val (gethash :foo hash)
+    (when-found (val (gethash :foo hash))
       body)
 
   
@@ -1745,9 +1794,11 @@ A simple data structure for choosing random items with weighted probabilities.
 
 ### `MAKE-WEIGHTLIST` (function)
 
-    (MAKE-WEIGHTLIST ITEMS WEIGHTS)
+    (MAKE-WEIGHTLIST WEIGHTS-AND-ITEMS)
 
 Make a weightlist of the given items and weights.
+
+  `weights-and-items` should be an alist of `(weight . item)` pairs.
 
   Weights can be any `real` numbers.  Weights of zero are fine, as long as at
   least one of the weights is nonzero (otherwise there's nothing to choose).
