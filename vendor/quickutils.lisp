@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-HASH-TABLE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RANGE :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-HASH-TABLE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RANGE :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -16,7 +16,8 @@
   (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
                                          :COMPOSE :COPY-HASH-TABLE :CURRY
                                          :NON-ZERO-P :EMPTYP :ENSURE-KEYWORD
-                                         :ENSURE-LIST :FLATTEN :MAPHASH-KEYS
+                                         :ENSURE-LIST :FLATTEN
+                                         :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :MAPHASH-VALUES
                                          :HASH-TABLE-VALUES :MAP-TREE :MKSTR
                                          :ONCE-ONLY :RANGE :RCURRY :SYMB :WEAVE
@@ -150,6 +151,16 @@ it is called with to `function`."
                      ((consp xs) (rec (car xs) (rec (cdr xs) acc)))
                      (t          (cons xs acc)))))
       (rec xs nil)))
+  
+
+  (defun hash-table-alist (table)
+    "Returns an association list containing the keys and values of hash table
+`table`."
+    (let ((alist nil))
+      (maphash (lambda (k v)
+                 (push (cons k v) alist))
+               table)
+      alist))
   
 
   (declaim (inline maphash-keys))
@@ -326,7 +337,8 @@ unique symbol the named variable will be bound to."
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(compose copy-hash-table curry emptyp ensure-keyword ensure-list
-            flatten hash-table-keys hash-table-values map-tree mkstr once-only
-            range rcurry symb weave with-gensyms with-unique-names)))
+            flatten hash-table-alist hash-table-keys hash-table-values map-tree
+            mkstr once-only range rcurry symb weave with-gensyms
+            with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

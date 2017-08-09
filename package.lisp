@@ -77,22 +77,26 @@
 (defpackage :losh.debugging
   (:documentation "Utilities for figuring out what the hell is going on.")
   (:export
-    :pr
-    :prl
-    :bits
-    :shut-up
-    :dis
-    :comment
-    :aesthetic-string
-    :structural-string
-    :gimme
+
+    #+sbcl :profile
     #+sbcl :start-profiling
     #+sbcl :stop-profiling
-    #+sbcl :profile
-    :print-table
+    :aesthetic-string
+    :bits
+    :comment
+    :dis
+    :gimme
+    :hex
+    :pht
+    :pr
     :print-hash-table
     :print-hash-table-concisely
-    :pht))
+    :print-table
+    :prl
+    :shut-up
+    :structural-string
+
+    ))
 
 (defpackage :losh.eldritch-horrors
   (:documentation "Abandon all hope, ye who enter here.")

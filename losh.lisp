@@ -1440,7 +1440,8 @@
 
 
 (defmacro-clause (FOR delta-vars WITHIN-RADIUS radius &optional
-                  SKIP-ORIGIN should-skip-origin)
+                  SKIP-ORIGIN should-skip-origin
+                  ORIGIN origin)
   "Iterate through a number of delta values within a given radius.
 
   Imagine you have a 2D array and you want to find all the neighbors of a given
@@ -1486,19 +1487,29 @@
     ; the point it is works in arbitrary dimensions.
 
   "
-  (with-gensyms (r -r control skip)
-    `(progn
-      (with ,r = ,radius)
-      (with ,-r = (- ,r))
-      (with ,skip = ,should-skip-origin)
-      (generate-nested ,(iterate (for var :in (ensure-list delta-vars))
-                                 (collect `(,var :from ,-r :to ,r)))
-                       :control-var ,control)
-      (next ,control)
-      (when (and ,skip
-                 ,@(iterate (for var :in (ensure-list delta-vars))
-                            (collect `(zerop ,var))))
-        (next ,control)))))
+  (let* ((delta-vars (ensure-list delta-vars))
+         (origin-vars (mapcar (lambda (dv) (gensym (mkstr 'origin- dv)))
+                              delta-vars))
+         (origin-vals (if (null origin)
+                        (mapcar (constantly 0) delta-vars)
+                        origin)))
+    (with-gensyms (r -r control skip)
+      `(progn
+         (with ,r = ,radius)
+         ,@(mapcar (lambda (ovar oval)
+                     `(with ,ovar = ,oval))
+                   origin-vars origin-vals)
+         (generate-nested ,(iterate (for var :in delta-vars)
+                                    (for orig :in origin-vars)
+                                    (collect `(,var :from (- ,orig ,r) :to (+ ,orig ,r))))
+                          :control-var ,control)
+         (next ,control)
+         ,@(unless (null should-skip-origin)
+             `((with ,skip = ,should-skip-origin)
+               (when (and ,skip
+                          ,@(iterate (for var :in (ensure-list delta-vars))
+                                     (collect `(zerop ,var))))
+                 (next ,control))))))))
 
 
 (defmacro-driver (FOR var EVERY-NTH n DO form)
@@ -1580,11 +1591,11 @@
 
 (defmacro-clause (ORING expr &optional INTO var)
   (let ((result (or var iterate::*result-var*)))
-    `(reducing ,expr :by #'or :into ,var :initial-value nil)))
+    `(reducing ,expr :by #'or :into ,result :initial-value nil)))
 
 (defmacro-clause (ANDING expr &optional INTO var)
   (let ((result (or var iterate::*result-var*)))
-    `(reducing ,expr :by #'and :into ,var :initial-value t)))
+    `(reducing ,expr :by #'and :into ,result :initial-value t)))
 
 
 (defun keywordize-clause (clause)
@@ -1962,7 +1973,7 @@
     (finish-output)))
 
 
-(defun bits (n size &optional (stream t))
+(defun bits (&optional (n *) (size 8) (stream t))
   "Print the bits of the `size`-bit two's complement integer `n` to `stream`.
 
   Examples:
@@ -1975,8 +1986,25 @@
 
   "
   ;; http://blog.chaitanyagupta.com/2013/10/print-bit-representation-of-signed.html
-  (format stream (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
-  (values))
+  (format stream (format nil "~~~D,'0B" size) (ldb (byte size 0) n)))
+
+(defun hex (&optional (thing *) (stream t))
+  "Print the `thing` to `stream` with numbers in base 16.
+
+  Examples:
+
+    (hex 255)
+    => FF
+
+    (hex #(0 128))
+    => #(0 80)
+
+  "
+  (let ((*print-base* 16))
+    (case stream
+      ((nil) (prin1-to-string thing))
+      ((t) (prin1 thing stream) (terpri stream) nil)
+      (otherwise (prin1 thing stream) (terpri stream) nil))))
 
 (defmacro shut-up (&body body)
   "Run `body` with stdout and stderr redirected to the void."
@@ -2298,7 +2326,8 @@
 
 
 ;;;; Hash Sets ----------------------------------------------------------------
-(defstruct (hash-set (:constructor make-hash-set%))
+(defstruct (hash-set (:constructor make-hash-set%)
+                     (:copier nil))
   (storage (error "Required") :type hash-table :read-only t))
 
 (defmethod print-object ((hset hash-set) stream)

@@ -547,7 +547,7 @@ Return the string used to represent `thing` when printing aesthetically.
 
 ### `BITS` (function)
 
-    (BITS N SIZE &OPTIONAL (STREAM T))
+    (BITS &OPTIONAL (N *) (SIZE 8) (STREAM T))
 
 Print the bits of the `size`-bit two's complement integer `n` to `stream`.
 
@@ -591,6 +591,22 @@ Disassemble the code generated for a `lambda` with `arglist` and `body`.
     (GIMME N
       &BODY
       BODY)
+
+### `HEX` (function)
+
+    (HEX &OPTIONAL (THING *) (STREAM T))
+
+Print the `thing` to `stream` with numbers in base 16.
+
+  Examples:
+
+    (hex 255)
+    => FF
+
+    (hex #(0 128))
+    => #(0 80)
+
+  
 
 ### `PHT` (function)
 
@@ -909,7 +925,14 @@ Simple hash set implementation.
 
 ### `COPY-HASH-SET` (function)
 
-    (COPY-HASH-SET INSTANCE)
+    (COPY-HASH-SET HSET)
+
+Create a (shallow) copy of the given hash set.
+
+  Only the storage for the hash set itself will be copied -- the elements
+  themselves will not be copied.
+
+  
 
 ### `HASH-SET` (struct)
 

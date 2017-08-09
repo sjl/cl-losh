@@ -11,6 +11,7 @@
                :ensure-keyword
                :ensure-list
                :flatten
+               :hash-table-alist
                :hash-table-keys
                :hash-table-values
                :map-tree
