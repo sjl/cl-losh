@@ -62,6 +62,7 @@
   (:export
     :-<>
     :<>
+    :nest
     :recursively
     :recur
     :when-found

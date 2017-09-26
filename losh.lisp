@@ -14,6 +14,30 @@
                     forms))
      <>))
 
+(defmacro nest (&rest forms)
+  "Thread the given forms, putting each as the body of the previous.
+
+  Example:
+
+    (nest (multiple-value-bind (a b c) (foo))
+          (when (and a b c))
+          (multiple-value-bind (d e f) (bar))
+          (when (and d e f))
+          (do-something))
+
+  macroexpands to:
+
+    (multiple-value-bind (a b c) (foo)
+      (when (and a b c)
+        (multiple-value-bind (d e f) (bar)
+          (when (and d e f)
+            (do-something)))))
+
+  "
+  ;; thanks, Fare
+  (reduce (lambda (prefix body) `(,@prefix ,body))
+          forms :from-end t))
+
 
 ;;;; Types --------------------------------------------------------------------
 (deftype array-index (&optional (length (1- array-dimension-limit)))
