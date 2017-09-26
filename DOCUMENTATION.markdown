@@ -472,6 +472,30 @@ Bind each pair in `bindings` with `multiple-value-bind` sequentially.
 
   
 
+### `NEST` (macro)
+
+    (NEST &REST FORMS)
+
+Thread the given forms, putting each as the body of the previous.
+
+  Example:
+
+    (nest (multiple-value-bind (a b c) (foo))
+          (when (and a b c))
+          (multiple-value-bind (d e f) (bar))
+          (when (and d e f))
+          (do-something))
+
+  macroexpands to:
+
+    (multiple-value-bind (a b c) (foo)
+      (when (and a b c)
+        (multiple-value-bind (d e f) (bar)
+          (when (and d e f)
+            (do-something)))))
+
+  
+
 ### `WHEN-FOUND` (macro)
 
     (WHEN-FOUND (VAR LOOKUP-EXPR)
