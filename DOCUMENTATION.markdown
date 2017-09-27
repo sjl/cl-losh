@@ -451,6 +451,92 @@ Perform `then` or `else` depending on the results of `lookup-expr`.
 
   
 
+### `IF-LET` (macro)
+
+    (IF-LET BINDINGS
+      &BODY
+      BODY)
+
+Bind `bindings` in parallel and execute `then` if all are true, or `else` otherwise.
+
+  `body` must be of the form `(...optional-declarations... then else)`.
+
+  This macro combines `if` and `let`.  It takes a list of bindings and binds
+  them like `let` before executing the `then` branch of `body`, but if any
+  binding's value evaluate to `nil` the process stops there and the `else`
+  branch is immediately executed (with no bindings in effect).
+
+  If any `optional-declarations` are included they will only be in effect for
+  the `then` branch.
+
+  Examples:
+
+    (if-let ((a (progn (print :a) 1))
+             (b (progn (print :b) 2))
+             (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    :C
+    (1 2 3)
+
+    (if-let ((a (progn (print :a) 1))
+             (b (progn (print :b) nil))
+             (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    NOPE
+
+  
+
+### `IF-LET*` (macro)
+
+    (IF-LET* BINDINGS
+      &BODY
+      BODY)
+
+Bind `bindings` sequentially and execute `then` if all are true, or `else` otherwise.
+
+  `body` must be of the form `(...optional-declarations... then else)`.
+
+  This macro combines `if` and `let*`.  It takes a list of bindings and binds
+  them like `let*` before executing the `then` branch of `body`, but if any
+  binding's value evaluate to `nil` the process stops there and the `else`
+  branch is immediately executed (with no bindings in effect).
+
+  If any `optional-declarations` are included they will only be in effect for
+  the `then` branch.
+
+  Examples:
+
+    (if-let* ((a (progn (print :a) 1))
+              (b (progn (print :b) 2))
+              (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    :C
+    (1 2 3)
+
+    (if-let* ((a (progn (print :a) 1))
+              (b (progn (print :b) nil))
+              (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    NOPE
+
+  
+
 ### `MULTIPLE-VALUE-BIND*` (macro)
 
     (MULTIPLE-VALUE-BIND* BINDINGS
@@ -524,17 +610,52 @@ Perform `body` with `var` bound to the result of `lookup-expr`, when valid.
 
   
 
-### `WHEN-LET*` (macro)
+### `WHEN-LET` (macro)
 
-    (WHEN-LET* BINDING-FORMS
+    (WHEN-LET BINDINGS
       &BODY
       BODY)
 
-Bind the forms in `binding-forms` in order, short-circuiting on `nil`.
+Bind `bindings` in parallel and execute `body`, short-circuiting on `nil`.
 
-  This is like Clojure's `when-let`.  It takes a list of binding and binds them
-  like `let*`, but if any of the expressions evaluate to `nil` the process stops
-  there and `nil` is immediately returned.
+  This macro combines `when` and `let`.  It takes a list of bindings and binds
+  them like `let` before executing `body`, but if any binding's value evaluates
+  to `nil` the process stops there and `nil` is immediately returned.
+
+  Examples:
+
+    (when-let ((a (progn (print :a) 1))
+               (b (progn (print :b) 2))
+               (c (progn (print :c) 3)))
+      (list a b c))
+    ; =>
+    :A
+    :B
+    :C
+    (1 2 3)
+
+    (when-let ((a (progn (print :a) 1))
+               (b (progn (print :b) nil))
+               (c (progn (print :c) 3)))
+      (list a b c))
+    ; =>
+    :A
+    :B
+    NIL
+
+  
+
+### `WHEN-LET*` (macro)
+
+    (WHEN-LET* BINDINGS
+      &BODY
+      BODY)
+
+Bind `bindings` sequentially and execute `body`, short-circuiting on `nil`.
+
+  This macro combines `when` and `let*`.  It takes a list of bindings and binds
+  them like `let` before executing `body`, but if any binding's value evaluates
+  to `nil` the process stops there and `nil` is immediately returned.
 
   Examples:
 

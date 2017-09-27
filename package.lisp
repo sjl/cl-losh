@@ -70,6 +70,9 @@
     :gathering
     :gathering-vector
     :gather
+    :if-let
+    :if-let*
+    :when-let
     :when-let*
     :multiple-value-bind*
     :do-repeat

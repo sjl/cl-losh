@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-HASH-TABLE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAP-TREE :MKSTR :ONCE-ONLY :RANGE :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :COPY-HASH-TABLE :CURRY :EMPTYP :ENSURE-KEYWORD :ENSURE-LIST :FLATTEN :HASH-TABLE-ALIST :HASH-TABLE-KEYS :HASH-TABLE-VALUES :MAKE-GENSYM :MAP-TREE :MKSTR :ONCE-ONLY :PARSE-BODY :RANGE :RCURRY :SYMB :WEAVE :WITH-GENSYMS) :ensure-package T :package "LOSH.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "LOSH.QUICKUTILS")
@@ -19,9 +19,11 @@
                                          :ENSURE-LIST :FLATTEN
                                          :HASH-TABLE-ALIST :MAPHASH-KEYS
                                          :HASH-TABLE-KEYS :MAPHASH-VALUES
-                                         :HASH-TABLE-VALUES :MAP-TREE :MKSTR
-                                         :ONCE-ONLY :RANGE :RCURRY :SYMB :WEAVE
-                                         :STRING-DESIGNATOR :WITH-GENSYMS))))
+                                         :HASH-TABLE-VALUES :MAKE-GENSYM
+                                         :MAP-TREE :MKSTR :ONCE-ONLY
+                                         :PARSE-BODY :RANGE :RCURRY :SYMB
+                                         :WEAVE :STRING-DESIGNATOR
+                                         :WITH-GENSYMS))))
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -199,6 +201,15 @@ it is called with to `function`."
       values))
   
 
+  (defun make-gensym (name)
+    "If `name` is a non-negative integer, calls `gensym` using it. Otherwise `name`
+must be a string designator, in which case calls `gensym` using the designated
+string as the argument."
+    (gensym (if (typep name '(integer 0))
+                name
+                (string name))))
+  
+
   (defun map-tree (function tree)
     "Map `function` to each of the leave of `tree`."
     (check-type tree cons)
@@ -257,6 +268,28 @@ Example:
             ,(let ,(mapcar (lambda (n g) (list (car n) g))
                     names-and-forms gensyms)
                ,@forms)))))
+  
+
+  (defun parse-body (body &key documentation whole)
+    "Parses `body` into `(values remaining-forms declarations doc-string)`.
+Documentation strings are recognized only if `documentation` is true.
+Syntax errors in body are signalled and `whole` is used in the signal
+arguments when given."
+    (let ((doc nil)
+          (decls nil)
+          (current nil))
+      (tagbody
+       :declarations
+         (setf current (car body))
+         (when (and documentation (stringp current) (cdr body))
+           (if doc
+               (error "Too many documentation strings in ~S." (or whole body))
+               (setf doc (pop body)))
+           (go :declarations))
+         (when (and (listp current) (eql (first current) 'declare))
+           (push (pop body) decls)
+           (go :declarations)))
+      (values body (nreverse decls) doc)))
   
 
   (defun range (start end &key (step 1) (key 'identity))
@@ -337,8 +370,8 @@ unique symbol the named variable will be bound to."
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(compose copy-hash-table curry emptyp ensure-keyword ensure-list
-            flatten hash-table-alist hash-table-keys hash-table-values map-tree
-            mkstr once-only range rcurry symb weave with-gensyms
-            with-unique-names)))
+            flatten hash-table-alist hash-table-keys hash-table-values
+            make-gensym map-tree mkstr once-only parse-body range rcurry symb
+            weave with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

@@ -584,12 +584,61 @@
          ,result))))
 
 
-(defmacro when-let* (binding-forms &body body)
-  "Bind the forms in `binding-forms` in order, short-circuiting on `nil`.
+(defmacro when-let (bindings &body body)
+  "Bind `bindings` in parallel and execute `body`, short-circuiting on `nil`.
 
-  This is like Clojure's `when-let`.  It takes a list of binding and binds them
-  like `let*`, but if any of the expressions evaluate to `nil` the process stops
-  there and `nil` is immediately returned.
+  This macro combines `when` and `let`.  It takes a list of bindings and binds
+  them like `let` before executing `body`, but if any binding's value evaluates
+  to `nil` the process stops there and `nil` is immediately returned.
+
+  Examples:
+
+    (when-let ((a (progn (print :a) 1))
+               (b (progn (print :b) 2))
+               (c (progn (print :c) 3)))
+      (list a b c))
+    ; =>
+    :A
+    :B
+    :C
+    (1 2 3)
+
+    (when-let ((a (progn (print :a) 1))
+               (b (progn (print :b) nil))
+               (c (progn (print :c) 3)))
+      (list a b c))
+    ; =>
+    :A
+    :B
+    NIL
+
+  "
+  ;; (when-let ((a 1)
+  ;;            (b 2))
+  ;;   (+ a b))
+  ;; =>
+  ;; (BLOCK #:BLOCK632
+  ;;   (LET* ((#:A633 (OR 1 (RETURN-FROM #:BLOCK632)))
+  ;;          (#:B634 (OR 2 (RETURN-FROM #:BLOCK632)))
+  ;;          (A #:A633)
+  ;;          (B #:B634))
+  ;;     (+ A B)))
+  (with-gensyms (block)
+    (loop
+      :for (symbol value) :in bindings
+      :for symbol% = (make-gensym symbol)
+      :collect `(,symbol% (or ,value (return-from ,block))) :into initial-let-bindings
+      :collect `(,symbol ,symbol%) :into final-let-bindings
+      :finally (return `(block ,block
+                          (let* (,@initial-let-bindings ,@final-let-bindings)
+                            ,@body))))))
+
+(defmacro when-let* (bindings &body body)
+  "Bind `bindings` sequentially and execute `body`, short-circuiting on `nil`.
+
+  This macro combines `when` and `let*`.  It takes a list of bindings and binds
+  them like `let` before executing `body`, but if any binding's value evaluates
+  to `nil` the process stops there and `nil` is immediately returned.
 
   Examples:
 
@@ -613,14 +662,155 @@
     NIL
 
   "
-  (if (null binding-forms)
-    `(progn ,@body)
-    (destructuring-bind ((symbol expr) . remaining-bindings)
-      binding-forms
-      `(let ((,symbol ,expr))
-         (when ,symbol
-           (when-let* ,remaining-bindings ,@body))))))
+  ;; (when-let* ((a 1)
+  ;;             (b 2))
+  ;;      (+ a b))
+  ;; =>
+  ;; (BLOCK #:BLOCK647
+  ;;   (LET* ((A (OR 1 (RETURN-FROM #:BLOCK647)))
+  ;;          (B (OR 2 (RETURN-FROM #:BLOCK647))))
+  ;;     (+ A B)))
+  (with-gensyms (block)
+    (loop
+      :for (symbol value) :in bindings
+      :collect `(,symbol (or ,value (return-from ,block))) :into let-bindings
+      :finally (return `(block ,block
+                          (let* (,@let-bindings)
+                            ,@body))))))
 
+(defmacro if-let (bindings &body body)
+  "Bind `bindings` in parallel and execute `then` if all are true, or `else` otherwise.
+
+  `body` must be of the form `(...optional-declarations... then else)`.
+
+  This macro combines `if` and `let`.  It takes a list of bindings and binds
+  them like `let` before executing the `then` branch of `body`, but if any
+  binding's value evaluate to `nil` the process stops there and the `else`
+  branch is immediately executed (with no bindings in effect).
+
+  If any `optional-declarations` are included they will only be in effect for
+  the `then` branch.
+
+  Examples:
+
+    (if-let ((a (progn (print :a) 1))
+             (b (progn (print :b) 2))
+             (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    :C
+    (1 2 3)
+
+    (if-let ((a (progn (print :a) 1))
+             (b (progn (print :b) nil))
+             (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    NOPE
+
+  "
+  ;; (if-let ((a 1)
+  ;;          (b 2))
+  ;;   (declare (type fixnum a b))
+  ;;   (+ a b)
+  ;;   'nope)
+  ;; =>
+  ;; (BLOCK #:BLOCK643
+  ;;   (TAGBODY
+  ;;     (LET* ((#:A645 (OR 1 (GO #:ELSE-LABEL644)))
+  ;;            (#:B646 (OR 2 (GO #:ELSE-LABEL644)))
+  ;;            (A #:A645)
+  ;;            (B #:B646))
+  ;;       (DECLARE (TYPE FIXNUM A B))
+  ;;       (RETURN-FROM #:BLOCK643 (+ A B)))
+  ;;    #:ELSE-LABEL644
+  ;;     (RETURN-FROM #:BLOCK643 'NOPE)))
+  (with-gensyms (block else-label)
+    (loop
+      :with (body declarations) = (multiple-value-list (parse-body body))
+      :with (then else) = (destructuring-bind (then else) body (list then else))
+      :for (symbol value) :in bindings
+      :for symbol% = (make-gensym symbol)
+      :collect `(,symbol% (or ,value (go ,else-label))) :into initial-let-bindings
+      :collect `(,symbol ,symbol%) :into final-let-bindings
+      :finally (return `(block ,block
+                          (tagbody
+                            (let* (,@initial-let-bindings ,@final-let-bindings)
+                              ,@declarations
+                              (return-from ,block ,then))
+                            ,else-label
+                            (return-from ,block ,else)))))))
+
+(defmacro if-let* (bindings &body body)
+  "Bind `bindings` sequentially and execute `then` if all are true, or `else` otherwise.
+
+  `body` must be of the form `(...optional-declarations... then else)`.
+
+  This macro combines `if` and `let*`.  It takes a list of bindings and binds
+  them like `let*` before executing the `then` branch of `body`, but if any
+  binding's value evaluate to `nil` the process stops there and the `else`
+  branch is immediately executed (with no bindings in effect).
+
+  If any `optional-declarations` are included they will only be in effect for
+  the `then` branch.
+
+  Examples:
+
+    (if-let* ((a (progn (print :a) 1))
+              (b (progn (print :b) 2))
+              (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    :C
+    (1 2 3)
+
+    (if-let* ((a (progn (print :a) 1))
+              (b (progn (print :b) nil))
+              (c (progn (print :c) 3)))
+      (list a b c)
+      'nope)
+    ; =>
+    :A
+    :B
+    NOPE
+
+  "
+  ;; (if-let* ((a 1)
+  ;;           (b 2))
+  ;;   (declare (type fixnum a b))
+  ;;   (+ a b)
+  ;;   'nope)
+  ;; =>
+  ;; (BLOCK #:BLOCK647
+  ;;   (TAGBODY
+  ;;     (LET* ((A (OR 1 (GO #:ELSE-LABEL648)))
+  ;;            (B (OR 2 (GO #:ELSE-LABEL648))))
+  ;;       (DECLARE (TYPE FIXNUM A B))
+  ;;       (RETURN-FROM #:BLOCK647 (+ A B)))
+  ;;    #:ELSE-LABEL648
+  ;;     (RETURN-FROM #:BLOCK647 'NOPE)))
+  (with-gensyms (block else-label)
+    (loop
+      :with (body declarations) = (multiple-value-list (parse-body body))
+      :with (then else) = (destructuring-bind (then else) body (list then else))
+      :for (symbol value) :in bindings
+      :collect `(,symbol (or ,value (go ,else-label))) :into let-bindings
+      :finally (return `(block ,block
+                          (tagbody
+                            (let* ,let-bindings
+                              ,@declarations
+                              (return-from ,block ,then))
+                            ,else-label
+                            (return-from ,block ,else)))))))
 
 (defmacro multiple-value-bind* (bindings &body body)
   "Bind each pair in `bindings` with `multiple-value-bind` sequentially.

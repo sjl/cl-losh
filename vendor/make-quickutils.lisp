@@ -14,9 +14,11 @@
                :hash-table-alist
                :hash-table-keys
                :hash-table-values
+               :make-gensym
                :map-tree
                :mkstr
                :once-only
+               :parse-body
                :range
                :rcurry
                :symb
