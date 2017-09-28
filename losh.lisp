@@ -721,31 +721,29 @@
   ;;   (+ a b)
   ;;   'nope)
   ;; =>
-  ;; (BLOCK #:BLOCK643
-  ;;   (TAGBODY
-  ;;     (LET* ((#:A645 (OR 1 (GO #:ELSE-LABEL644)))
-  ;;            (#:B646 (OR 2 (GO #:ELSE-LABEL644)))
-  ;;            (A #:A645)
-  ;;            (B #:B646))
+  ;; (BLOCK #:OUTER632
+  ;;   (BLOCK #:INNER633
+  ;;     (LET* ((#:A634 (OR 1 (RETURN-FROM #:INNER633)))
+  ;;            (#:B635 (OR 2 (RETURN-FROM #:INNER633)))
+  ;;            (A #:A634)
+  ;;            (B #:B635))
   ;;       (DECLARE (TYPE FIXNUM A B))
-  ;;       (RETURN-FROM #:BLOCK643 (+ A B)))
-  ;;    #:ELSE-LABEL644
-  ;;     (RETURN-FROM #:BLOCK643 'NOPE)))
-  (with-gensyms (block else-label)
+  ;;       (RETURN-FROM #:OUTER632 (+ A B))))
+  ;;   'NOPE)
+  (with-gensyms (outer inner)
     (loop
       :with (body declarations) = (multiple-value-list (parse-body body))
       :with (then else) = (destructuring-bind (then else) body (list then else))
       :for (symbol value) :in bindings
       :for symbol% = (make-gensym symbol)
-      :collect `(,symbol% (or ,value (go ,else-label))) :into initial-let-bindings
+      :collect `(,symbol% (or ,value (return-from ,inner))) :into initial-let-bindings
       :collect `(,symbol ,symbol%) :into final-let-bindings
-      :finally (return `(block ,block
-                          (tagbody
+      :finally (return `(block ,outer
+                          (block ,inner
                             (let* (,@initial-let-bindings ,@final-let-bindings)
                               ,@declarations
-                              (return-from ,block ,then))
-                            ,else-label
-                            (return-from ,block ,else)))))))
+                              (return-from ,outer ,then)))
+                          ,else)))))
 
 (defmacro if-let* (bindings &body body)
   "Bind `bindings` sequentially and execute `then` if all are true, or `else` otherwise.
@@ -790,27 +788,26 @@
   ;;   (+ a b)
   ;;   'nope)
   ;; =>
-  ;; (BLOCK #:BLOCK647
-  ;;   (TAGBODY
-  ;;     (LET* ((A (OR 1 (GO #:ELSE-LABEL648)))
-  ;;            (B (OR 2 (GO #:ELSE-LABEL648))))
+  ;; (BLOCK #:OUTER640
+  ;;   (BLOCK #:INNER641
+  ;;     (LET* ((A (OR 1 (RETURN-FROM #:INNER641)))
+  ;;            (B (OR 2 (RETURN-FROM #:INNER641))))
   ;;       (DECLARE (TYPE FIXNUM A B))
-  ;;       (RETURN-FROM #:BLOCK647 (+ A B)))
-  ;;    #:ELSE-LABEL648
-  ;;     (RETURN-FROM #:BLOCK647 'NOPE)))
-  (with-gensyms (block else-label)
+  ;;       (RETURN-FROM #:OUTER640 (+ A B))))
+  ;;   'NOPE)
+  (with-gensyms (outer inner)
     (loop
       :with (body declarations) = (multiple-value-list (parse-body body))
       :with (then else) = (destructuring-bind (then else) body (list then else))
       :for (symbol value) :in bindings
-      :collect `(,symbol (or ,value (go ,else-label))) :into let-bindings
-      :finally (return `(block ,block
-                          (tagbody
+      :collect `(,symbol (or ,value (return-from ,inner))) :into let-bindings
+      :finally (return `(block ,outer
+                          (block ,inner
                             (let* ,let-bindings
                               ,@declarations
-                              (return-from ,block ,then))
-                            ,else-label
-                            (return-from ,block ,else)))))))
+                              (return-from ,outer ,then)))
+                          ,else)))))
+
 
 (defmacro multiple-value-bind* (bindings &body body)
   "Bind each pair in `bindings` with `multiple-value-bind` sequentially.
