@@ -154,7 +154,7 @@
     :hset-filter!
     :hset-map
     :hset-map!
-    ))
+    :hset-reduce))
 
 (defpackage :losh.hash-tables
   (:documentation "Utilities for operating on hash tables.")

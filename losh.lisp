@@ -2749,6 +2749,18 @@
     new))
 
 
+(define-hset-op hset-reduce (hset function &key (initial-value nil ivp))
+  "Reduce `function` over the elements of `hset`.
+
+  The order in which the elements are processed is undefined.
+
+  "
+  (if ivp
+    (iterate (for (n nil) :in-hashtable storage)
+             (reducing n by function :initial-value initial-value))
+    (iterate (for (n nil) :in-hashtable storage)
+             (reducing n by function))))
+
 (define-hset-op hset-elements (hset)
   "Return a fresh list containing the elements of `hset`."
   (hash-table-keys storage))

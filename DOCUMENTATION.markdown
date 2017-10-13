@@ -1193,6 +1193,16 @@ Remove and return an arbitrarily-chosen element from `hset`.
 
   
 
+### `HSET-REDUCE` (function)
+
+    (HSET-REDUCE HSET FUNCTION &KEY (INITIAL-VALUE NIL IVP))
+
+Reduce `function` over the elements of `hset`.
+
+  The order in which the elements are processed is undefined.
+
+  
+
 ### `HSET-REMOVE!` (function)
 
     (HSET-REMOVE! HSET &REST ELEMENTS)
