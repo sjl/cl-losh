@@ -2204,14 +2204,19 @@
 
 
 ;;;; Lists --------------------------------------------------------------------
-(defun somelist (predicate list)
+(defun somelist (predicate list &rest more-lists)
   "Call `predicate` on successive sublists of `list`, returning the first true result.
 
   `somelist` is to `some` as `maplist` is to `mapcar`.
 
   "
-  (iterate (for l :on list)
-           (thereis (funcall predicate l))))
+  (if more-lists
+    (iterate
+      (for lists :first (cons list more-lists) :then (mapcar #'cdr lists))
+      (until (some #'null lists))
+      (thereis (apply predicate lists)))
+    (iterate (for l :on list)
+             (thereis (funcall predicate l)))))
 
 
 ;;;; Debugging & Logging ------------------------------------------------------
