@@ -1344,6 +1344,20 @@ Print the licenses used by the given project and its dependencies.
 
   
 
+## Package `LOSH.LISTS`
+
+Utilities for operating on lists.
+
+### `SOMELIST` (function)
+
+    (SOMELIST PREDICATE LIST)
+
+Call `predicate` on successive sublists of `list`, returning the first true result.
+
+  `somelist` is to `some` as `maplist` is to `mapcar`.
+
+  
+
 ## Package `LOSH.MATH`
 
 Utilities related to math and numbers.
@@ -1408,6 +1422,10 @@ Return the value of the digit at `position` in `integer`.
     (DIVIDESP N DIVISOR)
 
 Return whether `n` is evenly divisible by `divisor`.
+
+  The value returned will be the quotient when true, `nil` otherwise.
+
+  
 
 ### `IN-RANGE-P` (function)
 
@@ -1903,6 +1921,28 @@ Return a list of the prefix sums of the numbers in `sequence`.
 
   
 
+### `PRODUCT` (function)
+
+    (PRODUCT SEQUENCE &KEY KEY)
+
+Return the product of all elements of `sequence`.
+
+  If `key` is given, it will be called on each element to compute the
+  multiplicand.
+
+  Examples:
+
+    (product #(1 2 3))
+    ; => 6
+
+    (product '("1" "2" "3") :key #'parse-integer)
+    ; => 6
+
+    (product '("1" "2" "3") :key #'length)
+    ; => 1
+
+  
+
 ### `PROPORTIONS` (function)
 
     (PROPORTIONS SEQUENCE &KEY (TEST 'EQL) (FLOAT T))
@@ -1923,6 +1963,30 @@ Return a hash table containing the proportions of the items in `sequence`.
     (proportions '(foo foo bar) :float nil)
     => {foo 2/3
         bar 1/3}
+
+  
+
+### `SUMMATION` (function)
+
+    (SUMMATION SEQUENCE &KEY KEY)
+
+Return the sum of all elements of `sequence`.
+
+  If `key` is given, it will be called on each element to compute the addend.
+
+  This function's ugly name was chosen so it wouldn't clash with iterate's `sum`
+  symbol.  Sorry.
+
+  Examples:
+
+    (sum #(1 2 3))
+    ; => 6
+
+    (sum '("1" "2" "3") :key #'parse-integer)
+    ; => 6
+
+    (sum '("1" "2" "3") :key #'length)
+    ; => 3
 
   
 

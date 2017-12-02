@@ -302,7 +302,14 @@
     :take
     :take-while
     :drop
-    :drop-while))
+    :drop-while
+    :summation
+    :product))
+
+(defpackage :losh.lists
+  (:documentation "Utilities for operating on lists.")
+  (:export
+    :somelist))
 
 (defpackage :losh.weightlists
   (:documentation
@@ -332,6 +339,7 @@
    :losh.io
    :losh.iterate
    :losh.licensing
+   :losh.lists
    :losh.math
    :losh.mutation
    :losh.priority-queues

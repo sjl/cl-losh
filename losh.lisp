@@ -118,8 +118,14 @@
   (* x x))
 
 (defun-inline dividesp (n divisor)
-  "Return whether `n` is evenly divisible by `divisor`."
-  (zerop (mod n divisor)))
+  "Return whether `n` is evenly divisible by `divisor`.
+
+  The value returned will be the quotient when true, `nil` otherwise.
+
+  "
+  (multiple-value-bind (quotient remainder) (floor n divisor)
+    (when (zerop remainder)
+      quotient)))
 
 
 (declaim (ftype (function (real real real)
@@ -2144,6 +2150,68 @@
            (collect (cons n (if key
                               (funcall key el)
                               el)))))
+
+
+(defun-inlineable summation (sequence &key key)
+  "Return the sum of all elements of `sequence`.
+
+  If `key` is given, it will be called on each element to compute the addend.
+
+  This function's ugly name was chosen so it wouldn't clash with iterate's `sum`
+  symbol.  Sorry.
+
+  Examples:
+
+    (sum #(1 2 3))
+    ; => 6
+
+    (sum '(\"1\" \"2\" \"3\") :key #'parse-integer)
+    ; => 6
+
+    (sum '(\"1\" \"2\" \"3\") :key #'length)
+    ; => 3
+
+  "
+  (if key
+    (iterate (for n :in-whatever sequence)
+             (sum (funcall key n)))
+    (iterate (for n :in-whatever sequence)
+             (sum n))))
+
+(defun-inlineable product (sequence &key key)
+  "Return the product of all elements of `sequence`.
+
+  If `key` is given, it will be called on each element to compute the
+  multiplicand.
+
+  Examples:
+
+    (product #(1 2 3))
+    ; => 6
+
+    (product '(\"1\" \"2\" \"3\") :key #'parse-integer)
+    ; => 6
+
+    (product '(\"1\" \"2\" \"3\") :key #'length)
+    ; => 1
+
+  "
+  (if key
+    (iterate (for n :in-whatever sequence)
+             (multiplying (funcall key n)))
+    (iterate (for n :in-whatever sequence)
+             (multiplying n))))
+
+
+;;;; Lists --------------------------------------------------------------------
+(defun somelist (predicate list)
+  "Call `predicate` on successive sublists of `list`, returning the first true result.
+
+  `somelist` is to `some` as `maplist` is to `mapcar`.
+
+  "
+  (iterate (for l :on list)
+           (thereis (funcall predicate l))))
 
 
 ;;;; Debugging & Logging ------------------------------------------------------
