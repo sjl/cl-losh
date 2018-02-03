@@ -272,11 +272,11 @@
     (double-float double-float-epsilon)))
 
 
-(defun-inlineable randomp (&optional (chance 0.5))
+(defun-inlineable randomp (&optional (chance 0.5) (generator #'random))
   "Return a random boolean with `chance` probability of `t`."
-  (< (random 1.0) chance))
+  (< (funcall generator 1.0) chance))
 
-(defun random-elt (seq)
+(defun random-elt (seq &optional (generator #'random))
   "Return a random element of `seq`, and whether one was available.
 
   This will NOT be efficient for lists.
@@ -295,40 +295,43 @@
   (let ((length (length seq)))
     (if (zerop length)
       (values nil nil)
-      (values (elt seq (random length)) t))))
+      (values (elt seq (funcall generator length)) t))))
 
-(defun-inlineable random-range (min max)
+(defun-inlineable random-range (min max &optional (generator #'random))
   "Return a random number in [`min`, `max`)."
-  (+ min (random (- max min))))
+  (+ min (funcall generator (- max min))))
 
-(defun-inlineable random-range-inclusive (min max)
+(defun-inlineable random-range-inclusive (min max &optional (generator #'random))
   "Return a random number in [`min`, `max`]."
-  (+ min (random (+ (- max min) (epsilon min)))))
+  (+ min (funcall generator (+ (- max min) (epsilon min)))))
 
-(defun-inlineable random-range-exclusive (min max)
+(defun-inlineable random-range-exclusive (min max  &optional (generator #'random))
   "Return a random number in (`min`, `max`)."
-  (+ (epsilon min) min (random (- max min (epsilon min)))))
+  (+ (epsilon min) min (funcall generator (- max min (epsilon min)))))
 
-(defun-inlineable random-around (value spread)
+(defun-inlineable random-around (value spread &optional (generator #'random))
   "Return a random number within `spread` of `value` (inclusive)."
   (random-range-inclusive (- value spread)
-                          (+ value spread)))
+                          (+ value spread)
+                          generator))
 
 
 (let (spare)
-  (defun random-gaussian (&optional (mean 0.0) (standard-deviation 1.0))
+  (defun clear-gaussian-spare ()
+    (setf spare nil))
+  (defun random-gaussian (mean standard-deviation &optional (generator #'random))
     "Return a random float from a gaussian distribution.  NOT THREAD-SAFE (yet)!"
     ;; https://en.wikipedia.org/wiki/Marsaglia_polar_method
-    (declare (optimize (speed 3))
-             (inline random-range))
+    (declare (optimize (speed 3)
+                       (inline random-range)))
     (flet ((scale (n)
              (+ mean (* n standard-deviation))))
       (if spare
         (prog1
             (scale spare)
           (setf spare nil))
-        (loop :for u = (random-range -1.0 1.0)
-              :for v = (random-range -1.0 1.0)
+        (loop :for u = (random-range -1.0 1.0 generator)
+              :for v = (random-range -1.0 1.0 generator)
               :for s = (+ (square u) (square v))
               :while (or (>= s 1.0) (= s 0.0))
               :finally
@@ -337,9 +340,9 @@
                     spare (* v s))
               (return (scale (* u s))))))))
 
-(defun random-gaussian-integer (&optional (mean 0) (standard-deviation 1))
+(defun random-gaussian-integer (mean standard-deviation &optional (generator #'random))
   "Return a random integer from a gaussian distribution.  NOT THREAD-SAFE (yet)!"
-  (values (round (random-gaussian mean standard-deviation))))
+  (values (round (random-gaussian mean standard-deviation generator))))
 
 
 (defun d (n sides &optional (plus 0))
@@ -1458,6 +1461,27 @@
                           (if (< ,i ,len)
                             (elt ,source ,i)
                             (terminate))))))))
+
+(defmacro-driver (FOR var AROUND seq)
+  "Iterate cyclically around items in the given sequence.
+
+  The results are undefined if the sequence is empty.
+
+  "
+  (let ((kwd (if generate 'generate 'for)))
+    (with-gensyms (is-list original source i len)
+      `(progn
+         (with ,original = ,seq)
+         (with ,source = ,original)
+         (with ,is-list = (typep ,source 'list))
+         (with ,len = (if ,is-list -1 (length ,source)))
+         (for ,i :from 0)
+         (,kwd ,var next (if ,is-list
+                           (progn (unless ,source (setf ,source ,original))
+                                  (pop ,source))
+                           (progn (when (= ,i ,len) (setf ,i 0))
+                                  (elt ,source ,i))))))))
+
 
 
 (defclause-sequence ACROSS-FLAT-ARRAY INDEX-OF-FLAT-ARRAY
@@ -3174,10 +3198,10 @@
     (10 20 555 999)
 
   "
-  (destructuring-bind (type &key (conc-name type))
+  (destructuring-bind (type &key (conc-name (symb type '-)))
       (ensure-list type-and-options)
     (let* ((accessors (loop :for slot :in slots
-                            :collect (symb conc-name '- slot)))
+                            :collect (symb conc-name slot)))
            (symbol-args (loop :for slot :in slots
                               :collect (symb slot '-symbol)))
            (macro-name (symb 'with- type))
@@ -3193,6 +3217,7 @@
         `(with-flexible-accessors ,,`(list ,@accessor-binding-list)
           ,,type
           ,@body)))))
+
 
 (defmacro eval-dammit (&body body)
   "Just evaluate `body` all the time, jesus christ lisp."
