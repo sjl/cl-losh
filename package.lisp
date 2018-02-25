@@ -304,7 +304,8 @@
     :drop
     :drop-while
     :summation
-    :product))
+    :product
+    :doseq))
 
 (defpackage :losh.lists
   (:documentation "Utilities for operating on lists.")

@@ -582,10 +582,11 @@
     #(1 2 3 a b)
 
   "
-  (destructuring-bind (&key (size 16))
+  (destructuring-bind (&key (size 16) (element-type t))
       options
     (with-gensyms (result)
-      `(let ((,result (make-array ,size :adjustable t :fill-pointer 0)))
+      `(let ((,result (make-array ,size :adjustable t :fill-pointer 0
+                                  :element-type ,element-type)))
          (flet ((gather (item)
                   (vector-push-extend item ,result)))
            (declare (dynamic-extent #'gather))
@@ -905,6 +906,7 @@
 
 (define-modify-macro mulf (factor) *
   "Multiply `place` by `factor` in-place.")
+
 
 
 (defun %divf (value &optional divisor)
@@ -2225,6 +2227,15 @@
              (multiplying (funcall key n)))
     (iterate (for n :in-whatever sequence)
              (multiplying n))))
+
+
+(defmacro doseq ((var sequence) &body body)
+  "Perform `body` with `var` bound to each element in `sequence` in turn.
+
+  It's like `cl:dolist`, but for all sequences.
+
+  "
+  `(map nil (lambda (,var) ,@body) ,sequence))
 
 
 ;;;; Lists --------------------------------------------------------------------
