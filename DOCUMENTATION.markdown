@@ -1350,7 +1350,7 @@ Utilities for operating on lists.
 
 ### `SOMELIST` (function)
 
-    (SOMELIST PREDICATE LIST)
+    (SOMELIST PREDICATE LIST &REST MORE-LISTS)
 
 Call `predicate` on successive sublists of `list`, returning the first true result.
 
@@ -1716,13 +1716,13 @@ Roll some dice.
 
 ### `RANDOM-AROUND` (function)
 
-    (RANDOM-AROUND VALUE SPREAD)
+    (RANDOM-AROUND VALUE SPREAD &OPTIONAL (GENERATOR #'RANDOM))
 
 Return a random number within `spread` of `value` (inclusive).
 
 ### `RANDOM-ELT` (function)
 
-    (RANDOM-ELT SEQ)
+    (RANDOM-ELT SEQ &OPTIONAL (GENERATOR #'RANDOM))
 
 Return a random element of `seq`, and whether one was available.
 
@@ -1742,43 +1742,56 @@ Return a random element of `seq`, and whether one was available.
 
 ### `RANDOM-GAUSSIAN` (function)
 
-    (RANDOM-GAUSSIAN &OPTIONAL (MEAN 0.0) (STANDARD-DEVIATION 1.0))
+    (RANDOM-GAUSSIAN MEAN STANDARD-DEVIATION &OPTIONAL (GENERATOR #'RANDOM))
 
 Return a random float from a gaussian distribution.  NOT THREAD-SAFE (yet)!
 
 ### `RANDOM-GAUSSIAN-INTEGER` (function)
 
-    (RANDOM-GAUSSIAN-INTEGER &OPTIONAL (MEAN 0) (STANDARD-DEVIATION 1))
+    (RANDOM-GAUSSIAN-INTEGER MEAN STANDARD-DEVIATION &OPTIONAL
+                             (GENERATOR #'RANDOM))
 
 Return a random integer from a gaussian distribution.  NOT THREAD-SAFE (yet)!
 
 ### `RANDOM-RANGE` (function)
 
-    (RANDOM-RANGE MIN MAX)
+    (RANDOM-RANGE MIN MAX &OPTIONAL (GENERATOR #'RANDOM))
 
 Return a random number in [`min`, `max`).
 
 ### `RANDOM-RANGE-EXCLUSIVE` (function)
 
-    (RANDOM-RANGE-EXCLUSIVE MIN MAX)
+    (RANDOM-RANGE-EXCLUSIVE MIN MAX &OPTIONAL (GENERATOR #'RANDOM))
 
 Return a random number in (`min`, `max`).
 
 ### `RANDOM-RANGE-INCLUSIVE` (function)
 
-    (RANDOM-RANGE-INCLUSIVE MIN MAX)
+    (RANDOM-RANGE-INCLUSIVE MIN MAX &OPTIONAL (GENERATOR #'RANDOM))
 
 Return a random number in [`min`, `max`].
 
 ### `RANDOMP` (function)
 
-    (RANDOMP &OPTIONAL (CHANCE 0.5))
+    (RANDOMP &OPTIONAL (CHANCE 0.5) (GENERATOR #'RANDOM))
 
 Return a random boolean with `chance` probability of `t`.
 
 ## Package `LOSH.SEQUENCES`
 
 Utilities for operating on sequences.
+
+### `DOSEQ` (macro)
+
+    (DOSEQ (VAR SEQUENCE)
+      &BODY
+      BODY)
+
+Perform `body` with `var` bound to each element in `sequence` in turn.
+
+  It's like `cl:dolist`, but for all sequences.
+
+  
 
 ### `DROP` (function)
 
