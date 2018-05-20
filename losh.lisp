@@ -1322,12 +1322,14 @@
 
 (defmacro-clause (TIMING time-type &optional
                   SINCE-START-INTO since-var
-                  PER-ITERATION-INTO per-var)
+                  PER-ITERATION-INTO per-var
+                  SECONDS seconds?)
   "Time [real/run]-time into variables.
 
   `time-type` should be either the symbol `run-time` or `real-time`, depending
-  on which kind of time you want to track.  Times are reported in
-  `internal-time-units-per-second`.
+  on which kind of time you want to track.  Times are reported in internal time
+  units, unless `seconds?` is given, in which case they will be converted to
+  a `single-float` by dividing by `internal-time-units-per-second`.
 
   If `since-var` is given, on each iteration it will be bound to the amount of
   time that has passed since the beginning of the loop.
@@ -1338,6 +1340,8 @@
 
   If neither var is given, it is as if `since-var` were given and returned as
   the value of the `iterate` statement.
+
+  `seconds?` is checked at compile time, not runtime.
 
   Note that the position of this clause in the `iterate` statement matters.
   Also, the code movement of `iterate` can change things around.  Overall the
@@ -1359,10 +1363,9 @@
 
     ; sleep AFTER the timing clause
     (iterate (repeat 3)
-             (timing real-time :since-start-into s :per-iteration-into p)
+             (timing real-time :since-start-into s :per-iteration-into p :seconds t)
              (sleep 1.0)
-             (collect (list (/ s internal-time-units-per-second 1.0)
-                            (/ p internal-time-units-per-second 1.0))))
+             (collect (list s p)))
     =>
     ((0.0   0.0)
      (1.001 1.001)
@@ -1374,15 +1377,19 @@
                            ((:run-time run-time) 'get-internal-run-time)))
         (since-var (or since-var (when (null per-var)
                                    iterate::*result-var*))))
-    (with-gensyms (start-time current-time previous-time)
-      `(progn
-        (with ,start-time = (,timing-function))
-        (for ,current-time = (,timing-function))
-        ,@(when since-var
-            `((for ,since-var = (- ,current-time ,start-time))))
-        ,@(when per-var
-            `((for ,previous-time :previous ,current-time :initially ,start-time)
-              (for ,per-var = (- ,current-time ,previous-time))))))))
+    (flet ((convert (val)
+             (if seconds?
+               `(/ ,val internal-time-units-per-second 1.0f0)
+               val)))
+      (with-gensyms (start-time current-time previous-time)
+        `(progn
+           (with ,start-time = (,timing-function))
+           (for ,current-time = (,timing-function))
+           ,@(when since-var
+               `((for ,since-var = ,(convert `(- ,current-time ,start-time)))))
+           ,@(when per-var
+               `((for ,previous-time :previous ,current-time :initially ,start-time)
+                 (for ,per-var = ,(convert `(- ,current-time ,previous-time))))))))))
 
 
 (defmacro-driver (FOR var IN-LISTS lists)
@@ -3085,7 +3092,7 @@
     ,@args))
 
 
-(defun gnuplot-histogram (data &key (bin-width 1))
+(defun gnuplot-histogram (data &key (bin-width 1) spew-output)
   "Plot `data` as a histogram with gnuplot.
 
   `bin-width` should be the desired width of the bins.  The bins will be
@@ -3099,7 +3106,9 @@
             <>)
     frequencies
     hash-table-alist
-    (gnuplot <> :style :boxes
+    (gnuplot <>
+             :style :boxes
+             :spew-output spew-output
              :min-y 0
              :line-width 1
              :box-width (* bin-width 1.0))))
