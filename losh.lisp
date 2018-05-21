@@ -547,8 +547,8 @@
   (with-gensyms (result)
     `(let ((,result (make-queue)))
       (flet ((gather (item)
-               (enqueue item ,result)))
-        (declare (dynamic-extent #'gather))
+               (enqueue item ,result)
+               item))
         ,@body)
       (queue-contents ,result))))
 
@@ -588,8 +588,8 @@
       `(let ((,result (make-array ,size :adjustable t :fill-pointer 0
                                   :element-type ,element-type)))
          (flet ((gather (item)
-                  (vector-push-extend item ,result)))
-           (declare (dynamic-extent #'gather))
+                  (vector-push-extend item ,result)
+                  item))
            ,@body)
          ,result))))
 
