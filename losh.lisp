@@ -628,20 +628,14 @@
   ;;   (+ a b))
   ;; =>
   ;; (BLOCK #:BLOCK632
-  ;;   (LET* ((#:A633 (OR 1 (RETURN-FROM #:BLOCK632)))
-  ;;          (#:B634 (OR 2 (RETURN-FROM #:BLOCK632)))
-  ;;          (A #:A633)
-  ;;          (B #:B634))
+  ;;   (LET ((A (OR 1 (RETURN-FROM #:BLOCK632)))
+  ;;         (B (OR 2 (RETURN-FROM #:BLOCK632))))
   ;;     (+ A B)))
   (with-gensyms (block)
-    (loop
-      :for (symbol value) :in bindings
-      :for symbol% = (make-gensym symbol)
-      :collect `(,symbol% (or ,value (return-from ,block))) :into initial-let-bindings
-      :collect `(,symbol ,symbol%) :into final-let-bindings
-      :finally (return `(block ,block
-                          (let* (,@initial-let-bindings ,@final-let-bindings)
-                            ,@body))))))
+    `(block ,block
+       (let (,@(loop :for (symbol value) :in bindings
+                     :collect `(,symbol (or ,value (return-from ,block)))))
+         ,@body))))
 
 (defmacro when-let* (bindings &body body)
   "Bind `bindings` sequentially and execute `body`, short-circuiting on `nil`.
@@ -681,12 +675,10 @@
   ;;          (B (OR 2 (RETURN-FROM #:BLOCK647))))
   ;;     (+ A B)))
   (with-gensyms (block)
-    (loop
-      :for (symbol value) :in bindings
-      :collect `(,symbol (or ,value (return-from ,block))) :into let-bindings
-      :finally (return `(block ,block
-                          (let* (,@let-bindings)
-                            ,@body))))))
+    `(block ,block
+       (let* (,@(loop :for (symbol value) :in bindings
+                      :collect `(,symbol (or ,value (return-from ,block)))))
+         ,@body))))
 
 (defmacro if-let (bindings &body body)
   "Bind `bindings` in parallel and execute `then` if all are true, or `else` otherwise.
@@ -733,10 +725,8 @@
   ;; =>
   ;; (BLOCK #:OUTER632
   ;;   (BLOCK #:INNER633
-  ;;     (LET* ((#:A634 (OR 1 (RETURN-FROM #:INNER633)))
-  ;;            (#:B635 (OR 2 (RETURN-FROM #:INNER633)))
-  ;;            (A #:A634)
-  ;;            (B #:B635))
+  ;;     (LET ((A (OR 1 (RETURN-FROM #:INNER633)))
+  ;;           (B (OR 2 (RETURN-FROM #:INNER633))))
   ;;       (DECLARE (TYPE FIXNUM A B))
   ;;       (RETURN-FROM #:OUTER632 (+ A B))))
   ;;   'NOPE)
@@ -745,12 +735,10 @@
       :with (body declarations) = (multiple-value-list (parse-body body))
       :with (then else) = (destructuring-bind (then else) body (list then else))
       :for (symbol value) :in bindings
-      :for symbol% = (make-gensym symbol)
-      :collect `(,symbol% (or ,value (return-from ,inner))) :into initial-let-bindings
-      :collect `(,symbol ,symbol%) :into final-let-bindings
+      :collect `(,symbol (or ,value (return-from ,inner))) :into let-bindings
       :finally (return `(block ,outer
                           (block ,inner
-                            (let* (,@initial-let-bindings ,@final-let-bindings)
+                            (let ,let-bindings
                               ,@declarations
                               (return-from ,outer ,then)))
                           ,else)))))
