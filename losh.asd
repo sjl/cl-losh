@@ -19,7 +19,46 @@
     :serial t
     :components ((:file "quickutils")))
    (:file "package")
-   (:file "losh")))
+   (:module "src"
+    :components (
+
+                 (:file "chili-dogs")
+                 (:file "clos")
+                 (:file "eldritch-horrors")
+                 (:file "functions")
+                 (:file "hash-sets")
+                 (:file "io")
+                 (:file "iterate-pre")
+                 (:file "lists")
+                 (:file "mutation")
+
+                 (:file "arrays" :depends-on ("chili-dogs"))
+                 (:file "bits" :depends-on ("chili-dogs"))
+                 (:file "queues" :depends-on ("chili-dogs"))
+                 (:file "priority-queues" :depends-on ("mutation"))
+
+                 (:file "control-flow" :depends-on ("queues"))
+
+                 (:file "math" :depends-on ("control-flow"
+                                            "chili-dogs"))
+                 (:file "hash-tables" :depends-on ("control-flow"))
+
+                 (:file "random" :depends-on ("math"
+                                              "chili-dogs"))
+                 (:file "sequences" :depends-on ("chili-dogs"
+                                                 "hash-tables"))
+                 (:file "debugging" :depends-on ("control-flow"
+                                                 "math"
+                                                 "hash-tables"))
+
+                 (:file "iterate" :depends-on ("control-flow"
+                                               "sequences"))
+                 (:file "gnuplot" :depends-on ("control-flow"
+                                               "debugging"
+                                               "sequences"))
+                 (:file "weightlists" :depends-on ("sequences"))
+
+                 ))))
 
 (asdf:defsystem :losh/test
   :description "Test suite for losh."

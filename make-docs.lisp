@@ -16,7 +16,6 @@
         "LOSH.HASH-TABLES"
         "LOSH.IO"
         "LOSH.ITERATE"
-        "LOSH.LICENSING"
         "LOSH.LISTS"
         "LOSH.MATH"
         "LOSH.MUTATION"

@@ -17,115 +17,37 @@
              :collect `(:export ,@(external-symbols parent-package)))))
 
 
-(defpackage :losh.base
-  (:export :recursively))
-
-
-(defpackage :losh.arrays
-  (:documentation "Utilities related to arrays.")
-  (:export
-    :do-array
-    :bisect-left
-    :bisect-right
-    :fill-multidimensional-array
-    :fill-multidimensional-array-t
-    :fill-multidimensional-array-fixnum
-    :fill-multidimensional-array-single-float
-    :vector-last))
-
-(defpackage :losh.bits
-  (:documentation "Utilities for low-level bit stuff.")
-  (:export
-    :+/8
-    :-/8
-    :+/16
-    :-/16
-    :+/32
-    :-/32
-    :+/64
-    :-/64))
 
 (defpackage :losh.chili-dogs
+  (:use :cl :iterate :losh.quickutils)
   (:documentation "Gotta go FAST.")
   (:export
     :defun-inline
     :defun-inlineable))
 
 (defpackage :losh.clos
+  (:use :cl :iterate :losh.quickutils)
   (:documentation "Utilities for working with CLOS.")
   (:export
     :defclass*))
 
-(defpackage :losh.control-flow
-  (:use :losh.base)
-  (:documentation "Utilities for managing control flow.")
-  (:export
-    :-<>
-    :<>
-    :nest
-    :recursively
-    :recur
-    :when-found
-    :if-found
-    :gathering
-    :gathering-vector
-    :gather
-    :if-let
-    :if-let*
-    :when-let
-    :when-let*
-    :multiple-value-bind*
-    :do-repeat
-    :do-range))
-
-(defpackage :losh.debugging
-  (:documentation "Utilities for figuring out what the hell is going on.")
-  (:export
-
-    #+sbcl :profile
-    #+sbcl :start-profiling
-    #+sbcl :stop-profiling
-    :aesthetic-string
-    :bits
-    :comment
-    :dis
-    :gimme
-    :hex
-    :pht
-    :pr
-    :print-hash-table
-    :print-hash-table-concisely
-    :print-table
-    :prl
-    :shut-up
-    :structural-string
-
-    ))
-
 (defpackage :losh.eldritch-horrors
+  (:use :cl :iterate :losh.quickutils)
   (:documentation "Abandon all hope, ye who enter here.")
   (:export
     :eval-dammit
     :define-with-macro))
 
 (defpackage :losh.functions
+  (:use :cl :iterate :losh.quickutils)
   (:documentation "Utilities for working with higher-order functions.")
   (:export
     :juxt
     :nullary
     :fixed-point))
 
-(defpackage :losh.gnuplot
-  (:documentation "Utilities for plotting data with gnuplot.")
-  (:export
-    :gnuplot
-    :gnuplot-args
-    :gnuplot-expr
-    :gnuplot-function
-    :gnuplot-histogram
-    :x))
-
 (defpackage :losh.hash-sets
+  (:use :cl :iterate :losh.quickutils)
   (:documentation "Simple hash set implementation.")
   (:export
     :hash-set
@@ -156,20 +78,247 @@
     :hset-map!
     :hset-reduce))
 
-(defpackage :losh.hash-tables
-  (:documentation "Utilities for operating on hash tables.")
-  (:export
-    :hash-table-contents
-    :mutate-hash-values))
-
 (defpackage :losh.io
+  (:use :cl :iterate :losh.quickutils)
   (:documentation "Utilities for input/output/reading/etc.")
   (:export
     :read-all-from-file
     :read-all-from-string))
 
+(defpackage :losh.lists
+  (:use :cl :iterate :losh.quickutils)
+  (:documentation "Utilities for operating on lists.")
+  (:export
+    :somelist))
+
+(defpackage :losh.mutation
+  (:use :cl :iterate :losh.quickutils)
+  (:documentation "Utilities for mutating places in-place.")
+  (:export
+    :zapf
+    :%
+    :mulf
+    :divf
+    :modf
+    :remainderf
+    :clampf
+    :negatef
+    :notf
+    :callf))
+
+(defpackage :losh.iterate-pre
+  (:use :cl :iterate :losh.quickutils)
+  (:export
+    :in-whatever))
+
+
+(defpackage :losh.arrays
+  (:use :cl :iterate :losh.quickutils
+    :losh.chili-dogs)
+  (:documentation "Utilities related to arrays.")
+  (:export
+    :do-array
+    :bisect-left
+    :bisect-right
+    :fill-multidimensional-array
+    :fill-multidimensional-array-t
+    :fill-multidimensional-array-fixnum
+    :fill-multidimensional-array-single-float
+    :vector-last))
+
+(defpackage :losh.bits
+  (:use :cl :iterate :losh.quickutils
+    :losh.chili-dogs)
+  (:documentation "Utilities for low-level bit stuff.")
+  (:export
+    :+/8
+    :-/8
+    :+/16
+    :-/16
+    :+/32
+    :-/32
+    :+/64
+    :-/64))
+
+(defpackage :losh.queues
+  (:use :cl :iterate :losh.quickutils
+    :losh.chili-dogs)
+  (:documentation "A simple queue implementation.")
+  (:export
+    :queue
+    :make-queue
+    :queue-contents
+    :queue-size
+    :queue-empty-p
+    :enqueue
+    :dequeue
+    :queue-append))
+
+(defpackage :losh.priority-queues
+  (:use :cl :iterate :losh.quickutils
+    :losh.mutation)
+  (:documentation "Jankass priority queue implementation.")
+  (:export
+    :priority-queue
+    :make-priority-queue
+
+    :pq-insert
+    :pq-ensure
+    :pq-dequeue))
+
+
+(defpackage :losh.control-flow
+  (:use :cl :iterate :losh.quickutils
+    :losh.queues)
+  (:documentation "Utilities for managing control flow.")
+  (:export
+    :-<>
+    :<>
+    :nest
+    :recursively
+    :recur
+    :when-found
+    :if-found
+    :gathering
+    :gathering-vector
+    :gather
+    :if-let
+    :if-let*
+    :when-let
+    :when-let*
+    :multiple-value-bind*
+    :do-repeat
+    :do-range))
+
+
+(defpackage :losh.math
+  (:use :cl :iterate :losh.quickutils
+    :losh.chili-dogs
+    :losh.control-flow)
+  (:documentation "Utilities related to math and numbers.")
+  (:export
+    :tau
+    :tau/2
+    :1/2tau
+    :tau/4
+    :1/4tau
+    :2/4tau
+    :3/4tau
+    :tau/8
+    :1/8tau
+    :2/8tau
+    :3/8tau
+    :4/8tau
+    :5/8tau
+    :6/8tau
+    :7/8tau
+
+    :clamp
+    :degrees
+    :dividesp
+    :in-range-p
+    :lerp
+    :map-range
+    :norm
+    :precise-lerp
+    :radians
+    :square
+    :digit))
+
+(defpackage :losh.hash-tables
+  (:use :cl :iterate :losh.quickutils
+    :losh.control-flow)
+  (:documentation "Utilities for operating on hash tables.")
+  (:export
+    :hash-table-contents
+    :mutate-hash-values))
+
+
+(defpackage :losh.random
+  (:use :cl :iterate :losh.quickutils
+    :losh.chili-dogs
+    :losh.math)
+  (:documentation "Utilities related to randomness.")
+  (:export
+    :randomp
+    :random-elt
+    :random-range
+    :random-range-exclusive
+    :random-range-inclusive
+    :random-around
+    :random-gaussian
+    :random-gaussian-integer
+    :d))
+
+(defpackage :losh.sequences
+  (:use :cl :iterate :losh.quickutils
+    :losh.chili-dogs
+    :losh.hash-tables
+    :losh.iterate-pre)
+  (:documentation "Utilities for operating on sequences.")
+  (:export
+    :extrema
+    :enumerate
+    :prefix-sums
+    :frequencies
+    :proportions
+    :group-by
+    :take
+    :take-while
+    :drop
+    :drop-while
+    :summation
+    :product
+    :doseq))
+
+(defpackage :losh.debugging
+  (:use :cl :iterate :losh.quickutils
+    :losh.math
+    :losh.control-flow
+    :losh.hash-tables)
+  (:documentation "Utilities for figuring out what the hell is going on.")
+  (:export
+
+    #+sbcl :profile
+    #+sbcl :start-profiling
+    #+sbcl :stop-profiling
+    :aesthetic-string
+    :bits
+    :comment
+    :dis
+    :gimme
+    :hex
+    :pht
+    :pr
+    :print-hash-table
+    :print-hash-table-concisely
+    :print-table
+    :prl
+    :shut-up
+    :structural-string
+
+    ))
+
+
+(defpackage :losh.gnuplot
+  (:use :cl :iterate :losh.quickutils
+    :losh.control-flow
+    :losh.debugging
+    :losh.sequences)
+  (:documentation "Utilities for plotting data with gnuplot.")
+  (:export
+    :gnuplot
+    :gnuplot-args
+    :gnuplot-expr
+    :gnuplot-function
+    :gnuplot-histogram
+    :x))
+
 (defpackage :losh.iterate
-  (:use :iterate :losh.base) ; need this for iterate's `for` symbol fuckery
+  (:use :cl :iterate :losh.quickutils
+    :losh.iterate-pre
+    :losh.control-flow ;; always needed because we need a single RECURSIVELY symbol
+    :losh.sequences)
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
 
@@ -204,115 +353,9 @@
 
     ))
 
-(defpackage :losh.licensing
-  (:documentation "Utilities related to open source licenses.")
-  (:export
-    :print-licenses))
-
-(defpackage :losh.math
-  (:documentation "Utilities related to math and numbers.")
-  (:export
-    :tau
-    :tau/2
-    :1/2tau
-    :tau/4
-    :1/4tau
-    :2/4tau
-    :3/4tau
-    :tau/8
-    :1/8tau
-    :2/8tau
-    :3/8tau
-    :4/8tau
-    :5/8tau
-    :6/8tau
-    :7/8tau
-
-    :not=
-    :clamp
-    :degrees
-    :dividesp
-    :in-range-p
-    :lerp
-    :map-range
-    :norm
-    :precise-lerp
-    :radians
-    :square
-    :digit))
-
-(defpackage :losh.mutation
-  (:documentation "Utilities for mutating places in-place.")
-  (:export
-    :zapf
-    :%
-    :mulf
-    :divf
-    :modf
-    :remainderf
-    :clampf
-    :negatef
-    :notf
-    :callf))
-
-(defpackage :losh.priority-queues
-  (:documentation "Jankass priority queue implementation.")
-  (:export
-    :priority-queue
-    :make-priority-queue
-
-    :pq-insert
-    :pq-ensure
-    :pq-dequeue))
-
-(defpackage :losh.queues
-  (:documentation "A simple queue implementation.")
-  (:export
-    :queue
-    :make-queue
-    :queue-contents
-    :queue-size
-    :queue-empty-p
-    :enqueue
-    :dequeue
-    :queue-append))
-
-(defpackage :losh.random
-  (:documentation "Utilities related to randomness.")
-  (:export
-    :randomp
-    :random-elt
-    :random-range
-    :random-range-exclusive
-    :random-range-inclusive
-    :random-around
-    :random-gaussian
-    :random-gaussian-integer
-    :d))
-
-(defpackage :losh.sequences
-  (:documentation "Utilities for operating on sequences.")
-  (:export
-    :extrema
-    :enumerate
-    :prefix-sums
-    :frequencies
-    :proportions
-    :group-by
-    :take
-    :take-while
-    :drop
-    :drop-while
-    :summation
-    :product
-    :doseq))
-
-(defpackage :losh.lists
-  (:documentation "Utilities for operating on lists.")
-  (:export
-    :somelist))
-
 (defpackage :losh.weightlists
+  (:use :cl :iterate :losh.quickutils
+    :losh.sequences)
   (:documentation
     "A simple data structure for choosing random items with weighted probabilities.")
   (:export
@@ -339,7 +382,6 @@
    :losh.hash-tables
    :losh.io
    :losh.iterate
-   :losh.licensing
    :losh.lists
    :losh.math
    :losh.mutation

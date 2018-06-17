@@ -582,6 +582,32 @@ Thread the given forms, putting each as the body of the previous.
 
   
 
+### `RECURSIVELY` (macro)
+
+    (RECURSIVELY BINDINGS
+      &BODY
+      BODY)
+
+Execute `body` recursively, like Clojure's `loop`/`recur`.
+
+  `bindings` should contain a list of symbols and (optional) starting values.
+
+  In `body` the symbol `recur` will be bound to the function for recurring.
+
+  This macro doesn't perform an explicit tail-recursion check like Clojure's
+  `loop`.  You know what you're doing, right?
+
+  Example:
+
+      (defun length (some-list)
+        (recursively ((list some-list)
+                      (n 0))
+          (if (null list)
+            n
+            (recur (cdr list) (1+ n)))))
+
+  
+
 ### `WHEN-FOUND` (macro)
 
     (WHEN-FOUND (VAR LOOKUP-EXPR)
@@ -931,64 +957,6 @@ Just evaluate `body` all the time, jesus christ lisp.
 
 Utilities for working with higher-order functions.
 
-### `FIXED-POINT` (function)
-
-    (FIXED-POINT FUNCTION DATA &KEY (TEST 'EQL) (LIMIT NIL))
-
-Find a fixed point of `function`, starting with `data`.
-
-  Successive runs of `function` will be compared with `test`.  Once `test`
-  returns true the last result will be returned.
-
-  `limit` can be an integer to limit the maximum number of iterations performed.
-
-  A second value is also returned: `t` if a fixed point was found or `nil` if
-  the iteration limit was reached.
-
-  
-
-### `JUXT` (function)
-
-    (JUXT &REST FUNCTIONS)
-
-Return a function that will juxtapose the results of `functions`.
-
-  This is like Clojure's `juxt`.  Given functions `(f0 f1 ... fn)`, this will
-  return a new function which, when called with some arguments, will return
-  `(list (f0 ...args...) (f1 ...args...) ... (fn ...args...))`.
-
-  Example:
-
-    (funcall (juxt #'list #'+ #'- #'*) 1 2)
-    => ((1 2) 3 -1 2)
-
-  
-
-### `NULLARY` (function)
-
-    (NULLARY FUNCTION &OPTIONAL RESULT)
-
-Return a new function that acts as a nullary-patched version of `function`.
-
-  The new function will return `result` when called with zero arguments, and
-  delegate to `function` otherwise.
-
-  Examples:
-
-    (max 1 10 2) ; => 10
-    (max)        ; => invalid number of arguments
-
-    (funcall (nullary #'max))          ; => nil
-    (funcall (nullary #'max 0))        ; => 0
-    (funcall (nullary #'max 0) 1 10 2) ; => 10
-
-    (reduce #'max nil)                  ; => invalid number of arguments
-    (reduce (nullary #'max) nil)        ; => nil
-    (reduce (nullary #'max :empty) nil) ; => :empty
-    (reduce (nullary #'max) '(1 10 2))  ; => 10
-
-  
-
 ## Package `LOSH.GNUPLOT`
 
 Utilities for plotting data with gnuplot.
@@ -1054,7 +1022,7 @@ Plot `function` over [`start`, `end`) by `step` with gnuplot.
 
 ### `GNUPLOT-HISTOGRAM` (function)
 
-    (GNUPLOT-HISTOGRAM DATA &KEY (BIN-WIDTH 1))
+    (GNUPLOT-HISTOGRAM DATA &KEY (BIN-WIDTH 1) SPEW-OUTPUT)
 
 Plot `data` as a histogram with gnuplot.
 
@@ -1309,41 +1277,6 @@ Macroexpand the given iterate clause/driver.
 
   
 
-## Package `LOSH.LICENSING`
-
-Utilities related to open source licenses.
-
-### `PRINT-LICENSES` (function)
-
-    (PRINT-LICENSES QUICKLISP-PROJECT-DESIGNATOR)
-
-Print the licenses used by the given project and its dependencies.
-
-  Note that in order to do this the project must be `quickload`ed, so you might
-  want to do this in a separate Lisp image if you don't want to clutter your
-  current one.
-
-  If the project does not specify its license in its ASDF system definition it
-  will be listed as 'Unspecified'.  You should manually figure out what license
-  it uses (and maybe send a pull request).
-
-  Example:
-
-    (print-licenses 'fast-io)
-    =>
-    alexandria           | Public Domain / 0-clause MIT
-    babel                | MIT
-    cffi                 | MIT
-    cffi-grovel          | MIT
-    cffi-toolchain       | MIT
-    fast-io              | NewBSD
-    static-vectors       | MIT
-    trivial-features     | MIT
-    trivial-gray-streams | MIT
-    uiop                 | Unspecified
-
-  
-
 ## Package `LOSH.LISTS`
 
 Utilities for operating on lists.
@@ -1470,12 +1403,6 @@ Normalize `val` to a number between `0` and `1` (maybe).
   outside the 0/1 range.
 
   
-
-### `NOT=` (function)
-
-    (NOT= NUMBER &REST MORE-NUMBERS)
-
-Return `nil` if all arguments are numerically equal, `t` otherwise.
 
 ### `PRECISE-LERP` (function)
 
