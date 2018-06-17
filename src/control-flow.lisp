@@ -473,10 +473,14 @@
     ; 2 11
 
   "
-  (if (null ranges)
-    `(progn ,@body)
-    (destructuring-bind (var from below) (first ranges)
-      `(loop :for ,var :from ,from :below ,below
-             :do (do-range ,(rest ranges) ,@body)))))
+  (assert (not (null ranges)) ()
+    "Ranges to iterate in DO-RANGE must not be null.")
+  (recursively ((ranges ranges))
+    (if (null ranges)
+      `(progn ,@body)
+      (destructuring-bind (var from below) (first ranges)
+        `(loop
+           :for ,var :from ,from :below ,below
+           :do ,(recur (rest ranges)))))))
 
 
