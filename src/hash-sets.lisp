@@ -2,7 +2,7 @@
 
 (defstruct (hash-set (:constructor make-hash-set%)
                      (:copier nil))
-  (storage (error "Required") :type hash-table :read-only t))
+  (storage (error "Required") :type hash-table))
 
 (defmethod print-object ((hset hash-set) stream)
   (print-unreadable-object (hset stream :type t :identity t)
@@ -37,15 +37,15 @@
 (defmacro define-hset-op (name arglist &body body)
   (let* ((has-docstring (stringp (first body)))
          (docstring (if has-docstring
-                     (first body)
-                     ""))
+                      (first body)
+                      ""))
          (body (if has-docstring
                  (rest body)
                  body)))
     `(defun ,name ,arglist
-      ,docstring
-      (with-slots (storage) ,(first arglist)
-       ,@body))))
+       ,docstring
+       (symbol-macrolet ((storage (hash-set-storage ,(first arglist))))
+        ,@body))))
 
 
 (define-hset-op hset-empty-p (hset)
