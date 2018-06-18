@@ -74,6 +74,7 @@
                 :components ((:file "package")
                              (:file "base")
                              (:file "arrays")
+                             (:file "lists")
                              (:file "control-flow"))))
 
   :perform (asdf:test-op (op system)
