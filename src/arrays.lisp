@@ -1,7 +1,5 @@
 (in-package :losh.arrays)
 
-
-;;;; Arrays -------------------------------------------------------------------
 (declaim
   (ftype (function ((array * *) t)) fill-multidimensional-array)
   (ftype (function ((array t *) t)) fill-multidimensional-array-t)

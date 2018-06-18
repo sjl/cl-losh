@@ -73,6 +73,7 @@
                 :serial t
                 :components ((:file "package")
                              (:file "base")
+                             (:file "arrays")
                              (:file "control-flow"))))
 
   :perform (asdf:test-op (op system)
