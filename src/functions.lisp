@@ -1,4 +1,4 @@
-(in-package :losh.control-flow)
+(in-package :losh.functions)
 
 (defun juxt (&rest functions)
   "Return a function that will juxtapose the results of `functions`.

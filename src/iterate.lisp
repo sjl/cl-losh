@@ -656,7 +656,7 @@
 
 (defmacro-driver (FOR var IN-HASHSET hset)
   (let ((kwd (if generate 'generate 'for)))
-    `(,kwd (,var) :in-hashtable (hash-set-storage ,hset))))
+    `(,kwd (,var) :in-hashtable (losh.hash-sets::hash-set-storage ,hset))))
 
 (defmacro-driver (FOR var RECURSIVELY expr INITIALLY init)
   (let ((kwd (if generate 'generate 'for)))
