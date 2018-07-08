@@ -303,7 +303,7 @@
 
   This macro combines `if` and `let`.  It takes a list of bindings and binds
   them like `let` before executing the `then` branch of `body`, but if any
-  binding's value evaluate to `nil` the process stops there and the `else`
+  binding's value evaluates to `nil` the process stops there and the `else`
   branch is immediately executed (with no bindings in effect).
 
   If any `optional-declarations` are included they will only be in effect for
@@ -333,31 +333,16 @@
     NOPE
 
   "
-  ;; (if-let ((a 1)
-  ;;          (b 2))
-  ;;   (declare (type fixnum a b))
-  ;;   (+ a b)
-  ;;   'nope)
-  ;; =>
-  ;; (BLOCK #:OUTER632
-  ;;   (BLOCK #:INNER633
-  ;;     (LET ((A (OR 1 (RETURN-FROM #:INNER633)))
-  ;;           (B (OR 2 (RETURN-FROM #:INNER633))))
-  ;;       (DECLARE (TYPE FIXNUM A B))
-  ;;       (RETURN-FROM #:OUTER632 (+ A B))))
-  ;;   'NOPE)
   (with-gensyms (outer inner)
-    (loop
-      :with (body declarations) = (multiple-value-list (parse-body body))
-      :with (then else) = (destructuring-bind (then else) body (list then else))
-      :for (symbol value) :in bindings
-      :collect `(,symbol (or ,value (return-from ,inner))) :into let-bindings
-      :finally (return `(block ,outer
-                          (block ,inner
-                            (let ,let-bindings
-                              ,@declarations
-                              (return-from ,outer ,then)))
-                          ,else)))))
+    (multiple-value-bind (body declarations) (parse-body body)
+      (destructuring-bind (then else) body
+        `(block ,outer
+           (block ,inner
+             (let ,(loop :for (symbol value) :in bindings
+                         :collect `(,symbol (or ,value (return-from ,inner))))
+               ,@declarations
+               (return-from ,outer ,then)))
+           ,else)))))
 
 (defmacro if-let* (bindings &body body)
   "Bind `bindings` sequentially and execute `then` if all are true, or `else` otherwise.
@@ -396,31 +381,16 @@
     NOPE
 
   "
-  ;; (if-let* ((a 1)
-  ;;           (b 2))
-  ;;   (declare (type fixnum a b))
-  ;;   (+ a b)
-  ;;   'nope)
-  ;; =>
-  ;; (BLOCK #:OUTER640
-  ;;   (BLOCK #:INNER641
-  ;;     (LET* ((A (OR 1 (RETURN-FROM #:INNER641)))
-  ;;            (B (OR 2 (RETURN-FROM #:INNER641))))
-  ;;       (DECLARE (TYPE FIXNUM A B))
-  ;;       (RETURN-FROM #:OUTER640 (+ A B))))
-  ;;   'NOPE)
   (with-gensyms (outer inner)
-    (loop
-      :with (body declarations) = (multiple-value-list (parse-body body))
-      :with (then else) = (destructuring-bind (then else) body (list then else))
-      :for (symbol value) :in bindings
-      :collect `(,symbol (or ,value (return-from ,inner))) :into let-bindings
-      :finally (return `(block ,outer
-                          (block ,inner
-                            (let* ,let-bindings
-                              ,@declarations
-                              (return-from ,outer ,then)))
-                          ,else)))))
+    (multiple-value-bind (body declarations) (parse-body body)
+      (destructuring-bind (then else) body
+        `(block ,outer
+           (block ,inner
+             (let* ,(loop :for (symbol value) :in bindings
+                          :collect `(,symbol (or ,value (return-from ,inner))))
+               ,@declarations
+               (return-from ,outer ,then)))
+           ,else)))))
 
 
 (defmacro multiple-value-bind* (bindings &body body)

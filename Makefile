@@ -28,7 +28,8 @@ test-ccl:
 
 test-ecl:
 	$(heading_printer) roman 'ECL'
-	ecl --load test/run.lisp
+	# oh for fucks sake, use -- for longopts come on
+	ecl -load test/run.lisp
 
 test-abcl:
 	$(heading_printer) broadway 'ABCL'
