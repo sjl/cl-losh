@@ -5,7 +5,7 @@
           (remove nil args)))
 
 (defun gnuplot-args (&key
-                     (output :qt)
+                     (output :wxt)
                      (filename "plot.png")
                      (style :lines)
                      (size-x 1200)
@@ -39,6 +39,7 @@
       (ccase output
         ((:x :x11) (f "set terminal x11 persist"))
         (:qt (f "set terminal qt persist"))
+        (:wxt (f "set terminal wxt persist"))
         (:png
          (f "set terminal pngcairo dashed size ~D,~D font \"Lucida Grande,20\""
             size-x size-y)
@@ -136,7 +137,10 @@
     ,@args))
 
 
-(defun gnuplot-histogram (data &key (bin-width 1) spew-output)
+(defun gnuplot-histogram (data
+                          &rest args
+                          &key (bin-width 1)
+                          &allow-other-keys)
   "Plot `data` as a histogram with gnuplot.
 
   `bin-width` should be the desired width of the bins.  The bins will be
@@ -150,11 +154,11 @@
             <>)
     frequencies
     hash-table-alist
-    (gnuplot <>
-             :style :boxes
-             :spew-output spew-output
-             :min-y 0
-             :line-width 1
-             :box-width (* bin-width 1.0))))
+    (apply #'gnuplot <>
+           :style :boxes
+           :min-y 0
+           :line-width 1
+           :box-width (* bin-width 1.0)
+           args)))
 
 
