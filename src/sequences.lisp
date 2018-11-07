@@ -268,10 +268,24 @@
                               el)))))
 
 
-(defun-inlineable summation (sequence &key key)
+(defmacro doseq ((var sequence) &body body)
+  "Perform `body` with `var` bound to each element in `sequence` in turn.
+
+  It's like `cl:dolist`, but for all sequences.
+
+  "
+  `(map nil (lambda (,var) ,@body) ,sequence))
+
+
+(defun-inlineable summation (sequence &key key (initial-value 0) modulo)
   "Return the sum of all elements of `sequence`.
 
   If `key` is given, it will be called on each element to compute the addend.
+
+  If `initial-value` is given, it will be used instead of 0 to seed the addition.
+
+  If `modulo` is given the successive sums will be modulo'ed by it along the
+  way, which can prevent the need for bignums if you don't need the full result.
 
   This function's ugly name was chosen so it wouldn't clash with iterate's `sum`
   symbol.  Sorry.
@@ -288,22 +302,39 @@
     ; => 3
 
   "
-  (if key
-    (iterate (for n :in-whatever sequence)
-             (sum (funcall key n)))
-    (iterate (for n :in-whatever sequence)
-             (sum n))))
+  (let ((result initial-value))
+    (when modulo (modf result modulo))
+    (if modulo
+      (if key
+        (doseq (n sequence) (setf result (mod (+ result (funcall key n)) modulo)))
+        (doseq (n sequence) (setf result (mod (+ result n) modulo))))
+      (if key
+        (doseq (n sequence) (setf result (+ result (funcall key n))))
+        (doseq (n sequence) (setf result (+ result n)))))
+    result))
 
-(defun-inlineable product (sequence &key key)
+(defun-inlineable product (sequence &key key (initial-value 1) modulo)
   "Return the product of all elements of `sequence`.
 
   If `key` is given, it will be called on each element to compute the
   multiplicand.
 
+  If `initial-value` is given, it will be used instead of 1 to seed the
+  multiplication.
+
+  If `modulo` is given the successive products will be modulo'ed by it along the
+  way, which can prevent the need for bignums if you don't need the full result.
+
   Examples:
 
     (product #(1 2 3))
     ; => 6
+
+    (product #(1 2 3) :modulo 5)
+    ; => 1
+
+    (product #(1 2 3) :modulo 5 :initial-value 2)
+    ; => 2
 
     (product '(\"1\" \"2\" \"3\") :key #'parse-integer)
     ; => 6
@@ -312,19 +343,15 @@
     ; => 1
 
   "
-  (if key
-    (iterate (for n :in-whatever sequence)
-             (multiplying (funcall key n)))
-    (iterate (for n :in-whatever sequence)
-             (multiplying n))))
-
-
-(defmacro doseq ((var sequence) &body body)
-  "Perform `body` with `var` bound to each element in `sequence` in turn.
-
-  It's like `cl:dolist`, but for all sequences.
-
-  "
-  `(map nil (lambda (,var) ,@body) ,sequence))
+  (let ((result initial-value))
+    (when modulo (modf result modulo))
+    (if modulo
+      (if key
+        (doseq (n sequence) (setf result (mod (* result (funcall key n)) modulo)))
+        (doseq (n sequence) (setf result (mod (* result n) modulo))))
+      (if key
+        (doseq (n sequence) (setf result (* result (funcall key n))))
+        (doseq (n sequence) (setf result (* result n)))))
+    result))
 
 

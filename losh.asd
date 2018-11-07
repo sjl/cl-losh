@@ -46,7 +46,8 @@
                  (:file "random" :depends-on ("math"
                                               "chili-dogs"))
                  (:file "sequences" :depends-on ("chili-dogs"
-                                                 "hash-tables"))
+                                                 "hash-tables"
+                                                 "mutation"))
                  (:file "debugging" :depends-on ("control-flow"
                                                  "math"
                                                  "hash-tables"))

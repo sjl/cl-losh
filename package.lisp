@@ -254,7 +254,8 @@
   (:use :cl :iterate :losh.quickutils
     :losh.chili-dogs
     :losh.hash-tables
-    :losh.iterate-pre)
+    :losh.iterate-pre
+    :losh.mutation)
   (:documentation "Utilities for operating on sequences.")
   (:export
     :extrema
