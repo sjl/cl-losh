@@ -289,10 +289,8 @@
     :dis
     :gimme
     :hex
-    :pht
     :pr
-    :print-hash-table
-    :print-hash-table-concisely
+    :pretty-print-hash-table
     :print-table
     :prl
     :shut-up

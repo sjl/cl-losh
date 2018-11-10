@@ -138,58 +138,20 @@
   (values))
 
 
-(defun print-hash-table (hash-table &optional (stream t))
-  "Print a pretty representation of `hash-table` to `stream.`
+(defun pretty-print-hash-table (*standard-output* ht)
+  (pprint-logical-block
+      (*standard-output* (hash-table-contents ht) :prefix "{" :suffix "}")
+    (pprint-exit-if-list-exhausted)
+    (loop (destructuring-bind (k v) (pprint-pop)
+            (write k)
+            (write-string ": ")
+            (write v)
+            (pprint-exit-if-list-exhausted)
+            (write-string ", ")
+            (pprint-newline :linear)))))
 
-  Respects `*print-length*` when printing the elements.
 
-  "
-  (let* ((keys (hash-table-keys hash-table))
-         (vals (hash-table-values hash-table))
-         (count (hash-table-count hash-table))
-         (key-width (-<> keys
-                      (mapcar (compose #'length #'prin1-to-string) <>)
-                      (reduce #'max <> :initial-value 0)
-                      (clamp 0 20 <>))))
-    (print-unreadable-object (hash-table stream :type t)
-      (princ
-        ;; Something shits the bed and output gets jumbled (in SBCL at least) if
-        ;; we try to print to `stream` directly in the format statement inside
-        ;; `print-unreadable-object`, so instead we can just render to a string
-        ;; and `princ` that.
-        (format nil ":test ~A :count ~D {~%~{~{  ~vs ~s~}~%~}}"
-                (hash-table-test hash-table)
-                count
-                (loop
-                  :with limit = (or *print-length* 40)
-                  :for key :in keys
-                  :for val :in vals
-                  :for i :from 0 :to limit
-                  :collect
-                  (if (= i limit)
-                    (list key-width :too-many-items (list (- count i) :more))
-                    (list key-width key val))))
-        stream)))
-  (terpri stream)
-  (values))
-
-(defun pht (hash-table &optional (stream t))
-  "Synonym for `print-hash-table` for less typing at the REPL."
-  (print-hash-table hash-table stream))
-
-(defun print-hash-table-concisely (hash-table &optional (stream t))
-  "Print a concise representation of `hash-table` to `stream.`
-
-  Should respect `*print-length*` when printing the elements.
-
-  "
-  (print-unreadable-object (hash-table stream :type t)
-    (prin1 (hash-table-test hash-table))
-    (write-char #\space stream)
-    (prin1 (hash-table-contents hash-table) stream)))
-
-(defmethod print-object ((object hash-table) stream)
-  (print-hash-table-concisely object stream))
+(set-pprint-dispatch 'hash-table 'pretty-print-hash-table)
 
 
 #+sbcl
