@@ -91,15 +91,20 @@
 (defun-fmda single-float)
 
 
-(defun-inlineable bisect-left (predicate vector target)
-  "Bisect `vector` based on `(predicate el target)` and return the LEFT element.
+(defun-inlineable bisect-left (predicate vector target &key
+                               (key #'identity)
+                               (start 0)
+                               (end (length vector)))
+  "Bisect `vector` with `predicate` and return the LEFT element.
+
+  Only the subsequence of `vector` bounded by `start` and `end` is considered.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
 
   You can think of this function as partitioning the elements into two halves:
-  those that satisfy `(predicate el target)` and those that don't, and then
-  selecting the element on the LEFT side of the split:
+  those that satisfy `(predicate (funcall key element) target)` and those that
+  don't, and then selecting the element on the LEFT side of the split:
 
       satisfying  not statisfying
     #(..........  ...............)
@@ -112,40 +117,45 @@
 
   Examples:
 
-    ;                 index
-    ;              0 1 2 3 4 5          val  index
-    (bisect #'<  #(1 3 5 7 7 9) 5) ; =>   3, 1
-    (bisect #'<= #(1 3 5 7 7 9) 5) ; =>   5, 2
-    (bisect #'<= #(1 3 5 7 7 9) 7) ; =>   7, 4
-    (bisect #'<  #(1 3 5 7 7 9) 1) ; => nil, nil
-    (bisect #'>  #(9 8 8 8 1 0) 5) ; =>   8, 3
+    ;                     index
+    ;                  0 1 2 3 4 5                                val  index
+    (bisect-left '<  #(1 3 5 7 7 9) 5)                     ; =>     3, 1
+    (bisect-left '<= #(1 3 5 7 7 9) 5)                     ; =>     5, 2
+    (bisect-left '<= #(1 3 5 7 7 9) 7)                     ; =>     7, 4
+    (bisect-left '<  #(1 3 5 7 7 9) 1)                     ; =>   nil, nil
+    (bisect-left '>  #(9 8 8 8 1 0) 5)                     ; =>     8, 3
+    (bisect-left '<  #((1) (2 2) (3 3 3)) 2 :key #'length) ; =>   (1), 0
+    (bisect-left '<= #((1) (2 2) (3 3 3)) 2 :key #'length) ; => (2 2), 1
 
   "
-  (if (zerop (length vector))
+  (if (>= start end)
     (values nil nil)
     (iterate
-      (with bottom = 0)
-      (with top = (length vector))
-      (for index = (truncate (+ bottom top) 2))
+      (for index = (truncate (+ start end) 2))
       (for value = (aref vector index))
-      (for result = (funcall predicate value target))
-      (if (= bottom index)
+      (for result = (funcall predicate (funcall key value) target))
+      (if (= start index)
         (return (if result
                   (values value index)
                   (values nil nil)))
         (if result
-          (setf bottom index)
-          (setf top index))))))
+          (setf start index)
+          (setf end index))))))
 
-(defun-inlineable bisect-right (predicate vector target)
-  "Bisect `vector` based on `(predicate el target)` and return the RIGHT element.
+(defun-inlineable bisect-right (predicate vector target &key
+                                (key #'identity)
+                                (start 0)
+                                (end (length vector)))
+  "Bisect `vector` with `predicate` and return the RIGHT element.
+
+  Only the subsequence of `vector` bounded by `start` and `end` is considered.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
 
   You can think of this function as partitioning the elements into two halves:
-  those that satisfy `(predicate el target)` and those that don't, and then
-  selecting the element on the RIGHT side of the split:
+  those that satisfy `(predicate (funcall key element) target)` and those that
+  don't, and then selecting the element on the RIGHT side of the split:
 
       satisfying  not statisfying
     #(..........  ...............)
@@ -158,23 +168,25 @@
 
   Examples:
 
-    ;                 index
-    ;               0 1 2 3 4 5           val  index
-    (rbisect #'<  #(1 3 5 7 7 9) 5)  ; =>   5, 2
-    (rbisect #'<= #(1 3 5 7 7 9) 5)  ; =>   7, 3
-    (rbisect #'<= #(1 3 5 7 7 9) 7)  ; =>   9, 5
-    (rbisect #'<  #(1 3 5 7 7 9) 10) ; => nil, nil
-    (rbisect #'>  #(9 8 8 8 1 0) 5)  ; =>   1, 4
+    ;                       index
+    ;                   0 1 2 3 4 5                                  val  index
+    (bisect-right '<  #(1 3 5 7 7 9) 5)                     ; =>       5, 2
+    (bisect-right '<= #(1 3 5 7 7 9) 5)                     ; =>       7, 3
+    (bisect-right '<= #(1 3 5 7 7 9) 7)                     ; =>       9, 5
+    (bisect-right '<  #(1 3 5 7 7 9) 10)                    ; =>     nil, nil
+    (bisect-right '>  #(9 8 8 8 1 0) 5)                     ; =>       1, 4
+    (bisect-right '<  #((1) (2 2) (3 3 3)) 2 :key #'length) ; =>   (2 2), 1
+    (bisect-right '<= #((1) (2 2) (3 3 3)) 2 :key #'length) ; => (3 3 3), 2
 
   "
-  (if (zerop (length vector))
+  (if (>= start end)
     (values nil nil)
     (iterate
-      (with bottom = -1)
-      (with top = (1- (length vector)))
+      (with bottom = (1- start))
+      (with top = (1- end))
       (for index = (ceiling (+ bottom top) 2))
       (for value = (aref vector index))
-      (for result = (funcall predicate value target))
+      (for result = (funcall predicate (funcall key value) target))
       (if (= top index)
         (return (if result
                   (values nil nil)
