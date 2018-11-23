@@ -355,3 +355,18 @@
     result))
 
 
+(defun string-join (separator sequence)
+  "Join a `sequence` of objects into a string, separated by `separator`.
+
+  All objects in `sequence` (and `separator`) will be `princ-to-string`ed before
+  joining.
+
+  This is implemented simply, not efficiently, so consider implementing your own
+  if you're joining a lot of stuff.
+
+  "
+  (unless (stringp separator)
+    (callf separator #'princ-to-string))
+  (flet ((concat (current next)
+           (concatenate 'string current separator next)))
+    (reduce (nullary #'concat "") sequence :key #'princ-to-string)))

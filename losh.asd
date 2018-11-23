@@ -47,6 +47,7 @@
                                               "chili-dogs"))
                  (:file "sequences" :depends-on ("chili-dogs"
                                                  "hash-tables"
+                                                 "functions"
                                                  "mutation"))
                  (:file "debugging" :depends-on ("control-flow"
                                                  "math"

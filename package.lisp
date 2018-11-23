@@ -253,6 +253,7 @@
 (defpackage :losh.sequences
   (:use :cl :iterate :losh.quickutils
     :losh.chili-dogs
+    :losh.functions
     :losh.hash-tables
     :losh.iterate-pre
     :losh.mutation)
@@ -270,7 +271,8 @@
     :drop-while
     :summation
     :product
-    :doseq))
+    :doseq
+    :string-join))
 
 (defpackage :losh.debugging
   (:use :cl :iterate :losh.quickutils
