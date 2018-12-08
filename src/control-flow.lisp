@@ -453,4 +453,37 @@
            :for ,var :from ,from :below ,below
            :do ,(recur (rest ranges)))))))
 
+(defmacro do-irange (ranges &body body)
+  "Perform `body` on the given inclusive `ranges`.
+
+  Each range in `ranges` should be of the form `(variable from to)`.  During
+  iteration `body` will be executed with `variable` bound to successive values
+  in the range [`from`, `to`].
+
+  If multiple ranges are given they will be iterated in a nested fashion.
+
+  Example:
+
+    (do-irange ((x  0  2)
+                (y 10 11))
+      (pr x y))
+    ; =>
+    ; 0 10
+    ; 0 11
+    ; 1 10
+    ; 1 11
+    ; 2 10
+    ; 2 11
+
+  "
+  (assert (not (null ranges)) ()
+    "Ranges to iterate in DO-RANGE must not be null.")
+  (recursively ((ranges ranges))
+    (if (null ranges)
+      `(progn ,@body)
+      (destructuring-bind (var from to) (first ranges)
+        `(loop
+           :for ,var :from ,from :to ,to
+           :do ,(recur (rest ranges)))))))
+
 

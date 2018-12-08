@@ -188,7 +188,8 @@
     :when-let*
     :multiple-value-bind*
     :do-repeat
-    :do-range))
+    :do-range
+    :do-irange))
 
 
 (defpackage :losh.math
