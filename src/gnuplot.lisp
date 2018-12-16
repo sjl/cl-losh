@@ -126,17 +126,6 @@
     (apply #'gnuplot data args)))
 
 
-(defmacro gnuplot-expr (expr &rest args)
-  "Plot `expr` (an expression involving `x`) with gnuplot.
-
-  See the docstring of `gnuplot-args` for other keyword arguments.
-
-  "
-  `(gnuplot-function (lambda (x) ,expr)
-    :line-title ',expr
-    ,@args))
-
-
 (defun gnuplot-histogram (data
                           &rest args
                           &key (bin-width 1)

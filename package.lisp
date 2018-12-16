@@ -311,10 +311,8 @@
   (:export
     :gnuplot
     :gnuplot-args
-    :gnuplot-expr
     :gnuplot-function
-    :gnuplot-histogram
-    :x))
+    :gnuplot-histogram))
 
 (defpackage :losh.iterate
   (:use :cl :iterate :losh.quickutils
