@@ -192,12 +192,12 @@
   (dump-profile filename))
 
 #+sbcl
-(defmacro profile (&body body)
-  "Profile `body` and dump the report to `lisp.prof`."
+(defmacro profile (form &key (mode :cpu))
+  "Profile `form` and dump the report to `lisp.prof`."
   `(progn
-     (start-profiling)
+     (start-profiling :mode ,mode)
      (unwind-protect
-         (time (progn ,@body))
+         (time ,form)
        (stop-profiling))))
 
 
