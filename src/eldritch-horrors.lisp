@@ -49,7 +49,7 @@
   (destructuring-bind (type &key (conc-name (symb type '-)))
       (ensure-list type-and-options)
     (let* ((accessors (loop :for slot :in slots
-                            :collect (symb conc-name slot)))
+                            :collect (if conc-name (symb conc-name slot) slot)))
            (symbol-args (loop :for slot :in slots
                               :collect (symb slot '-symbol)))
            (macro-name (symb 'with- type))

@@ -50,7 +50,7 @@
 (define-modify-macro remainderf (divisor) rem
   "Remainder `place` by `divisor` in-place.")
 
-(define-modify-macro clampf (from to) clamp
+(define-modify-macro clampf (from to) losh.math:clamp
   "Clamp `place` between `from` and `to` in-place.")
 
 (define-modify-macro negatef () -

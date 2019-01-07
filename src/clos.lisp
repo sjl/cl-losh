@@ -5,7 +5,9 @@
                             (type nil type?)
                             (documentation nil documentation?)
                             (initform nil initform?)
-                            (accessor (symb conc-name name))
+                            (accessor (if conc-name
+                                        (symb conc-name name)
+                                        name))
                             (initarg (ensure-keyword name)))
       (ensure-list slot-spec)
     `(,name
