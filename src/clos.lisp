@@ -5,6 +5,7 @@
                             (type nil type?)
                             (documentation nil documentation?)
                             (initform nil initform?)
+                            (allocation nil allocation?)
                             (accessor (if conc-name
                                         (symb conc-name name)
                                         name))
@@ -14,6 +15,7 @@
       :initarg ,initarg
       :accessor ,accessor
       ,@(when initform? `(:initform ,initform))
+      ,@(when allocation? `(:allocation ,allocation))
       ,@(when type? `(:type ,type))
       ,@(when documentation? `(:documentation ,documentation)))))
 
