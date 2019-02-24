@@ -665,3 +665,29 @@
        (,kwd ,var = ,expr))))
 
 
+(defmacro-driver (FOR var SEED seed THEN then)
+  "Bind `var` to `seed` initially, then to `then` on every iteration.
+
+  This differs from `(FOR … FIRST … THEN …)` and `(FOR … INITIALLY … THEN …)`
+  because `then` is evaluated on every iteration, *including* the first.
+
+  Example:
+
+    (iterate
+      (repeat 3)
+      (for x :first     0 :then (1+ x))
+      (for y :initially 0 :then (1+ y))
+      (for z :seed      0 :then (1+ z))
+      (collect (list x y z)))
+    ; =>
+    ((0 0 1)
+     (1 1 2)
+     (2 2 3))
+
+  "
+  (let ((kwd (if generate 'generate 'for)))
+    `(progn
+       (,kwd ,var :next ,then)
+       (initially (setf ,var ,seed)))))
+
+

@@ -351,6 +351,8 @@
     :test
     :timing
     :within-radius
+    :seed
+    :then
 
     ))
 
