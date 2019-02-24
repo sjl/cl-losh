@@ -1,5 +1,11 @@
 (in-package :losh.io)
 
+(defun read-all (stream)
+  "Read all forms from `stream` and return them as a fresh list."
+  (iterate
+    (for v :in-stream stream)
+    (collect v)))
+
 (defun read-all-from-string (string)
   "Read all forms from `string` and return them as a fresh list."
   (iterate
@@ -14,10 +20,4 @@
 (defun read-all-from-file (path)
   "Read all forms from the file at `path` and return them as a fresh list."
   (with-open-file (file path :direction :input)
-    (iterate
-      (with done = (gensym))
-      (for form = (read file nil done))
-      (while (not (eq form done)))
-      (collect form))))
-
-
+    (read-all file)))

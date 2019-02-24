@@ -82,6 +82,7 @@
   (:use :cl :iterate :losh.quickutils)
   (:documentation "Utilities for input/output/reading/etc.")
   (:export
+    :read-all
     :read-all-from-file
     :read-all-from-string))
 
