@@ -596,6 +596,28 @@
          (with ,hash-table = (make-hash-table :test ,test))
          (setf (gethash ,key ,hash-table) ,value)))))
 
+(defmacro-clause (COLLECT-SET element &optional
+                  INTO var
+                  TEST (test '#'eql))
+  "Collect elements into a hash set at `var`.
+
+  If `var` is omitted the hash set will be returned instead.
+
+  `test` specifies the test used for the hash set.
+
+  Example:
+
+    (iterate (for y :in '(a b a))
+             (collect-set y))
+    ; => {a b}
+
+  "
+  (let ((hash-set (or var iterate::*result-var*)))
+    `(progn
+       (with ,hash-set = (make-hash-set :test ,test))
+       (hset-insert! ,hash-set ,element))))
+
+
 (defmacro-clause (ORING expr &optional INTO var)
   (let ((result (or var iterate::*result-var*)))
     `(reducing ,expr :by #'or :into ,result :initial-value nil)))

@@ -54,7 +54,9 @@
                                                  "hash-tables"))
 
                  (:file "iterate" :depends-on ("control-flow"
-                                               "sequences"))
+                                               "sequences"
+                                               "iterate-pre"
+                                               "hash-sets"))
                  (:file "gnuplot" :depends-on ("control-flow"
                                                "debugging"
                                                "sequences"))
