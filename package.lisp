@@ -82,6 +82,7 @@
   (:use :cl :iterate :losh.quickutils)
   (:documentation "Utilities for input/output/reading/etc.")
   (:export
+    :read-all
     :read-all-from-file
     :read-all-from-string))
 
@@ -317,6 +318,7 @@
 (defpackage :losh.iterate
   (:use :cl :iterate :losh.quickutils
     :losh.iterate-pre
+    :losh.hash-sets
     :losh.control-flow ;; always needed because we need a single RECURSIVELY symbol
     :losh.sequences)
   (:documentation "Custom `iterate` drivers and clauses.")
@@ -326,6 +328,7 @@
     :anding
     :averaging
     :collect-hash
+    :collect-set
     :cycling
     :every-nth
     :for-nested
@@ -350,6 +353,8 @@
     :test
     :timing
     :within-radius
+    :seed
+    :then
 
     ))
 

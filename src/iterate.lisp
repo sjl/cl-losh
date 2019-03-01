@@ -596,6 +596,28 @@
          (with ,hash-table = (make-hash-table :test ,test))
          (setf (gethash ,key ,hash-table) ,value)))))
 
+(defmacro-clause (COLLECT-SET element &optional
+                  INTO var
+                  TEST (test '#'eql))
+  "Collect elements into a hash set at `var`.
+
+  If `var` is omitted the hash set will be returned instead.
+
+  `test` specifies the test used for the hash set.
+
+  Example:
+
+    (iterate (for y :in '(a b a))
+             (collect-set y))
+    ; => {a b}
+
+  "
+  (let ((hash-set (or var iterate::*result-var*)))
+    `(progn
+       (with ,hash-set = (make-hash-set :test ,test))
+       (hset-insert! ,hash-set ,element))))
+
+
 (defmacro-clause (ORING expr &optional INTO var)
   (let ((result (or var iterate::*result-var*)))
     `(reducing ,expr :by #'or :into ,result :initial-value nil)))
@@ -663,5 +685,31 @@
     `(progn
        (initially (setf ,var ,init))
        (,kwd ,var = ,expr))))
+
+
+(defmacro-driver (FOR var SEED seed THEN then)
+  "Bind `var` to `seed` initially, then to `then` on every iteration.
+
+  This differs from `(FOR … FIRST … THEN …)` and `(FOR … INITIALLY … THEN …)`
+  because `then` is evaluated on every iteration, *including* the first.
+
+  Example:
+
+    (iterate
+      (repeat 3)
+      (for x :first     0 :then (1+ x))
+      (for y :initially 0 :then (1+ y))
+      (for z :seed      0 :then (1+ z))
+      (collect (list x y z)))
+    ; =>
+    ((0 0 1)
+     (1 1 2)
+     (2 2 3))
+
+  "
+  (let ((kwd (if generate 'generate 'for)))
+    `(progn
+       (,kwd ,var :next ,then)
+       (initially (setf ,var ,seed)))))
 
 
