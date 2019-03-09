@@ -1055,10 +1055,11 @@ Plot `data` to `filename` with gnuplot.
 
 ### `GNUPLOT-ARGS` (function)
 
-    (GNUPLOT-ARGS &KEY (OUTPUT :WXT) (FILENAME plot.png) (STYLE :LINES) (SIZE-X 1200) (SIZE-Y 800)
+    (GNUPLOT-ARGS &KEY (OUTPUT :QT) (FILENAME plot.png) (STYLE :LINES) (SIZE-X 1200) (SIZE-Y 800)
                   (LABEL-X) (LABEL-Y) (LINE-TITLE 'DATA) (LINE-WIDTH 4) (SMOOTH NIL) (AXIS-X NIL)
                   (AXIS-Y NIL) (MIN-X NIL) (MAX-X NIL) (MIN-Y NIL) (MAX-Y NIL) (TICS-X NIL)
-                  (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL) (BOX-WIDTH NIL) &ALLOW-OTHER-KEYS)
+                  (TICS-Y NIL) (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL) (BOX-WIDTH NIL)
+                  &ALLOW-OTHER-KEYS)
 
 Return the formatted command line arguments for the given gnuplot arguments.
 
@@ -1072,7 +1073,7 @@ Return the formatted command line arguments for the given gnuplot arguments.
     (GNUPLOT-FUNCTION FUNCTION &REST ARGS &KEY (START 0.0) (END 1.0) (STEP 0.1) (INCLUDE-END NIL)
                       &ALLOW-OTHER-KEYS)
 
-Plot `function` over [`start`, `end`) by `step` with gnuplot.
+Plot `function` over `[start, end)` by `step` with gnuplot.
 
   If `include-end` is `t` the `end` value will also be plotted.
 
