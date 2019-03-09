@@ -5,7 +5,7 @@
           (remove nil args)))
 
 (defun gnuplot-args (&key
-                     (output :wxt)
+                     (output :qt)
                      (filename "plot.png")
                      (style :lines)
                      (size-x 1200)
@@ -22,6 +22,7 @@
                      (min-y nil)
                      (max-y nil)
                      (tics-x nil)
+                     (tics-y nil)
                      (graph-title)
                      (logscale-x nil)
                      (logscale-y nil)
@@ -33,12 +34,28 @@
   the list of possible gnuplot arguments all in one place.
 
   "
+  (check-type axis-x boolean)
+  (check-type axis-y boolean)
+  (check-type logscale-x boolean)
+  (check-type logscale-y boolean)
+  (check-type line-width (or integer float))
+  (check-type box-width (or null integer float))
+  (check-type min-x (or null integer float))
+  (check-type min-y (or null integer float))
+  (check-type max-x (or null integer float))
+  (check-type max-y (or null integer float))
+  (check-type tics-x (or null integer float))
+  (check-type tics-y (or null integer float))
+  (check-type graph-title (or null string))
+  (check-type label-x (or null string))
+  (check-type label-y (or null string))
+  (check-type smooth (member nil :unique :frequency :csplines :acsplines :bezier :sbezier))
   (flet ((esc (string) (remove #\' (aesthetic-string string)))
          (f (&rest args) (apply #'format nil (substitute "" nil args))))
     (gnuplot-args%
       (ccase output
         ((:x :x11) (f "set terminal x11 persist"))
-        (:qt (f "set terminal qt persist"))
+        (:qt (f "set terminal qt"))
         (:wxt (f "set terminal wxt persist"))
         (:png
          (f "set terminal pngcairo dashed size ~D,~D font \"Lucida Grande,20\""
@@ -47,8 +64,9 @@
       (f "set border linewidth 1")
       (f "set style line 10 dashtype 2 linewidth 3 linecolor \"#666666\"")
       (when axis-x (f "set xzeroaxis linestyle 10"))
-      (when tics-x (f "set xtics ~A" tics-x))
       (when axis-y (f "set yzeroaxis linestyle 10"))
+      (when tics-x (f "set xtics ~A" tics-x))
+      (when tics-y (f "set ytics ~A" tics-y))
       (when box-width (f "set boxwidth ~A" box-width))
       (when graph-title (f "set title '~A'" (esc graph-title)))
       (when label-x (f "set xlabel '~A'" (esc label-x)))
@@ -59,12 +77,11 @@
       (f "set yrange [~A:~A]" min-y max-y)
       (f "plot '-' using 1:2 title '~A' with ~(~A~) linewidth ~D ~A"
          (esc line-title) style line-width
-         (when smooth (f "smooth ~(~A~)" smooth))))))
+         (when smooth (f "smooth ~(~A~)" smooth)))
+      (f "pause mouse close"))))
 
 
-(defun gnuplot (data
-                &rest args
-                &key
+(defun gnuplot (data &rest args &key
                 (x #'car)
                 (y #'cdr)
                 (spew-output nil)
@@ -83,16 +100,14 @@
   See the docstring of `gnuplot-args` for other keyword arguments.
 
   "
-  (uiop/package:symbol-call :ql :quickload 'external-program :silent t)
-  (let* ((process (uiop/package:symbol-call
-                    :external-program :start
-                    "gnuplot"
-                    (apply #'gnuplot-args args)
-                    :input :stream
-                    :output (if spew-output *standard-output* nil)))
-         (in (uiop/package:symbol-call
-               :external-program :process-input-stream
-               process)))
+  (funcall (read-from-string "ql:quickload") 'external-program :silent t)
+  (let* ((process (funcall (read-from-string "external-program:start")
+                           "gnuplot"
+                           (apply #'gnuplot-args args)
+                           :input :stream
+                           :output (if spew-output *standard-output* nil)))
+         (in (funcall (read-from-string "external-program:process-input-stream")
+                      process)))
     (unwind-protect
         (progn
           (iterate (for item :in-whatever data)
@@ -101,15 +116,13 @@
       (close in))
     process))
 
-(defun gnuplot-function (function
-                         &rest args
-                         &key
+(defun gnuplot-function (function &rest args &key
                          (start 0.0)
                          (end 1.0)
                          (step 0.1)
                          (include-end nil)
                          &allow-other-keys)
-  "Plot `function` over [`start`, `end`) by `step` with gnuplot.
+  "Plot `function` over `[start, end)` by `step` with gnuplot.
 
   If `include-end` is `t` the `end` value will also be plotted.
 
@@ -126,9 +139,8 @@
     (apply #'gnuplot data args)))
 
 
-(defun gnuplot-histogram (data
-                          &rest args
-                          &key (bin-width 1)
+(defun gnuplot-histogram (data &rest args &key
+                          (bin-width 1)
                           &allow-other-keys)
   "Plot `data` as a histogram with gnuplot.
 
