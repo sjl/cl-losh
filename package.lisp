@@ -331,6 +331,7 @@
     :collect-set
     :cycling
     :every-nth
+    :finding-all
     :for-nested
     :in-array
     :in-hashset
@@ -348,13 +349,13 @@
     :real-time
     :recursively
     :run-time
+    :seed
     :since-start-into
     :skip-origin
     :test
+    :then
     :timing
     :within-radius
-    :seed
-    :then
 
     ))
 

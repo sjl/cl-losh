@@ -249,7 +249,6 @@
                                   (elt ,source ,i))))))))
 
 
-
 (defclause-sequence ACROSS-FLAT-ARRAY INDEX-OF-FLAT-ARRAY
   :access-fn 'row-major-aref
   :size-fn 'array-total-size
@@ -713,3 +712,98 @@
        (initially (setf ,var ,seed)))))
 
 
+(defmacro-clause (FINDING-ALL expr MINIMIZING m-expr &optional INTO var)
+  "Collect all `expr`s minimizing `m-expr` into a list at `var`.
+
+  The partial list at `var` is available for inspection at any point in the loop.
+
+  If `m-expr` is a sharp-quoted function, then it is called on `expr` instead of
+  being evaluated and compared itself.
+
+  "
+  ;; TODO: result-type
+  (alexandria:with-gensyms (min value m-value tail)
+    (let ((result (or var iterate::*result-var*)))
+      `(progn
+         (with ,result = '())
+         (with ,tail = nil)
+         (with ,min = nil)
+         ,(typecase m-expr
+            ((cons (eql function) (cons t null))
+             `(progn
+                (for ,value = ,expr)
+                (for ,m-value = (funcall ,m-expr ,value))
+                (cond
+                  ((or (null ,min)
+                       (< ,m-value ,min)) (setf ,result (list ,value)
+                                                ,tail ,result
+                                                ,min ,m-value))
+                  ((= ,m-value ,min) (setf (cdr ,tail) (cons ,value nil)
+                                           ,tail (cdr ,tail))))))
+            (t `(progn
+                  (for ,m-value = ,m-expr)
+                  (cond
+                    ((or (null ,min)
+                         (< ,m-value ,min)) (setf ,result (list ,expr)
+                                                  ,tail ,result
+                                                  ,min ,m-value))
+                    ((= ,m-value ,min) (setf (cdr ,tail) (cons ,expr nil)
+                                             ,tail (cdr ,tail)))))))))))
+
+(defmacro-clause (FINDING-ALL expr MAXIMIZING m-expr &optional INTO var)
+  "Collect all `expr`s maximizing `m-expr` into a list at `var`.
+
+  The partial list at `var` is available for inspection at any point in the loop.
+
+  If `m-expr` is a sharp-quoted function, then it is called on `expr` instead of
+  being evaluated and compared itself.
+
+  "
+  ;; TODO: result-type
+  (alexandria:with-gensyms (max value m-value tail)
+    (let ((result (or var iterate::*result-var*)))
+      `(progn
+         (with ,result = '())
+         (with ,tail = nil)
+         (with ,max = nil)
+         ,(typecase m-expr
+            ((cons (eql function) (cons t null))
+             `(progn
+                (for ,value = ,expr)
+                (for ,m-value = (funcall ,m-expr ,value))
+                (cond
+                  ((or (null ,max)
+                       (> ,m-value ,max)) (setf ,result (list ,value)
+                                                ,tail ,result
+                                                ,max ,m-value))
+                  ((= ,m-value ,max) (setf (cdr ,tail) (cons ,value nil)
+                                           ,tail (cdr ,tail))))))
+            (t `(progn
+                  (for ,m-value = ,m-expr)
+                  (cond
+                    ((or (null ,max)
+                         (> ,m-value ,max)) (setf ,result (list ,expr)
+                                                  ,tail ,result
+                                                  ,max ,m-value))
+                    ((= ,m-value ,max) (setf (cdr ,tail) (cons ,expr nil)
+                                             ,tail (cdr ,tail)))))))))))
+
+(defmacro-clause (FINDING-ALL expr SUCH-THAT test &optional INTO var RESULT-TYPE result-type)
+  "Collect all `expr`s for which `test` is true.
+
+  If `test` is a sharp-quoted function, then it is called on `expr` instead of
+  being evaluated and compared itself.
+
+  "
+  (let ((result (or var iterate::*result-var*)))
+    (typecase test
+      ((cons (eql function) (cons t null))
+       (alexandria:with-gensyms (value)
+         `(progn
+            (for ,value = ,expr)
+            (when (funcall ,test ,value)
+              (collect ,value :into ,result
+                       ,@(when result-type `(:result-type ,result-type)))))))
+      (t `(when ,test
+            (collect ,expr :into ,result
+                     ,@(when result-type `(:result-type ,result-type))))))))
