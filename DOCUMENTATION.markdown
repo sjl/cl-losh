@@ -24,16 +24,18 @@ Utilities related to arrays.
 
 ### `BISECT-LEFT` (function)
 
-    (BISECT-LEFT PREDICATE VECTOR TARGET)
+    (BISECT-LEFT PREDICATE VECTOR TARGET &KEY (KEY #'IDENTITY) (START 0) (END (LENGTH VECTOR)))
 
-Bisect `vector` based on `(predicate el target)` and return the LEFT element.
+Bisect `vector` with `predicate` and return the LEFT element.
+
+  Only the subsequence of `vector` bounded by `start` and `end` is considered.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
 
   You can think of this function as partitioning the elements into two halves:
-  those that satisfy `(predicate el target)` and those that don't, and then
-  selecting the element on the LEFT side of the split:
+  those that satisfy `(predicate (funcall key element) target)` and those that
+  don't, and then selecting the element on the LEFT side of the split:
 
       satisfying  not statisfying
     #(..........  ...............)
@@ -46,28 +48,32 @@ Bisect `vector` based on `(predicate el target)` and return the LEFT element.
 
   Examples:
 
-    ;                 index
-    ;              0 1 2 3 4 5          val  index
-    (bisect #'<  #(1 3 5 7 7 9) 5) ; =>   3, 1
-    (bisect #'<= #(1 3 5 7 7 9) 5) ; =>   5, 2
-    (bisect #'<= #(1 3 5 7 7 9) 7) ; =>   7, 4
-    (bisect #'<  #(1 3 5 7 7 9) 1) ; => nil, nil
-    (bisect #'>  #(9 8 8 8 1 0) 5) ; =>   8, 3
+    ;                     index
+    ;                  0 1 2 3 4 5                                val  index
+    (bisect-left '<  #(1 3 5 7 7 9) 5)                     ; =>     3, 1
+    (bisect-left '<= #(1 3 5 7 7 9) 5)                     ; =>     5, 2
+    (bisect-left '<= #(1 3 5 7 7 9) 7)                     ; =>     7, 4
+    (bisect-left '<  #(1 3 5 7 7 9) 1)                     ; =>   nil, nil
+    (bisect-left '>  #(9 8 8 8 1 0) 5)                     ; =>     8, 3
+    (bisect-left '<  #((1) (2 2) (3 3 3)) 2 :key #'length) ; =>   (1), 0
+    (bisect-left '<= #((1) (2 2) (3 3 3)) 2 :key #'length) ; => (2 2), 1
 
   
 
 ### `BISECT-RIGHT` (function)
 
-    (BISECT-RIGHT PREDICATE VECTOR TARGET)
+    (BISECT-RIGHT PREDICATE VECTOR TARGET &KEY (KEY #'IDENTITY) (START 0) (END (LENGTH VECTOR)))
 
-Bisect `vector` based on `(predicate el target)` and return the RIGHT element.
+Bisect `vector` with `predicate` and return the RIGHT element.
+
+  Only the subsequence of `vector` bounded by `start` and `end` is considered.
 
   `vector` must be sorted (with `predicate`) before this function is called
   (this is not checked).
 
   You can think of this function as partitioning the elements into two halves:
-  those that satisfy `(predicate el target)` and those that don't, and then
-  selecting the element on the RIGHT side of the split:
+  those that satisfy `(predicate (funcall key element) target)` and those that
+  don't, and then selecting the element on the RIGHT side of the split:
 
       satisfying  not statisfying
     #(..........  ...............)
@@ -80,13 +86,15 @@ Bisect `vector` based on `(predicate el target)` and return the RIGHT element.
 
   Examples:
 
-    ;                 index
-    ;               0 1 2 3 4 5           val  index
-    (rbisect #'<  #(1 3 5 7 7 9) 5)  ; =>   5, 2
-    (rbisect #'<= #(1 3 5 7 7 9) 5)  ; =>   7, 3
-    (rbisect #'<= #(1 3 5 7 7 9) 7)  ; =>   9, 5
-    (rbisect #'<  #(1 3 5 7 7 9) 10) ; => nil, nil
-    (rbisect #'>  #(9 8 8 8 1 0) 5)  ; =>   1, 4
+    ;                       index
+    ;                   0 1 2 3 4 5                                  val  index
+    (bisect-right '<  #(1 3 5 7 7 9) 5)                     ; =>       5, 2
+    (bisect-right '<= #(1 3 5 7 7 9) 5)                     ; =>       7, 3
+    (bisect-right '<= #(1 3 5 7 7 9) 7)                     ; =>       9, 5
+    (bisect-right '<  #(1 3 5 7 7 9) 10)                    ; =>     nil, nil
+    (bisect-right '>  #(9 8 8 8 1 0) 5)                     ; =>       1, 4
+    (bisect-right '<  #((1) (2 2) (3 3 3)) 2 :key #'length) ; =>   (2 2), 1
+    (bisect-right '<= #((1) (2 2) (3 3 3)) 2 :key #'length) ; => (3 3 3), 2
 
   
 
@@ -313,6 +321,35 @@ Utilities for managing control flow.
 
 Thread the given forms, with `<>` as a placeholder.
 
+### `DO-IRANGE` (macro)
+
+    (DO-IRANGE RANGES
+      &BODY
+      BODY)
+
+Perform `body` on the given inclusive `ranges`.
+
+  Each range in `ranges` should be of the form `(variable from to)`.  During
+  iteration `body` will be executed with `variable` bound to successive values
+  in the range [`from`, `to`].
+
+  If multiple ranges are given they will be iterated in a nested fashion.
+
+  Example:
+
+    (do-irange ((x  0  2)
+                (y 10 11))
+      (pr x y))
+    ; =>
+    ; 0 10
+    ; 0 11
+    ; 1 10
+    ; 1 11
+    ; 2 10
+    ; 2 11
+
+  
+
 ### `DO-RANGE` (macro)
 
     (DO-RANGE RANGES
@@ -463,7 +500,7 @@ Bind `bindings` in parallel and execute `then` if all are true, or `else` otherw
 
   This macro combines `if` and `let`.  It takes a list of bindings and binds
   them like `let` before executing the `then` branch of `body`, but if any
-  binding's value evaluate to `nil` the process stops there and the `else`
+  binding's value evaluates to `nil` the process stops there and the `else`
   branch is immediately executed (with no bindings in effect).
 
   If any `optional-declarations` are included they will only be in effect for
@@ -779,12 +816,6 @@ Print the `thing` to `stream` with numbers in base 16.
 
   
 
-### `PHT` (function)
-
-    (PHT HASH-TABLE &OPTIONAL (STREAM T))
-
-Synonym for `print-hash-table` for less typing at the REPL.
-
 ### `PR` (function)
 
     (PR &REST ARGS)
@@ -798,25 +829,9 @@ Print `args` readably, separated by spaces and followed by a newline.
 
   
 
-### `PRINT-HASH-TABLE` (function)
+### `PRETTY-PRINT-HASH-TABLE` (function)
 
-    (PRINT-HASH-TABLE HASH-TABLE &OPTIONAL (STREAM T))
-
-Print a pretty representation of `hash-table` to `stream.`
-
-  Respects `*print-length*` when printing the elements.
-
-  
-
-### `PRINT-HASH-TABLE-CONCISELY` (function)
-
-    (PRINT-HASH-TABLE-CONCISELY HASH-TABLE &OPTIONAL (STREAM T))
-
-Print a concise representation of `hash-table` to `stream.`
-
-  Should respect `*print-length*` when printing the elements.
-
-  
+    (PRETTY-PRINT-HASH-TABLE *STANDARD-OUTPUT* HT)
 
 ### `PRINT-TABLE` (function)
 
@@ -957,14 +972,71 @@ Just evaluate `body` all the time, jesus christ lisp.
 
 Utilities for working with higher-order functions.
 
+### `FIXED-POINT` (function)
+
+    (FIXED-POINT FUNCTION DATA &KEY (TEST 'EQL) (LIMIT NIL))
+
+Find a fixed point of `function`, starting with `data`.
+
+  Successive runs of `function` will be compared with `test`.  Once `test`
+  returns true the last result will be returned.
+
+  `limit` can be an integer to limit the maximum number of iterations performed.
+
+  A second value is also returned: `t` if a fixed point was found or `nil` if
+  the iteration limit was reached.
+
+  
+
+### `JUXT` (function)
+
+    (JUXT &REST FUNCTIONS)
+
+Return a function that will juxtapose the results of `functions`.
+
+  This is like Clojure's `juxt`.  Given functions `(f0 f1 ... fn)`, this will
+  return a new function which, when called with some arguments, will return
+  `(list (f0 ...args...) (f1 ...args...) ... (fn ...args...))`.
+
+  Example:
+
+    (funcall (juxt #'list #'+ #'- #'*) 1 2)
+    => ((1 2) 3 -1 2)
+
+  
+
+### `NULLARY` (function)
+
+    (NULLARY FUNCTION &OPTIONAL RESULT)
+
+Return a new function that acts as a nullary-patched version of `function`.
+
+  The new function will return `result` when called with zero arguments, and
+  delegate to `function` otherwise.
+
+  Examples:
+
+    (max 1 10 2) ; => 10
+    (max)        ; => invalid number of arguments
+
+    (funcall (nullary #'max))          ; => nil
+    (funcall (nullary #'max 0))        ; => 0
+    (funcall (nullary #'max 0) 1 10 2) ; => 10
+
+    (reduce #'max nil)                  ; => invalid number of arguments
+    (reduce (nullary #'max) nil)        ; => nil
+    (reduce (nullary #'max :empty) nil) ; => :empty
+    (reduce (nullary #'max) '(1 10 2))  ; => 10
+
+  
+
 ## Package `LOSH.GNUPLOT`
 
 Utilities for plotting data with gnuplot.
 
 ### `GNUPLOT` (function)
 
-    (GNUPLOT DATA &REST ARGS &KEY (X #'CAR) (Y #'CDR) (SPEW-OUTPUT NIL)
-             &ALLOW-OTHER-KEYS)
+    (GNUPLOT DATA &REST ARGS &KEY (X #'CAR) (Y #'CDR) (SPEW-OUTPUT NIL) &ALLOW-OTHER-KEYS)
 
 Plot `data` to `filename` with gnuplot.
 
@@ -983,12 +1055,11 @@ Plot `data` to `filename` with gnuplot.
 
 ### `GNUPLOT-ARGS` (function)
 
-    (GNUPLOT-ARGS &KEY (OUTPUT :QT) (FILENAME plot.png) (STYLE :LINES)
-                  (SIZE-X 1200) (SIZE-Y 800) (LABEL-X) (LABEL-Y)
-                  (LINE-TITLE 'DATA) (LINE-WIDTH 4) (SMOOTH NIL) (AXIS-X NIL)
-                  (AXIS-Y NIL) (MIN-X NIL) (MAX-X NIL) (MIN-Y NIL) (MAX-Y NIL)
-                  (TICS-X NIL) (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL)
-                  (BOX-WIDTH NIL) &ALLOW-OTHER-KEYS)
+    (GNUPLOT-ARGS &KEY (OUTPUT :QT) (FILENAME plot.png) (STYLE :LINES) (SIZE-X 1200) (SIZE-Y 800)
+                  (LABEL-X) (LABEL-Y) (LINE-TITLE 'DATA) (LINE-WIDTH 4) (SMOOTH NIL) (AXIS-X NIL)
+                  (AXIS-Y NIL) (MIN-X NIL) (MAX-X NIL) (MIN-Y NIL) (MAX-Y NIL) (TICS-X NIL)
+                  (TICS-Y NIL) (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL) (BOX-WIDTH NIL)
+                  &ALLOW-OTHER-KEYS)
 
 Return the formatted command line arguments for the given gnuplot arguments.
 
@@ -997,22 +1068,12 @@ Return the formatted command line arguments for the given gnuplot arguments.
 
   
 
-### `GNUPLOT-EXPR` (macro)
-
-    (GNUPLOT-EXPR EXPR &REST ARGS)
-
-Plot `expr` (an expression involving `x`) with gnuplot.
-
-  See the docstring of `gnuplot-args` for other keyword arguments.
-
-  
-
 ### `GNUPLOT-FUNCTION` (function)
 
-    (GNUPLOT-FUNCTION FUNCTION &REST ARGS &KEY (START 0.0) (END 1.0) (STEP 0.1)
-                      (INCLUDE-END NIL) &ALLOW-OTHER-KEYS)
+    (GNUPLOT-FUNCTION FUNCTION &REST ARGS &KEY (START 0.0) (END 1.0) (STEP 0.1) (INCLUDE-END NIL)
+                      &ALLOW-OTHER-KEYS)
 
-Plot `function` over [`start`, `end`) by `step` with gnuplot.
+Plot `function` over `[start, end)` by `step` with gnuplot.
 
   If `include-end` is `t` the `end` value will also be plotted.
 
@@ -1022,7 +1083,7 @@ Plot `function` over [`start`, `end`) by `step` with gnuplot.
 
 ### `GNUPLOT-HISTOGRAM` (function)
 
-    (GNUPLOT-HISTOGRAM DATA &KEY (BIN-WIDTH 1) SPEW-OUTPUT)
+    (GNUPLOT-HISTOGRAM DATA &REST ARGS &KEY (BIN-WIDTH 1) &ALLOW-OTHER-KEYS)
 
 Plot `data` as a histogram with gnuplot.
 
@@ -1243,6 +1304,12 @@ Replace each value in `hash-table` with the result of calling `function` on it.
 ## Package `LOSH.IO`
 
 Utilities for input/output/reading/etc.
+
+### `READ-ALL` (function)
+
+    (READ-ALL STREAM)
+
+Read all forms from `stream` and return them as a fresh list.
 
 ### `READ-ALL-FROM-FILE` (function)
 
@@ -1675,8 +1742,7 @@ Return a random float from a gaussian distribution.  NOT THREAD-SAFE (yet)!
 
 ### `RANDOM-GAUSSIAN-INTEGER` (function)
 
-    (RANDOM-GAUSSIAN-INTEGER MEAN STANDARD-DEVIATION &OPTIONAL
-                             (GENERATOR #'RANDOM))
+    (RANDOM-GAUSSIAN-INTEGER MEAN STANDARD-DEVIATION &OPTIONAL (GENERATOR #'RANDOM))
 
 Return a random integer from a gaussian distribution.  NOT THREAD-SAFE (yet)!
 
@@ -1863,17 +1929,29 @@ Return a list of the prefix sums of the numbers in `sequence`.
 
 ### `PRODUCT` (function)
 
-    (PRODUCT SEQUENCE &KEY KEY)
+    (PRODUCT SEQUENCE &KEY KEY (INITIAL-VALUE 1) MODULO)
 
 Return the product of all elements of `sequence`.
 
   If `key` is given, it will be called on each element to compute the
   multiplicand.
 
+  If `initial-value` is given, it will be used instead of 1 to seed the
+  multiplication.
+
+  If `modulo` is given the successive products will be modulo'ed by it along the
+  way, which can prevent the need for bignums if you don't need the full result.
+
   Examples:
 
     (product #(1 2 3))
     ; => 6
+
+    (product #(1 2 3) :modulo 5)
+    ; => 1
+
+    (product #(1 2 3) :modulo 5 :initial-value 2)
+    ; => 2
 
     (product '("1" "2" "3") :key #'parse-integer)
     ; => 6
@@ -1906,13 +1984,32 @@ Return a hash table containing the proportions of the items in `sequence`.
 
   
 
+### `STRING-JOIN` (function)
+
+    (STRING-JOIN SEPARATOR SEQUENCE)
+
+Join a `sequence` of objects into a string, separated by `separator`.
+
+  All objects in `sequence` (and `separator`) will be `princ-to-string`ed before
+  joining.
+
+  This is implemented simply, not efficiently, so consider implementing your own
+  if you're joining a lot of stuff.
+
+  
+
 ### `SUMMATION` (function)
 
-    (SUMMATION SEQUENCE &KEY KEY)
+    (SUMMATION SEQUENCE &KEY KEY (INITIAL-VALUE 0) MODULO)
 
 Return the sum of all elements of `sequence`.
 
   If `key` is given, it will be called on each element to compute the addend.
+
+  If `initial-value` is given, it will be used instead of 0 to seed the addition.
+
+  If `modulo` is given the successive sums will be modulo'ed by it along the
+  way, which can prevent the need for bignums if you don't need the full result.
 
   This function's ugly name was chosen so it wouldn't clash with iterate's `sum`
   symbol.  Sorry.
