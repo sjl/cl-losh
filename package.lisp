@@ -232,7 +232,13 @@
   (:documentation "Utilities for operating on hash tables.")
   (:export
     :hash-table-contents
-    :mutate-hash-values))
+    :mutate-hash-values
+    :remhash-if
+    :remhash-if-not
+    :remhash-if-key
+    :remhash-if-not-key
+    :remhash-if-value
+    :remhash-if-not-value))
 
 
 (defpackage :losh.random
