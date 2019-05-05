@@ -32,7 +32,12 @@
 
   "
   `(prog1
-    (progn ,@(mapcar (lambda (arg) `(pr ',arg ,arg)) args))
+    (progn ,@(mapcar (lambda (arg)
+                       (with-gensyms (a)
+                         `(let ((,a ,arg))
+                            (pr ',arg ,a)
+                            ,a)))
+                     args))
     (terpri)
     (finish-output)))
 

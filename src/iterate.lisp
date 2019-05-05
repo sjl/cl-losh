@@ -722,7 +722,7 @@
 
   "
   ;; TODO: result-type
-  (alexandria:with-gensyms (min value m-value tail)
+  (with-gensyms (min value m-value tail)
     (let ((result (or var iterate::*result-var*)))
       `(progn
          (with ,result = '())
@@ -760,7 +760,7 @@
 
   "
   ;; TODO: result-type
-  (alexandria:with-gensyms (max value m-value tail)
+  (with-gensyms (max value m-value tail)
     (let ((result (or var iterate::*result-var*)))
       `(progn
          (with ,result = '())
@@ -798,7 +798,7 @@
   (let ((result (or var iterate::*result-var*)))
     (typecase test
       ((cons (eql function) (cons t null))
-       (alexandria:with-gensyms (value)
+       (with-gensyms (value)
          `(progn
             (for ,value = ,expr)
             (when (funcall ,test ,value)

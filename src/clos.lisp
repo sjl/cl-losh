@@ -26,7 +26,7 @@
   automatically be filled in with sane values if they aren't given.
 
   "
-  (destructuring-bind (name &key (conc-name (symb name '-)))
+  (destructuring-bind (name &key conc-name)
       (ensure-list name-and-options)
     `(defclass ,name ,direct-superclasses
        ,(mapcar (curry #'build-slot-definition conc-name) slots)
