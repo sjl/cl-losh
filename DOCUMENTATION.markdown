@@ -877,11 +877,9 @@ Print `args` labeled and readably.
 
 ### `PROFILE` (macro)
 
-    (PROFILE
-      &BODY
-      BODY)
+    (PROFILE FORM &KEY (MODE :CPU))
 
-Profile `body` and dump the report to `lisp.prof`.
+Profile `form` and dump the report to `lisp.prof`.
 
 ### `SHUT-UP` (macro)
 
@@ -1301,6 +1299,54 @@ Replace each value in `hash-table` with the result of calling `function` on it.
 
   
 
+### `REMHASH-IF` (function)
+
+    (REMHASH-IF TEST HASH-TABLE)
+
+Remove elements which satisfy `(test key value)` from `hash-table`.
+
+  Returns the hash table.
+
+### `REMHASH-IF-KEY` (function)
+
+    (REMHASH-IF-KEY TEST HASH-TABLE)
+
+Remove elements which satisfy `(test key)` from `hash-table`.
+
+  Returns the hash table.
+
+### `REMHASH-IF-NOT` (function)
+
+    (REMHASH-IF-NOT TEST HASH-TABLE)
+
+Remove elements which don't satisfy `(test key value)` from `hash-table`.
+
+  Returns the hash table.
+
+### `REMHASH-IF-NOT-KEY` (function)
+
+    (REMHASH-IF-NOT-KEY TEST HASH-TABLE)
+
+Remove elements which satisfy don't `(test key)` from `hash-table`.
+
+  Returns the hash table.
+
+### `REMHASH-IF-NOT-VALUE` (function)
+
+    (REMHASH-IF-NOT-VALUE TEST HASH-TABLE)
+
+Remove elements which satisfy don't `(test value)` from `hash-table`.
+
+  Returns the hash table.
+
+### `REMHASH-IF-VALUE` (function)
+
+    (REMHASH-IF-VALUE TEST HASH-TABLE)
+
+Remove elements which satisfy `(test value)` from `hash-table`.
+
+  Returns the hash table.
+
 ## Package `LOSH.IO`
 
 Utilities for input/output/reading/etc.
@@ -1676,19 +1722,11 @@ Slots: `CONTENTS`, `LAST`, `SIZE`
 
 Enqueue each element of `list` in `queue` and return the queue's final size.
 
-### `QUEUE-CONTENTS` (function)
-
-    (QUEUE-CONTENTS VALUE INSTANCE)
-
 ### `QUEUE-EMPTY-P` (function)
 
     (QUEUE-EMPTY-P QUEUE)
 
 Return whether `queue` is empty.
-
-### `QUEUE-SIZE` (function)
-
-    (QUEUE-SIZE VALUE INSTANCE)
 
 ## Package `LOSH.RANDOM`
 
@@ -2088,17 +2126,9 @@ Make a weightlist of the given items and weights.
 
 Slots: `WEIGHTS`, `SUMS`, `ITEMS`, `TOTAL`
 
-### `WEIGHTLIST-ITEMS` (function)
-
-    (WEIGHTLIST-ITEMS VALUE INSTANCE)
-
 ### `WEIGHTLIST-RANDOM` (function)
 
     (WEIGHTLIST-RANDOM WEIGHTLIST)
 
 Return a random item from the weightlist, taking the weights into account.
-
-### `WEIGHTLIST-WEIGHTS` (function)
-
-    (WEIGHTLIST-WEIGHTS VALUE INSTANCE)
 

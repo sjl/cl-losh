@@ -46,7 +46,7 @@
     (10 20 555 999)
 
   "
-  (destructuring-bind (type &key (conc-name (symb type '-)))
+  (destructuring-bind (type &key conc-name)
       (ensure-list type-and-options)
     (let* ((accessors (loop :for slot :in slots
                             :collect (if conc-name (symb conc-name slot) slot)))
