@@ -107,11 +107,6 @@
     :notf
     :callf))
 
-(defpackage :losh.iterate-pre
-  (:use :cl :iterate :losh.quickutils)
-  (:export
-    :in-whatever))
-
 
 (defpackage :losh.arrays
   (:use :cl :iterate :losh.quickutils
@@ -241,6 +236,49 @@
     :remhash-if-value
     :remhash-if-not-value))
 
+(defpackage :losh.iterate
+  (:use :cl :iterate :losh.quickutils
+    :losh.hash-sets
+    :losh.control-flow) ;; always needed because we need a single RECURSIVELY symbol 
+  (:documentation "Custom `iterate` drivers and clauses.")
+  (:export
+
+    :across-flat-array
+    :anding
+    :averaging
+    :collect-frequencies
+    :collect-hash
+    :collect-set
+    :cycling
+    :every-nth
+    :finding-all
+    :for-nested
+    :in-array
+    :in-hashset
+    :in-lists
+    :in-sequences
+    :in-whatever
+    :index-of-flat-array
+    :initially
+    :into
+    :macroexpand-iterate
+    :modulo
+    :oring
+    :pairs-of-list
+    :per-iteration-into
+    :real-time
+    :recursively
+    :run-time
+    :seed
+    :since-start-into
+    :skip-origin
+    :test
+    :then
+    :timing
+    :within-radius
+
+    ))
+
 
 (defpackage :losh.random
   (:use :cl :iterate :losh.quickutils
@@ -263,7 +301,7 @@
     :losh.chili-dogs
     :losh.functions
     :losh.hash-tables
-    :losh.iterate-pre
+    :losh.iterate
     :losh.mutation)
   (:documentation "Utilities for operating on sequences.")
   (:export
@@ -320,50 +358,6 @@
     :gnuplot-args
     :gnuplot-function
     :gnuplot-histogram))
-
-(defpackage :losh.iterate
-  (:use :cl :iterate :losh.quickutils
-    :losh.iterate-pre
-    :losh.hash-sets
-    :losh.control-flow ;; always needed because we need a single RECURSIVELY symbol
-    :losh.sequences)
-  (:documentation "Custom `iterate` drivers and clauses.")
-  (:export
-
-    :across-flat-array
-    :anding
-    :averaging
-    :collect-hash
-    :collect-set
-    :cycling
-    :every-nth
-    :finding-all
-    :for-nested
-    :in-array
-    :in-hashset
-    :in-lists
-    :in-sequences
-    :in-whatever
-    :index-of-flat-array
-    :initially
-    :into
-    :macroexpand-iterate
-    :modulo
-    :oring
-    :pairs-of-list
-    :per-iteration-into
-    :real-time
-    :recursively
-    :run-time
-    :seed
-    :since-start-into
-    :skip-origin
-    :test
-    :then
-    :timing
-    :within-radius
-
-    ))
 
 (defpackage :losh.weightlists
   (:use :cl :iterate :losh.quickutils

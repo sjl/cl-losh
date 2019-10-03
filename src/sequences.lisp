@@ -35,11 +35,8 @@
         bar 1}
 
   "
-  (iterate
-    (with result = (make-hash-table :test test))
-    (for i :in-whatever sequence)
-    (incf (gethash i result 0))
-    (finally (return result))))
+  (iterate (for i :in-whatever sequence)
+           (collect-frequencies i)))
 
 (defun proportions (sequence &key (test 'eql) (float t))
   "Return a hash table containing the proportions of the items in `sequence`.

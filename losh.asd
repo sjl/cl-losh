@@ -22,45 +22,51 @@
    (:module "src"
     :components (
 
+                 ;; 0 ---------------------------------------------------------
                  (:file "chili-dogs")
                  (:file "clos")
                  (:file "eldritch-horrors")
                  (:file "functions")
                  (:file "hash-sets")
                  (:file "io")
-                 (:file "iterate-pre")
                  (:file "lists")
                  (:file "mutation")
 
+                 ;; 1 ---------------------------------------------------------
                  (:file "arrays" :depends-on ("chili-dogs"))
                  (:file "bits" :depends-on ("chili-dogs"))
                  (:file "queues" :depends-on ("chili-dogs"))
                  (:file "priority-queues" :depends-on ("mutation"))
 
+                 ;; 2 ---------------------------------------------------------
                  (:file "control-flow" :depends-on ("queues"))
 
+                 ;; 3 ---------------------------------------------------------
+                 (:file "iterate" :depends-on ("control-flow"
+                                               "hash-sets"))
                  (:file "math" :depends-on ("control-flow"
                                             "chili-dogs"))
                  (:file "hash-tables" :depends-on ("control-flow"))
 
+
+                 ;; 4 ---------------------------------------------------------
                  (:file "random" :depends-on ("math"
                                               "chili-dogs"))
                  (:file "sequences" :depends-on ("chili-dogs"
                                                  "hash-tables"
                                                  "functions"
+                                                 "iterate"
                                                  "mutation"))
                  (:file "debugging" :depends-on ("control-flow"
                                                  "math"
                                                  "hash-tables"))
 
-                 (:file "iterate" :depends-on ("control-flow"
-                                               "sequences"
-                                               "iterate-pre"
-                                               "hash-sets"))
+                 ;; 5 ---------------------------------------------------------
+                 (:file "weightlists" :depends-on ("sequences"))
                  (:file "gnuplot" :depends-on ("control-flow"
+                                               "iterate"
                                                "debugging"
                                                "sequences"))
-                 (:file "weightlists" :depends-on ("sequences"))
 
                  ))))
 

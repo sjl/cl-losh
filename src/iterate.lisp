@@ -13,6 +13,29 @@
     :with-index iterate::with-index))
 
 
+(defmacro-driver (FOR var IN-WHATEVER seq)
+  "Iterate over items in the given sequence.
+
+  Unlike iterate's own `in-sequence` this won't use the horrifyingly inefficient
+  `elt`/`length` functions on a list.
+
+  "
+  (let ((kwd (if generate 'generate 'for)))
+    (with-gensyms (is-list source i len)
+      `(progn
+        (with ,source = ,seq)
+        (with ,is-list = (typep ,source 'list))
+        (with ,len = (if ,is-list -1 (length ,source)))
+        (for ,i :from 0)
+        (,kwd ,var next (if ,is-list
+                          (if ,source
+                            (pop ,source)
+                            (terminate))
+                          (if (< ,i ,len)
+                            (elt ,source ,i)
+                            (terminate))))))))
+
+
 (defmacro-driver (FOR var MODULO divisor &sequence)
   "Iterate numerically with `var` bound modulo `divisor`.
 
@@ -616,6 +639,30 @@
        (with ,hash-set = (make-hash-set :test ,test))
        (hset-insert! ,hash-set ,element))))
 
+(defmacro-clause (COLLECT-FREQUENCIES expr &optional
+                  INTO var
+                  TEST (test '#'eql))
+  "Collect frequencies of `expr` values into a hash table at `var`.
+
+  If `var` is omitted the hash table will be returned instead.
+
+  `test` specifies the test used for the hash table.
+
+  Example:
+
+    (iterate (for x :in '(b a n a n a s))
+             (collect-frequencies x))
+    ; => {b 1
+    ;     a 3
+    ;     n 2
+    ;     s 1}
+
+  "
+  (let ((hash-table (or var iterate::*result-var*)))
+    `(progn
+       (with ,hash-table = (make-hash-table :test ,test))
+       (incf (gethash ,expr ,hash-table 0)))))
+
 
 (defmacro-clause (ORING expr &optional INTO var)
   (let ((result (or var iterate::*result-var*)))
@@ -634,7 +681,8 @@
 
 (defun keywordize-some-of-clause (clause)
   ; please kill me
-  (append (take 2 clause) (keywordize-clause (nthcdr 2 clause))))
+  (append (list (first clause) (second clause))
+          (keywordize-clause (nthcdr 2 clause))))
 
 (defun macroexpand-iterate (clause)
   "Macroexpand the given iterate clause/driver.
