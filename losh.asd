@@ -10,8 +10,8 @@
   :in-order-to ((asdf:test-op (asdf:test-op :losh/test)))
 
   :depends-on (:iterate
-               #+sbcl :sb-sprof
-               )
+               :uiop
+               #+sbcl :sb-sprof)
 
   :serial t
   :components
@@ -31,6 +31,7 @@
                  (:file "io")
                  (:file "lists")
                  (:file "mutation")
+                 (:file "shell")
 
                  ;; 1 ---------------------------------------------------------
                  (:file "arrays" :depends-on ("chili-dogs"))

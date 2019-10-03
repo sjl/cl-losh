@@ -17,7 +17,6 @@
              :collect `(:export ,@(external-symbols parent-package)))))
 
 
-
 (defpackage :losh.chili-dogs
   (:use :cl :iterate :losh.quickutils)
   (:documentation "Gotta go FAST.")
@@ -106,6 +105,14 @@
     :negatef
     :notf
     :callf))
+
+(defpackage :losh.shell
+  (:use :cl :iterate :losh.quickutils)
+  (:documentation "Utilities for interacting with external programs.")
+  (:export
+    :sh
+    :pbcopy
+    :pbpaste))
 
 
 (defpackage :losh.arrays
@@ -395,6 +402,7 @@
    :losh.queues
    :losh.random
    :losh.sequences
+   :losh.shell
    :losh.weightlists
 
    )

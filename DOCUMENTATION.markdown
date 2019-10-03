@@ -2105,6 +2105,43 @@ Take elements from `seq` as long as `predicate` remains true.
 
   
 
+## Package `LOSH.SHELL`
+
+Utilities for interacting with external programs.
+
+### `PBCOPY` (function)
+
+    (PBCOPY OBJECT)
+
+`pbcopy` the `aesthetic-string` of `object`.
+
+### `PBPASTE` (function)
+
+    (PBPASTE)
+
+`pbpaste` the current clipboard as a string.
+
+### `SH` (function)
+
+    (SH COMMAND &KEY INPUT OUTPUT (WAIT T))
+
+Run `command`, piping `input` to it, optionally returning its output.
+
+  `command` must be either a string (the program), or a list of the program and
+  its arguments.
+
+  `wait` must be a boolean.  If true, this function will block until the command
+  completes.  If false, it will return immediately and allow the program to run
+  asynchronously.
+
+  `input` must be a character input stream, a string, or `nil`.  If non-`nil`
+  its contents will be sent to the program as its standard input.
+
+  `output` must be one of `:string`, `:stream`, or `nil`.  `:string` cannot be
+  used if `:wait` is `nil`.
+
+  
+
 ## Package `LOSH.WEIGHTLISTS`
 
 A simple data structure for choosing random items with weighted probabilities.

@@ -23,6 +23,7 @@
         "LOSH.QUEUES"
         "LOSH.RANDOM"
         "LOSH.SEQUENCES"
+        "LOSH.SHELL"
         "LOSH.WEIGHTLISTS"
 
         ))
