@@ -1888,7 +1888,7 @@ Return an alist of `(n . element)` for each element of `sequence`.
 
 ### `EXTREMA` (function)
 
-    (EXTREMA PREDICATE SEQUENCE)
+    (EXTREMA PREDICATE SEQUENCE &KEY (KEY #'IDENTITY))
 
 Return the smallest and largest elements of `sequence` according to `predicate`.
 
@@ -2123,7 +2123,7 @@ Utilities for interacting with external programs.
 
 ### `SH` (function)
 
-    (SH COMMAND &KEY INPUT OUTPUT (WAIT T))
+    (SH COMMAND &KEY INPUT (WAIT T) (RESULT-TYPE 'NULL))
 
 Run `command`, piping `input` to it, optionally returning its output.
 
@@ -2137,8 +2137,15 @@ Run `command`, piping `input` to it, optionally returning its output.
   `input` must be a character input stream, a string, or `nil`.  If non-`nil`
   its contents will be sent to the program as its standard input.
 
-  `output` must be one of `:string`, `:stream`, or `nil`.  `:string` cannot be
-  used if `:wait` is `nil`.
+  `result-type` must be one of:
+
+  * `null`: output will be sent to `/dev/null` and `nil` returned.
+  * `stream`: output will be returned as a character stream.
+  * `string`: all output will be gathered up and returned as a single string.
+  * `list`: all output will be gathered up and returned as a list of lines.
+
+  If `wait` is `nil`, the only acceptable values for `result-type` are `null`
+  and `stream`.
 
   
 
