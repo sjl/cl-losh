@@ -223,7 +223,7 @@
     (sequence (drop-while-seq predicate seq))))
 
 
-(defun extrema (predicate sequence)
+(defun extrema (predicate sequence &key (key #'identity))
   "Return the smallest and largest elements of `sequence` according to `predicate`.
 
   `predicate` should be a strict ordering predicate (e.g. `<`).
@@ -232,12 +232,16 @@
   respectively.
 
   "
-  (iterate (with min = (elt sequence 0))
-           (with max = (elt sequence 0))
-           (for el :in-whatever sequence)
-           (when (funcall predicate el min) (setf min el))
-           (when (funcall predicate max el) (setf max el))
-           (finally (return (values min max)))))
+  (iterate
+    (with min = (elt sequence 0))
+    (with min-val = (funcall key min))
+    (with max = (elt sequence 0))
+    (with max-val = (funcall key max))
+    (for el :in-whatever sequence)
+    (for val = (funcall key el))
+    (when (funcall predicate val min-val) (setf min el min-val val))
+    (when (funcall predicate max-val val) (setf max el max-val val))
+    (finally (return (values min max)))))
 
 
 (defun enumerate (sequence &key (start 0) (step 1) key)
