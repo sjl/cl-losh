@@ -10,7 +10,7 @@
   :in-order-to ((asdf:test-op (asdf:test-op :losh/test)))
 
   :depends-on (:iterate
-               :uiop
+               :external-program
                #+sbcl :sb-sprof)
 
   :serial t
