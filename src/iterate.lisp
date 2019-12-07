@@ -727,12 +727,6 @@
   (let ((kwd (if generate 'generate 'for)))
     `(,kwd (,var) :in-hashtable (losh.hash-sets::hash-set-storage ,hset))))
 
-(defmacro-driver (FOR var RECURSIVELY expr INITIALLY init)
-  (let ((kwd (if generate 'generate 'for)))
-    `(progn
-       (initially (setf ,var ,init))
-       (,kwd ,var = ,expr))))
-
 
 (defmacro-driver (FOR var SEED seed THEN then)
   "Bind `var` to `seed` initially, then to `then` on every iteration.
@@ -760,6 +754,10 @@
        (initially (setf ,var ,seed)))))
 
 
+(deftype sharp-quoted-function ()
+  '(cons (eql function)
+         (cons t null)))
+
 (defmacro-clause (FINDING-ALL expr MINIMIZING m-expr &optional INTO var)
   "Collect all `expr`s minimizing `m-expr` into a list at `var`.
 
@@ -777,7 +775,7 @@
          (with ,tail = nil)
          (with ,min = nil)
          ,(typecase m-expr
-            ((cons (eql function) (cons t null))
+            (sharp-quoted-function
              `(progn
                 (for ,value = ,expr)
                 (for ,m-value = (funcall ,m-expr ,value))
@@ -815,7 +813,7 @@
          (with ,tail = nil)
          (with ,max = nil)
          ,(typecase m-expr
-            ((cons (eql function) (cons t null))
+            (sharp-quoted-function
              `(progn
                 (for ,value = ,expr)
                 (for ,m-value = (funcall ,m-expr ,value))
@@ -845,13 +843,133 @@
   "
   (let ((result (or var iterate::*result-var*)))
     (typecase test
-      ((cons (eql function) (cons t null))
-       (with-gensyms (value)
-         `(progn
-            (for ,value = ,expr)
-            (when (funcall ,test ,value)
-              (collect ,value :into ,result
-                       ,@(when result-type `(:result-type ,result-type)))))))
+      (sharp-quoted-function
+        (with-gensyms (value)
+          `(progn
+             (for ,value = ,expr)
+             (when (funcall ,test ,value)
+               (collect ,value :into ,result
+                        ,@(when result-type `(:result-type ,result-type)))))))
       (t `(when ,test
             (collect ,expr :into ,result
                      ,@(when result-type `(:result-type ,result-type))))))))
+
+(defmacro-clause (FINDING-FIRST expr SUCH-THAT test &optional INTO var)
+  "Collect the first `expr`s for which `test` is true.
+
+  Unlike vanilla `finding`, does not block further iteration.
+
+  If `test` is a sharp-quoted function, then it is called on `expr` instead of
+  being evaluated and compared itself.
+
+  "
+  (with-gensyms (value found)
+    (let ((result (or var iterate::*result-var*)))
+      `(progn
+         (with ,found)
+         ,@(when var (list `(with ,var)))
+         ,(typecase test
+            (sharp-quoted-function
+              `(unless ,found
+                 (for ,value = ,expr)
+                 (when (funcall ,test ,value)
+                   (setf ,found t ,result ,value))))
+            (t `(unless ,found
+                  (when ,test
+                    (setf ,found t ,result ,expr)))))))))
+
+
+(defmacro returning (&rest values)
+  "Return `values` from the iterate clause.
+
+  Equivalent to `(finally (return (values ...)))`.
+
+  "
+  `(finally (return (values ,@values))))
+
+(defmacro-driver (FOR var-or-vars MATCHING regex AGAINST string &optional OVERLAP overlap? START start END end)
+  "Iterate over the matches of `regex` in `string`, binding `vars`.
+
+  `regex` must be a suitable argument for passing to `ppcre:create-scanner`.
+  Note that `ppcre:create-scanner` accepts already-created scanners and returns
+  them unchanged, so you can provide an existing scanner if you wish.
+
+  `var-or-vars` will be bound to the successive matches.  If it is a symbol, it
+  will be bound to the entire match.  If it is a list of variables, they will be
+  bound to the register groups as if by `ppcre:register-groups-bind`.
+
+  If `overlap?` is true, after finding a match, the next match will be searched
+  for from the next character, instead of skipping past the entire previous
+  match.
+
+  `generate` is supported.
+
+  Examples:
+
+    (iterate (for word :matching \"\\\\w+\" :against \"foo bar baz\")
+             (collect word))
+    ; =>
+    (\"foo\" \"bar\" \"baz\")
+
+    (iterate (for x :matching \"\\\\w\\\\w\" :against \"abcde\")
+             (collect x))
+    ; =>
+    (\"ab\" \"cd\")
+
+    (iterate (for x :matching \"\\\\w\\\\w\" :against \"abcde\" :overlap t)
+             (collect x))
+    ; =>
+    (\"ab\" \"bc\" \"cd\" \"de\")
+
+    (iterate (for ((#'string-upcase name) (#'parse-integer year month day))
+                  :matching \"(\\\\w+)? (\\\\d+)-(\\\\d+)-(\\\\d+)\"
+                  :against \"foo 2019-12-06 / 2010-11-14\")
+             (collect (list name year month day)))
+    ; =>
+    ((\"FOO\" 2019 12 6) (NIL 2010 11 14))
+
+    (iterate (for x :matching (ppcre:create-scanner \"foo+\" :case-insensitive-mode t)
+                    :against \"FOOOOD\")
+             (collect x))
+    ; =>
+    (\"FOOOO\")
+
+  "
+  (let* ((kwd (if generate 'generate 'for))
+         (single (symbolp var-or-vars))
+         (var (if single var-or-vars nil))
+         (vars (unless single
+                 (iterate
+                   (for spec :in var-or-vars)
+                   (etypecase spec
+                     (cons (destructuring-bind (function &rest vars) spec
+                             (appending (mapcar (curry #'cons function) vars))))
+                     (symbol (appending (list `(nil . ,spec)))))))))
+    (with-gensyms (scanner% pos% start% end% string% reg-start% reg-end% limit%)
+      `(progn
+         (with ,pos% = ,(or start 0))
+         (with ,string% = ,string)
+         (with ,limit% = ,(or end `(length ,string%)))
+         (with ,scanner% = (ppcre:create-scanner ,regex))
+         (,kwd ,(if single
+                  var
+                  `(values ,@(mapcar #'cdr vars)))
+          :next
+          (multiple-value-bind (,start% ,end% ,@(unless single `(,reg-start% ,reg-end%)))
+              (ppcre:scan ,scanner% ,string% :start ,pos% :end ,limit%)
+            (if (null ,start%)
+              (terminate)
+              (progn (setf ,pos% ,(if overlap? `(1+ ,start%) end%))
+                     ,(if single
+                        `(subseq ,string% ,start% ,end%)
+                        `(values
+                           ,@(iterate
+                               (for i :from 0)
+                               (for (function . nil) :in vars)
+                               (collect
+                                 `(when (aref ,reg-start% ,i)
+                                    (,@(if function `(funcall ,function) `(progn))
+                                     (subseq ,string%
+                                             (aref ,reg-start% ,i)
+                                             (aref ,reg-end% ,i))))))))))))))))
+

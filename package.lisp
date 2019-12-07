@@ -245,8 +245,7 @@
 
 (defpackage :losh.iterate
   (:use :cl :iterate :losh.quickutils
-    :losh.hash-sets
-    :losh.control-flow) ;; always needed because we need a single RECURSIVELY symbol 
+    :losh.hash-sets)
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
 
@@ -259,6 +258,7 @@
     :cycling
     :every-nth
     :finding-all
+    :finding-first
     :for-nested
     :in-array
     :in-hashset
@@ -274,7 +274,6 @@
     :pairs-of-list
     :per-iteration-into
     :real-time
-    :recursively
     :run-time
     :seed
     :since-start-into
@@ -283,6 +282,12 @@
     :then
     :timing
     :within-radius
+    :returning
+    :matching
+    :against
+    :overlap
+    :start
+    :end
 
     ))
 
