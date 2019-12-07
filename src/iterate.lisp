@@ -855,9 +855,9 @@
                      ,@(when result-type `(:result-type ,result-type))))))))
 
 (defmacro-clause (FINDING-FIRST expr SUCH-THAT test &optional INTO var)
-  "Collect the first `expr`s for which `test` is true.
+  "Collect the first `expr` for which `test` is true.
 
-  Unlike vanilla `finding`, does not block further iteration.
+  Unlike vanilla `finding`, it does not block further iteration.
 
   If `test` is a sharp-quoted function, then it is called on `expr` instead of
   being evaluated and compared itself.
@@ -888,7 +888,7 @@
   `(finally (return (values ,@values))))
 
 (defmacro-driver (FOR var-or-vars MATCHING regex AGAINST string &optional OVERLAP overlap? START start END end)
-  "Iterate over the matches of `regex` in `string`, binding `vars`.
+  "Iterate over the matches of `regex` in `string`, binding `var-or-vars`.
 
   `regex` must be a suitable argument for passing to `ppcre:create-scanner`.
   Note that `ppcre:create-scanner` accepts already-created scanners and returns
