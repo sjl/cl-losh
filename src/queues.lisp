@@ -10,7 +10,7 @@
 
 
 (declaim
-  (ftype (function ()
+  (ftype (function (&key (:initial-contents list))
                    (values queue &optional))
          make-queue)
   (ftype (function (queue)
@@ -27,9 +27,12 @@
          queue-append))
 
 
-(defun-inlineable make-queue ()
+(defun-inlineable make-queue (&key initial-contents)
   "Allocate and return a fresh queue."
-  (make-queue%))
+  (let ((queue (make-queue%)))
+    (when initial-contents
+      (queue-append queue initial-contents))
+    queue))
 
 (defun-inlineable queue-empty-p (queue)
   "Return whether `queue` is empty."
