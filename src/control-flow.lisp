@@ -13,6 +13,19 @@
                     forms))
      <>))
 
+(defmacro _ (expr &rest forms)
+  "Thread the given forms, with `_` as a placeholder."
+  ;; I am going to lose my fucking mind if I have to program lisp without
+  ;; a threading macro, but I don't want to add another dep to this library, so
+  ;; here we are.
+  `(let* ((_ ,expr)
+          ,@(mapcar (lambda (form)
+                      (if (symbolp form)
+                        `(_ (,form _))
+                        `(_ ,form)))
+                    forms))
+     _))
+
 (defmacro nest (&rest forms)
   "Thread the given forms, putting each as the body of the previous.
 
