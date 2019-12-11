@@ -177,6 +177,7 @@
   (:export
     :-<>
     :<>
+    :_
     :nest
     :recursively
     :recur
