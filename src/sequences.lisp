@@ -23,8 +23,11 @@
     (sum i :into s)
     (collect s)))
 
-(defun frequencies (sequence &key (test 'eql))
-  "Return a hash table containing the frequencies of the items in `sequence`.
+(defun frequencies (sequence &key (test #'eql) key)
+  "Return a hash table containing the frequencies of the elements of `sequence`.
+
+  When `key` is given, it will be called on the elements first before they are
+  counted.
 
   Uses `test` for the `:test` of the hash table.
 
@@ -35,11 +38,17 @@
         bar 1}
 
   "
-  (iterate (for i :in-whatever sequence)
-           (collect-frequencies i)))
+  (if key
+    (iterate (for i :in-whatever sequence)
+             (collect-frequencies (funcall key i) :test test))
+    (iterate (for i :in-whatever sequence)
+             (collect-frequencies i :test test))))
 
-(defun proportions (sequence &key (test 'eql) (float t))
+(defun proportions (sequence &key (test 'eql) (float t) key)
   "Return a hash table containing the proportions of the items in `sequence`.
+
+  When `key` is given, it will be called on the elements first before they are
+  counted.
 
   Uses `test` for the `:test` of the hash table.
 
@@ -57,7 +66,7 @@
         bar 1/3}
 
   "
-  (let* ((freqs (frequencies sequence :test test))
+  (let* ((freqs (frequencies sequence :test test :key key))
          (total (reduce #'+ (hash-table-values freqs)
                         :initial-value (if float 1.0 1))))
     (mutate-hash-values (lambda (v) (/ v total))

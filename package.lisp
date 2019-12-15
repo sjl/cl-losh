@@ -28,7 +28,8 @@
   (:use :cl :iterate :losh.quickutils)
   (:documentation "Utilities for working with CLOS.")
   (:export
-    :defclass*))
+    :defclass*
+    :define-condition*))
 
 (defpackage :losh.eldritch-horrors
   (:use :cl :iterate :losh.quickutils)

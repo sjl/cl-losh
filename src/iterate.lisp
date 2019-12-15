@@ -957,6 +957,7 @@
           :next
           (multiple-value-bind (,start% ,end% ,@(unless single `(,reg-start% ,reg-end%)))
               (ppcre:scan ,scanner% ,string% :start ,pos% :end ,limit%)
+            (declare (ignorable ,end%))
             (if (null ,start%)
               (terminate)
               (progn (setf ,pos% ,(if overlap? `(1+ ,start%) end%))

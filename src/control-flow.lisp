@@ -440,20 +440,23 @@
   iteration `body` will be executed with `variable` bound to successive values
   in the range [`from`, `below`).
 
+  `from` can be larger than `below`, in which case the values will be stepped
+  down instead of up.
+
   If multiple ranges are given they will be iterated in a nested fashion.
 
   Example:
 
-    (do-range ((x  0  3)
-               (y 10 12))
+    (do-range ((x  0  6  2)
+               (y 12 10))
       (pr x y))
     ; =>
-    ; 0 10
+    ; 0 12
     ; 0 11
-    ; 1 10
-    ; 1 11
-    ; 2 10
+    ; 2 12
     ; 2 11
+    ; 4 12
+    ; 4 11
 
   "
   (assert (not (null ranges)) ()
@@ -461,32 +464,41 @@
   (recursively ((ranges ranges))
     (if (null ranges)
       `(progn ,@body)
-      (destructuring-bind (var from below) (first ranges)
-        `(loop
-           :for ,var :from ,from :below ,below
-           :do ,(recur (rest ranges)))))))
+      (destructuring-bind (var from to &optional by) (first ranges)
+        (with-gensyms (cmp)
+          (once-only (from to by)
+            `(do ((,cmp (if ,by
+                          (if (minusp ,by) #'<= #'>=)
+                          (if (< ,from ,to) #'>= #'<=)))
+                  (,by (or ,by (if (< ,from ,to) 1 -1)))
+                  (,var ,from (+ ,var ,by)))
+               ((funcall ,cmp ,var ,to))
+               ,(recur (rest ranges)))))))))
 
 (defmacro do-irange (ranges &body body)
   "Perform `body` on the given inclusive `ranges`.
 
-  Each range in `ranges` should be of the form `(variable from to)`.  During
-  iteration `body` will be executed with `variable` bound to successive values
-  in the range [`from`, `to`].
+  Each range in `ranges` should be of the form `(variable from to &optional by)`.
+  During iteration `body` will be executed with `variable` bound to successive
+  values according to `by` in the range [`from`, `to`].
+
+  `from` can be larger than `to`, in which case the values will be stepped down
+  instead of up.
 
   If multiple ranges are given they will be iterated in a nested fashion.
 
   Example:
 
-    (do-irange ((x  0  2)
-                (y 10 11))
+    (do-irange ((x  0  4  2)
+                (y 11 10))
       (pr x y))
     ; =>
-    ; 0 10
     ; 0 11
-    ; 1 10
-    ; 1 11
-    ; 2 10
+    ; 0 10
     ; 2 11
+    ; 2 10
+    ; 4 11
+    ; 4 10
 
   "
   (assert (not (null ranges)) ()
@@ -494,9 +506,15 @@
   (recursively ((ranges ranges))
     (if (null ranges)
       `(progn ,@body)
-      (destructuring-bind (var from to) (first ranges)
-        `(loop
-           :for ,var :from ,from :to ,to
-           :do ,(recur (rest ranges)))))))
+      (destructuring-bind (var from to &optional by) (first ranges)
+        (with-gensyms (cmp)
+          (once-only (from to by)
+            `(do ((,cmp (if ,by
+                          (if (minusp ,by) #'< #'>)
+                          (if (< ,from ,to) #'> #'<)))
+                  (,by (or ,by (if (< ,from ,to) 1 -1)))
+                  (,var ,from (+ ,var ,by)))
+               ((funcall ,cmp ,var ,to))
+               ,(recur (rest ranges)))))))))
 
 
