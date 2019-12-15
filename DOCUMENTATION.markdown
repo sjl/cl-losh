@@ -309,6 +309,23 @@ Utilities for working with CLOS.
   This is like `defclass`, but the `:initarg` and `:accessor` slot options will
   automatically be filled in with sane values if they aren't given.
 
+  `name-and-options` can be a symbol or a list, which will be destructured
+  against `(name &key conc-name)`.
+
+  
+
+### `DEFINE-CONDITION*` (macro)
+
+    (DEFINE-CONDITION* NAME-AND-OPTIONS DIRECT-SUPERCLASSES SLOTS &REST OPTIONS)
+
+`define-condition` without the tedium.
+
+  This is like `define-condition`, but the `:initarg` and `:accessor` slot
+  options will automatically be filled in with sane values if they aren't given.
+
+  `name-and-options` can be a symbol or a list, which will be destructured
+  against `(name &key conc-name)`.
+
   
 
 ## Package `LOSH.CONTROL-FLOW`
@@ -321,6 +338,12 @@ Utilities for managing control flow.
 
 Thread the given forms, with `<>` as a placeholder.
 
+### `_` (macro)
+
+    (_ EXPR &REST FORMS)
+
+Thread the given forms, with `_` as a placeholder.
+
 ### `DO-IRANGE` (macro)
 
     (DO-IRANGE RANGES
@@ -329,24 +352,27 @@ Thread the given forms, with `<>` as a placeholder.
 
 Perform `body` on the given inclusive `ranges`.
 
-  Each range in `ranges` should be of the form `(variable from to)`.  During
-  iteration `body` will be executed with `variable` bound to successive values
-  in the range [`from`, `to`].
+  Each range in `ranges` should be of the form `(variable from to &optional by)`.
+  During iteration `body` will be executed with `variable` bound to successive
+  values according to `by` in the range [`from`, `to`].
+
+  `from` can be larger than `to`, in which case the values will be stepped down
+  instead of up.
 
   If multiple ranges are given they will be iterated in a nested fashion.
 
   Example:
 
-    (do-irange ((x  0  2)
-                (y 10 11))
+    (do-irange ((x  0  4  2)
+                (y 11 10))
       (pr x y))
     ; =>
-    ; 0 10
     ; 0 11
-    ; 1 10
-    ; 1 11
-    ; 2 10
+    ; 0 10
     ; 2 11
+    ; 2 10
+    ; 4 11
+    ; 4 10
 
   
 
@@ -362,20 +388,23 @@ Perform `body` on the given `ranges`.
   iteration `body` will be executed with `variable` bound to successive values
   in the range [`from`, `below`).
 
+  `from` can be larger than `below`, in which case the values will be stepped
+  down instead of up.
+
   If multiple ranges are given they will be iterated in a nested fashion.
 
   Example:
 
-    (do-range ((x  0  3)
-               (y 10 12))
+    (do-range ((x  0  6  2)
+               (y 12 10))
       (pr x y))
     ; =>
-    ; 0 10
+    ; 0 12
     ; 0 11
-    ; 1 10
-    ; 1 11
-    ; 2 10
+    ; 2 12
     ; 2 11
+    ; 4 12
+    ; 4 11
 
   
 
@@ -1390,6 +1419,16 @@ Macroexpand the given iterate clause/driver.
 
   
 
+### `RETURNING` (macro)
+
+    (RETURNING &REST VALUES)
+
+Return `values` from the iterate clause.
+
+  Equivalent to `(finally (return (values ...)))`.
+
+  
+
 ## Package `LOSH.LISTS`
 
 Utilities for operating on lists.
@@ -1708,7 +1747,7 @@ Enqueue `item` in `queue`, returning the new size of the queue.
 
 ### `MAKE-QUEUE` (function)
 
-    (MAKE-QUEUE)
+    (MAKE-QUEUE &KEY INITIAL-CONTENTS)
 
 Allocate and return a fresh queue.
 
@@ -1901,9 +1940,12 @@ Return the smallest and largest elements of `sequence` according to `predicate`.
 
 ### `FREQUENCIES` (function)
 
-    (FREQUENCIES SEQUENCE &KEY (TEST 'EQL))
+    (FREQUENCIES SEQUENCE &KEY (TEST #'EQL) KEY)
 
-Return a hash table containing the frequencies of the items in `sequence`.
+Return a hash table containing the frequencies of the elements of `sequence`.
+
+  When `key` is given, it will be called on the elements first before they are
+  counted.
 
   Uses `test` for the `:test` of the hash table.
 
@@ -2001,9 +2043,12 @@ Return the product of all elements of `sequence`.
 
 ### `PROPORTIONS` (function)
 
-    (PROPORTIONS SEQUENCE &KEY (TEST 'EQL) (FLOAT T))
+    (PROPORTIONS SEQUENCE &KEY (TEST 'EQL) (FLOAT T) KEY)
 
 Return a hash table containing the proportions of the items in `sequence`.
+
+  When `key` is given, it will be called on the elements first before they are
+  counted.
 
   Uses `test` for the `:test` of the hash table.
 
