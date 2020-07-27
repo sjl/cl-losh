@@ -13,10 +13,10 @@
      (declaim (notinline ,name))
      ',name))
 
-(defmacro defun-inline (name &body body)
+(defmacro defun-inline (name args &body body)
   "Like `defun`, but declaims `name` to be `inline`."
   `(progn
      (declaim (inline ,name))
-     (defun ,name ,@body)
+     (defun ,name ,args ,@body)
      ',name))
 
