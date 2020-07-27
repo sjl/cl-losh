@@ -1,23 +1,17 @@
 (in-package :losh.clos)
 
 (defun build-slot-definition (conc-name slot-spec)
-  (destructuring-bind (name &key
-                            (type nil type?)
-                            (documentation nil documentation?)
-                            (initform nil initform?)
-                            (allocation nil allocation?)
-                            (accessor (if conc-name
-                                        (symb conc-name name)
-                                        name))
-                            (initarg (ensure-keyword name)))
-      (ensure-list slot-spec)
+  (destructuring-bind (name &rest slot-options) (ensure-list slot-spec)
     `(,name
-      :initarg ,initarg
-      :accessor ,accessor
-      ,@(when initform? `(:initform ,initform))
-      ,@(when allocation? `(:allocation ,allocation))
-      ,@(when type? `(:type ,type))
-      ,@(when documentation? `(:documentation ,documentation)))))
+      ,@(unless (getf slot-options :initarg)
+          `(:initarg ,(ensure-keyword name)))
+      ,@(unless (or (getf slot-options :reader)
+                    (getf slot-options :writer)
+                    (getf slot-options :accessor))
+          `(:accessor ,(if conc-name
+                         (symb conc-name name)
+                         name)))
+      ,@slot-args)))
 
 (defmacro defclass* (name-and-options direct-superclasses slots &rest options)
   "`defclass` without the tedium.
