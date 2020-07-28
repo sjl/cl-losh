@@ -11,7 +11,7 @@
           `(:accessor ,(if conc-name
                          (symb conc-name name)
                          name)))
-      ,@slot-args)))
+      ,@slot-options)))
 
 (defmacro defclass* (name-and-options direct-superclasses slots &rest options)
   "`defclass` without the tedium.
