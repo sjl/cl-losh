@@ -264,12 +264,14 @@
          (with ,source = ,original)
          (with ,is-list = (typep ,source 'list))
          (with ,len = (if ,is-list -1 (length ,source)))
-         (for ,i :from 0)
-         (,kwd ,var next (if ,is-list
-                           (progn (unless ,source (setf ,source ,original))
-                                  (pop ,source))
-                           (progn (when (= ,i ,len) (setf ,i 0))
-                                  (elt ,source ,i))))))))
+         (with ,i = -1)
+         (,kwd ,var :next (if ,is-list
+                            (progn (unless ,source (setf ,source ,original))
+                                   (pop ,source))
+                            (progn (incf ,i)
+                                   (when (= ,i ,len)
+                                     (setf ,i 0))
+                                   (elt ,source ,i))))))))
 
 
 (defclause-sequence ACROSS-FLAT-ARRAY INDEX-OF-FLAT-ARRAY
