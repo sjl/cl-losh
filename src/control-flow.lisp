@@ -181,7 +181,7 @@
         ,@body)
       (queue-contents ,result))))
 
-(defmacro gathering-vector (options &body body)
+(defmacro gathering-vector ((&key (size 16) (element-type t)) &body body)
   "Run `body` to gather some things and return a fresh vector of them.
 
   `body` will be executed with the symbol `gather` bound to a function of one
@@ -211,16 +211,14 @@
     #(1 2 3 a b)
 
   "
-  (destructuring-bind (&key (size 16) (element-type t))
-      options
-    (with-gensyms (result)
-      `(let ((,result (make-array ,size :adjustable t :fill-pointer 0
-                                  :element-type ,element-type)))
-         (flet ((gather (item)
-                  (vector-push-extend item ,result)
-                  item))
-           ,@body)
-         ,result))))
+  (with-gensyms (result)
+    `(let ((,result (make-array ,size :adjustable t :fill-pointer 0
+                      :element-type ,element-type)))
+       (flet ((gather (item)
+                (vector-push-extend item ,result)
+                item))
+         ,@body)
+       ,result)))
 
 
 (defmacro when-let (bindings &body body)
