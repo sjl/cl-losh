@@ -61,11 +61,17 @@
               result)))))
 
 
+(defparameter *pbcopy-command* "pbcopy"
+  "The shell command to use for `pbcopy`.  When run, this command should set the clipboard contents to its standard input.")
+
+(defparameter *pbpaste-command* "pbpaste"
+  "The shell command to use for `pbpaste`.  When run, this command should print the clipboard contents on standard output.")
+
 (defun pbcopy (object)
   "`pbcopy` the `aesthetic-string` of `object`."
-  (sh "pbcopy" :input (format nil "~A" object) :wait nil)
+  (sh *pbcopy-command* :input (format nil "~A" object) :wait nil)
   (values))
 
 (defun pbpaste ()
   "`pbpaste` the current clipboard as a string."
-  (values (sh "pbpaste" :result-type 'string)))
+  (values (sh *pbpaste-command* :result-type 'string)))

@@ -113,7 +113,9 @@
   (:export
     :sh
     :pbcopy
-    :pbpaste))
+    :pbpaste
+    :*pbcopy-command*
+    :*pbpaste-command*))
 
 
 (defpackage :losh.arrays
