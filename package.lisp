@@ -90,6 +90,8 @@
   (:use :cl :iterate :losh.quickutils)
   (:documentation "Utilities for operating on lists.")
   (:export
+    :0..   :1..   :n..
+    :0...  :1...  :n...
     :somelist))
 
 (defpackage :losh.mutation
@@ -305,6 +307,7 @@
     :randomp
     :random-elt
     :random-range
+
     :random-range-exclusive
     :random-range-inclusive
     :random-around
