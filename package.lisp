@@ -104,6 +104,7 @@
     :divf
     :modf
     :remainderf
+    :truncatef
     :clampf
     :negatef
     :notf

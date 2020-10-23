@@ -50,6 +50,9 @@
 (define-modify-macro remainderf (divisor) rem
   "Remainder `place` by `divisor` in-place.")
 
+(define-modify-macro truncatef (divisor) truncate
+  "Truncate `place` by `divisor` in-place.")
+
 (define-modify-macro clampf (from to) losh.math:clamp
   "Clamp `place` between `from` and `to` in-place.")
 
