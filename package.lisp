@@ -357,6 +357,7 @@
     :dis
     :gimme
     :hex
+    :phr
     :pr
     :pretty-print-hash-table
     :print-table

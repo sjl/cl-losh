@@ -41,6 +41,10 @@
     (terpri)
     (finish-output)))
 
+(defun phr ()
+  "Print a horizontal rule to aid in visual debugging."
+  (pr "-----------------------------------------------------------------------"))
+
 
 (defun bits (&optional (n *) (size 8) (stream t))
   "Print the bits of the `size`-bit two's complement integer `n` to `stream`.
