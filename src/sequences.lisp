@@ -302,13 +302,13 @@
 
   Examples:
 
-    (sum #(1 2 3))
+    (summation #(1 2 3))
     ; => 6
 
-    (sum '(\"1\" \"2\" \"3\") :key #'parse-integer)
+    (summation '(\"1\" \"2\" \"3\") :key #'parse-integer)
     ; => 6
 
-    (sum '(\"1\" \"2\" \"3\") :key #'length)
+    (summation '(\"1\" \"2\" \"3\") :key #'length)
     ; => 3
 
   "
