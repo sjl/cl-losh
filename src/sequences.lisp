@@ -9,19 +9,24 @@
   `(integer 0 (,length)))
 
 
-(defun prefix-sums (sequence)
-  "Return a list of the prefix sums of the numbers in `sequence`.
+(defun prefix-sums (sequence &key key (result-type 'list))
+  "Return the prefix sums of the elements of `sequence`.
+
+  If `key` is given, it will be called on the elements before summing.
+  `result-type` must be a type suitable for passing to `map`.
 
   Example:
 
     (prefix-sums '(10 10 10 0 1))
-    => (10 20 30 30 31)
+    ; => (10 20 30 30 31)
+
+    (prefix-sums \"ABCD\" :key #'char-code :result-type '(vector fixnum))
+    ; => #(65 131 198 266)
 
   "
-  (iterate
-    (for i :in-whatever sequence)
-    (sum i :into s)
-    (collect s)))
+  (let ((sum 0))
+    (map result-type (lambda (x) (incf sum (if key (funcall key x) x)))
+         sequence)))
 
 (defun frequencies (sequence &key (test #'eql) key)
   "Return a hash table containing the frequencies of the elements of `sequence`.
