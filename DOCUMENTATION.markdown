@@ -278,6 +278,7 @@ Gotta go FAST.
 ### `DEFUN-INLINE` (macro)
 
     (DEFUN-INLINE NAME
+        ARGS
       &BODY
       BODY)
 
@@ -453,7 +454,7 @@ Run `body` to gather some things and return a fresh list of them.
 
 ### `GATHERING-VECTOR` (macro)
 
-    (GATHERING-VECTOR OPTIONS
+    (GATHERING-VECTOR (&KEY (SIZE 16) (ELEMENT-TYPE T))
       &BODY
       BODY)
 
@@ -844,6 +845,12 @@ Print the `thing` to `stream` with numbers in base 16.
     => #(0 80)
 
   
+
+### `PHR` (function)
+
+    (PHR)
+
+Print a horizontal rule to aid in visual debugging.
 
 ### `PR` (function)
 
@@ -1433,6 +1440,42 @@ Return `values` from the iterate clause.
 
 Utilities for operating on lists.
 
+### `0..` (function)
+
+    (0.. BELOW)
+
+Return a fresh list of the range `[0, below)`.
+
+### `0...` (function)
+
+    (0... TO)
+
+Return a fresh list of the range `[0, to]`.
+
+### `1..` (function)
+
+    (1.. BELOW)
+
+Return a fresh list of the range `[1, below)`.
+
+### `1...` (function)
+
+    (1... TO)
+
+Return a fresh list of the range `[1, to]`.
+
+### `N..` (function)
+
+    (N.. FROM BELOW)
+
+Return a fresh list of the range `[from, below)`.
+
+### `N...` (function)
+
+    (N... FROM TO)
+
+Return a fresh list of the range `[from, to]`.
+
 ### `SOMELIST` (function)
 
     (SOMELIST PREDICATE LIST &REST MORE-LISTS)
@@ -1656,6 +1699,12 @@ Set `place` to `(not place)` in-place.
 
 Remainder `place` by `divisor` in-place.
 
+### `TRUNCATEF` (macro)
+
+    (TRUNCATEF PLACE DIVISOR)
+
+Truncate `place` by `divisor` in-place.
+
 ### `ZAPF` (macro)
 
     (ZAPF &REST PLACE-EXPR-PAIRS)
@@ -1851,6 +1900,51 @@ Return a random boolean with `chance` probability of `t`.
 
 Utilities for operating on sequences.
 
+### `DEFINE-SORTING-PREDICATE` (macro)
+
+    (DEFINE-SORTING-PREDICATE NAME PREDICATE-SPEC &REST MORE-PREDICATE-SPECS)
+
+Define `name` as a predicate that composes the given predicates.
+
+  This function takes one or more predicates and composes them into a single
+  predicate suitable for passing to `sort`.  Earlier predicates will take
+  precedence over later ones — later predicates will only be called to break
+  ties for earlier predicates.  This is useful if you want to do something like
+  "sort customers by last name, then by first name, then by ID number".
+
+  `predicate-spec` can be one of:
+
+  * `(function ...)`
+  * `(lambda ...)`
+  * A list of `(predicate &key key)`.
+  * Any other object, which will be treated as a predicate.
+
+  If a `key` is specified, it will be called on arguments before passing them to
+  `predicate`.  Note that the `key` only affects the predicate it's consed to,
+  not later predicates.
+
+  See `make-sorting-predicate` for a functional version.
+
+  Examples:
+
+    ;; Sort shorter strings first, breaking ties lexicographically:
+    (define-sorting-predicate fancy<
+      (#< :key #'length)
+      #'string<)
+
+    (sort (list "zz" "abc" "yy") #'fancy<)
+    ; => ("yy" "zz" "abc")
+
+    ;; Sort customers by last name, then first name, then ID number:
+    (define-sorting-predicate customer<
+       (#string< :key #'last-name)
+       (#string< :key #'first-name)
+       (#< :key #'id))
+
+    (sort (find-customers) #'customer<)
+
+  
+
 ### `DOSEQ` (macro)
 
     (DOSEQ (VAR SEQUENCE)
@@ -1994,16 +2088,63 @@ Return a hash table of the elements of `sequence` grouped by `function`.
 
   
 
+### `MAKE-SORTING-PREDICATE` (function)
+
+    (MAKE-SORTING-PREDICATE PREDICATE-SPEC &REST MORE-PREDICATE-SPECS)
+
+Compose the given predicates into a single predicate and return it.
+
+  This function takes one or more predicates and composes them into a single
+  predicate suitable for passing to `sort`.  Earlier predicates will take
+  precedence over later ones — later predicates will only be called to break
+  ties for earlier predicates.  This is useful if you want to do something like
+  "sort customers by last name, then by first name, then by ID number".
+
+  `predicate-spec` can be either a function or a cons of `(predicate . key)`,
+  in which case the key will be called on arguments before passing them to
+  `predicate`.  Note that the `key` only affects the predicate it's consed to,
+  not later predicates.
+
+  See `define-sorting-predicate` for a convenient way to define named sorting
+  predicates.
+
+  Examples:
+
+    ;; Trivial example:
+    (sort (list "zz" "abc")
+          (make-sorting-predicate #'string<))
+    ; => ("abc" "zz")
+
+    ;; Sort shorter strings first, breaking ties lexicographically:
+    (sort (list "zz" "abc" "yy")
+          (make-sorting-predicate (cons #'< #'length) #'string<))
+    ; => ("yy" "zz" "abc")
+
+    ;; Sort customers by last name, then first name, then ID number:
+    (sort (find-customers)
+          (make-sorting-predicate
+            (cons #'string< #'last-name)
+            (cons #'string< #'first-name)
+            (cons #'< #'id)))
+
+  
+
 ### `PREFIX-SUMS` (function)
 
-    (PREFIX-SUMS SEQUENCE)
+    (PREFIX-SUMS SEQUENCE &KEY KEY (RESULT-TYPE 'LIST))
 
-Return a list of the prefix sums of the numbers in `sequence`.
+Return the prefix sums of the elements of `sequence`.
+
+  If `key` is given, it will be called on the elements before summing.
+  `result-type` must be a type suitable for passing to `map`.
 
   Example:
 
     (prefix-sums '(10 10 10 0 1))
-    => (10 20 30 30 31)
+    ; => (10 20 30 30 31)
+
+    (prefix-sums "ABCD" :key #'char-code :result-type '(vector fixnum))
+    ; => #(65 131 198 266)
 
   
 
@@ -2073,11 +2214,7 @@ Return a hash table containing the proportions of the items in `sequence`.
 
 Join a `sequence` of objects into a string, separated by `separator`.
 
-  All objects in `sequence` (and `separator`) will be `princ-to-string`ed before
-  joining.
-
-  This is implemented simply, not efficiently, so consider implementing your own
-  if you're joining a lot of stuff.
+  All objects in `sequence` (and `separator`) will be `princ`ed before joining.
 
   
 
@@ -2099,13 +2236,13 @@ Return the sum of all elements of `sequence`.
 
   Examples:
 
-    (sum #(1 2 3))
+    (summation #(1 2 3))
     ; => 6
 
-    (sum '("1" "2" "3") :key #'parse-integer)
+    (summation '("1" "2" "3") :key #'parse-integer)
     ; => 6
 
-    (sum '("1" "2" "3") :key #'length)
+    (summation '("1" "2" "3") :key #'length)
     ; => 3
 
   
@@ -2153,6 +2290,14 @@ Take elements from `seq` as long as `predicate` remains true.
 ## Package `LOSH.SHELL`
 
 Utilities for interacting with external programs.
+
+### `*PBCOPY-COMMAND*` (variable)
+
+The shell command to use for `pbcopy`.  When run, this command should set the clipboard contents to its standard input.
+
+### `*PBPASTE-COMMAND*` (variable)
+
+The shell command to use for `pbpaste`.  When run, this command should print the clipboard contents on standard output.
 
 ### `PBCOPY` (function)
 

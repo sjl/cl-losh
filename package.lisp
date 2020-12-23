@@ -338,7 +338,9 @@
     :summation
     :product
     :doseq
-    :string-join))
+    :string-join
+    :define-sorting-predicate
+    :make-sorting-predicate))
 
 (defpackage :losh.debugging
   (:use :cl :iterate :losh.quickutils

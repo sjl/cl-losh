@@ -87,6 +87,7 @@
                              (:file "base")
                              (:file "arrays")
                              (:file "lists")
+                             (:file "sequences")
                              (:file "control-flow"))))
 
   :perform (asdf:test-op (op system)
