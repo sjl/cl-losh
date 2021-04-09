@@ -373,15 +373,155 @@
 (defun string-join (separator sequence)
   "Join a `sequence` of objects into a string, separated by `separator`.
 
-  All objects in `sequence` (and `separator`) will be `princ-to-string`ed before
-  joining.
-
-  This is implemented simply, not efficiently, so consider implementing your own
-  if you're joining a lot of stuff.
+  All objects in `sequence` (and `separator`) will be `princ`ed before joining.
 
   "
   (unless (stringp separator)
     (callf separator #'princ-to-string))
-  (flet ((concat (current next)
-           (concatenate 'string current separator next)))
-    (reduce (nullary #'concat "") sequence :key #'princ-to-string)))
+  (with-output-to-string (s)
+    (let ((first t))
+      (map nil (lambda (el)
+                 (if first
+                   (setf first nil)
+                   (write-string separator s))
+                 (princ el s))
+           sequence))))
+
+
+(defun make-sorting-predicate (predicate-spec &rest more-predicate-specs)
+  "Compose the given predicates into a single predicate and return it.
+
+  This function takes one or more predicates and composes them into a single
+  predicate suitable for passing to `sort`.  Earlier predicates will take
+  precedence over later ones — later predicates will only be called to break
+  ties for earlier predicates.  This is useful if you want to do something like
+  \"sort customers by last name, then by first name, then by ID number\".
+
+  `predicate-spec` can be either a function or a cons of `(predicate . key)`,
+  in which case the key will be called on arguments before passing them to
+  `predicate`.  Note that the `key` only affects the predicate it's consed to,
+  not later predicates.
+
+  See `define-sorting-predicate` for a convenient way to define named sorting
+  predicates.
+
+  Examples:
+
+    ;; Trivial example:
+    (sort (list \"zz\" \"abc\")
+          (make-sorting-predicate #'string<))
+    ; => (\"abc\" \"zz\")
+
+    ;; Sort shorter strings first, breaking ties lexicographically:
+    (sort (list \"zz\" \"abc\" \"yy\")
+          (make-sorting-predicate (cons #'< #'length) #'string<))
+    ; => (\"yy\" \"zz\" \"abc\")
+
+    ;; Sort customers by last name, then first name, then ID number:
+    (sort (find-customers)
+          (make-sorting-predicate
+            (cons #'string< #'last-name)
+            (cons #'string< #'first-name)
+            (cons #'< #'id)))
+
+  "
+  (let (predicate key)
+    (if (consp predicate-spec)
+      (setf predicate (car predicate-spec)
+            key (cdr predicate-spec))
+      (setf predicate predicate-spec
+            key nil))
+    (if (null more-predicate-specs)
+      (if key
+        (lambda (x y)
+          (funcall predicate (funcall key x) (funcall key y)))
+        predicate)
+      (let ((next (apply #'make-sorting-predicate more-predicate-specs)))
+        (if key
+          (lambda (x y)
+            (let ((kx (funcall key x))
+                  (ky (funcall key y)))
+              (cond
+                ((funcall predicate kx ky) t)
+                ((funcall predicate ky kx) nil)
+                (t (funcall next x y)))))
+          (lambda (x y)
+            (cond
+              ((funcall predicate x y) t)
+              ((funcall predicate y x) nil)
+              (t (funcall next x y)))))))))
+
+(defmacro define-sorting-predicate (name predicate-spec &rest more-predicate-specs)
+  "Define `name` as a predicate that composes the given predicates.
+
+  This function takes one or more predicates and composes them into a single
+  predicate suitable for passing to `sort`.  Earlier predicates will take
+  precedence over later ones — later predicates will only be called to break
+  ties for earlier predicates.  This is useful if you want to do something like
+  \"sort customers by last name, then by first name, then by ID number\".
+
+  `predicate-spec` can be one of:
+
+  * `(function ...)`
+  * `(lambda ...)`
+  * A list of `(predicate &key key)`.
+  * Any other object, which will be treated as a predicate.
+
+  If a `key` is specified, it will be called on arguments before passing them to
+  `predicate`.  Note that the `key` only affects the predicate it's consed to,
+  not later predicates.
+
+  See `make-sorting-predicate` for a functional version.
+
+  Examples:
+
+    ;; Sort shorter strings first, breaking ties lexicographically:
+    (define-sorting-predicate fancy<
+      (#\< :key #'length)
+      #'string<)
+
+    (sort (list \"zz\" \"abc\" \"yy\") #'fancy<)
+    ; => (\"yy\" \"zz\" \"abc\")
+
+    ;; Sort customers by last name, then first name, then ID number:
+    (define-sorting-predicate customer<
+       (#\string< :key #'last-name)
+       (#\string< :key #'first-name)
+       (#\< :key #'id))
+
+    (sort (find-customers) #'customer<)
+
+  "
+  (with-gensyms (x y kx ky)
+    (labels
+        ((parse-spec (spec)
+           (if (consp spec)
+             (if (member (first spec) '(function lambda))
+               (values spec nil)
+               (destructuring-bind (predicate &key key) spec
+                 (values predicate key)))
+             (values spec nil)))
+         (expand (spec more-specs)
+           (multiple-value-bind (predicate key) (parse-spec spec)
+             (once-only (predicate)
+               (if (null more-specs)
+                 `(if ,(if key
+                         (once-only (key)
+                           `(funcall ,predicate (funcall ,key ,x) (funcall ,key ,y)))
+                         `(funcall ,predicate ,x ,y))
+                    t
+                    nil)
+                 (if key
+                   (once-only (key)
+                     `(let ((,kx (funcall ,key ,x))
+                            (,ky (funcall ,key ,y)))
+                        (cond
+                          ((funcall ,predicate ,kx ,ky) t)
+                          ((funcall ,predicate ,ky ,kx) nil)
+                          (t ,(expand (first more-specs) (rest more-specs))))))
+                   `(cond
+                      ((funcall ,predicate ,x ,y) t)
+                      ((funcall ,predicate ,y ,x) nil)
+                      (t ,(expand (first more-specs) (rest more-specs))))))))))
+      `(defun ,name (,x ,y)
+         ,(expand predicate-spec more-predicate-specs)))))
