@@ -730,6 +730,24 @@
     `(,kwd (,var) :in-hashtable (losh.hash-sets::hash-set-storage ,hset))))
 
 
+(defmacro-driver (FOR var IN-RING-BUFFER ring-buffer)
+  "Iterate over the elements of `ring-buffer`, oldest to newest."
+  (let ((kwd (if generate 'generate 'for)))
+    (with-gensyms (rb r w d s)
+      `(progn
+         (with ,rb = ,ring-buffer)
+         (with ,r = (losh.ring-buffers::r ,rb))
+         (with ,w = (losh.ring-buffers::w ,rb))
+         (with ,d = (losh.ring-buffers::data ,rb))
+         (with ,s = (losh.ring-buffers::size ,rb))
+         (,kwd ,var :next (if (= ,r ,w)
+                            (terminate)
+                            (prog1 (svref ,d ,r)
+                              (incf ,r)
+                              (when (= ,r ,s)
+                                (setf ,r 0)))))))))
+
+
 (defmacro-driver (FOR var SEED seed THEN then)
   "Bind `var` to `seed` initially, then to `then` on every iteration.
 

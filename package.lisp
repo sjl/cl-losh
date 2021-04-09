@@ -178,6 +178,29 @@
     :pq-ensure
     :pq-dequeue))
 
+(defpackage :losh.ring-buffers
+  (:use :cl :iterate :losh.quickutils
+    :losh.chili-dogs
+    :losh.eldritch-horrors
+    :losh.mutation)
+  (:documentation "Simple ring buffer implementation.")
+  (:export
+
+    :do-ring-buffer
+    :make-ring-buffer
+    :rb-contents
+    :rb-count
+    :rb-empty-p
+    :rb-full-p
+    :rb-pop
+    :rb-push
+    :rb-ref
+    :rb-safe-push
+    :rb-size
+    :ring-buffer
+
+    ))
+
 
 (defpackage :losh.control-flow
   (:use :cl :iterate :losh.quickutils
@@ -256,17 +279,20 @@
 
 (defpackage :losh.iterate
   (:use :cl :iterate :losh.quickutils
-    :losh.hash-sets)
+    :losh.hash-sets
+    :losh.ring-buffers)
   (:documentation "Custom `iterate` drivers and clauses.")
   (:export
 
     :across-flat-array
+    :against
     :anding
     :averaging
     :collect-frequencies
     :collect-hash
     :collect-set
     :cycling
+    :end
     :every-nth
     :finding-all
     :finding-first
@@ -274,31 +300,30 @@
     :in-array
     :in-hashset
     :in-lists
+    :in-ring-buffer
     :in-sequences
     :in-whatever
     :index-of-flat-array
     :initially
     :into
     :macroexpand-iterate
+    :matching
     :modulo
     :oring
+    :overlap
     :pairs-of-list
     :per-iteration-into
     :real-time
+    :returning
     :run-time
     :seed
     :since-start-into
     :skip-origin
+    :start
     :test
     :then
     :timing
     :within-radius
-    :returning
-    :matching
-    :against
-    :overlap
-    :start
-    :end
 
     ))
 
@@ -419,6 +444,7 @@
    :losh.priority-queues
    :losh.queues
    :losh.random
+   :losh.ring-buffers
    :losh.sequences
    :losh.shell
    :losh.weightlists

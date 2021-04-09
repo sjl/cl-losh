@@ -22,6 +22,7 @@
         "LOSH.PRIORITY-QUEUES"
         "LOSH.QUEUES"
         "LOSH.RANDOM"
+        "LOSH.RING-BUFFERS"
         "LOSH.SEQUENCES"
         "LOSH.SHELL"
         "LOSH.WEIGHTLISTS"
