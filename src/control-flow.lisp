@@ -516,3 +516,49 @@
                ,(recur (rest ranges)))))))))
 
 
+(let ((eof (gensym "EOF")))
+  (defmacro do-file
+      ((symbol path &rest open-options &key (reader '#'read-line) &allow-other-keys)
+       &body body)
+    "Iterate over the contents of `file` using `reader`.
+
+    During iteration, `symbol` will be set to successive values read from the
+    file by `reader`.
+
+    `reader` can be any function that conforms to the usual reading interface,
+    i.e. anything that can handle `(read-foo stream eof-error-p eof-value)`.
+
+    Any keyword arguments other than `:reader` will be passed along to `open`.
+    If `nil` is used for one of the `:if-…` options to `open` and this results
+    in `open` returning `nil`, no iteration will take place.
+
+    An implicit block named `nil` surrounds the iteration, so `return` can be
+    used to terminate early.
+
+    Returns `nil` by default.
+
+    Examples:
+
+      (do-file (line \"foo.txt\")
+        (print line))
+
+      (do-file (form \"foo.lisp\" :reader #'read :external-format :EBCDIC-US)
+        (when (eq form :stop)
+          (return :stopped-early))
+        (print form))
+
+      (do-file (line \"does-not-exist.txt\" :if-does-not-exist nil)
+        (this-will-not-be-executed))
+
+    "
+    (let ((open-options (alexandria:remove-from-plist open-options :reader)))
+      (with-gensyms (stream)
+        (once-only (path reader)
+          `(when-let ((,stream (open ,path :direction :input ,@open-options)))
+             (unwind-protect
+                 (do ((,symbol
+                       (funcall ,reader ,stream nil ',eof)
+                       (funcall ,reader ,stream nil ',eof)))
+                     ((eq ,symbol ',eof))
+                   ,@body)
+               (close ,stream))))))))

@@ -202,7 +202,8 @@
     :multiple-value-bind*
     :do-repeat
     :do-range
-    :do-irange))
+    :do-irange
+    :do-file))
 
 
 (defpackage :losh.math
