@@ -12,6 +12,7 @@
   :depends-on (:iterate
                :cl-ppcre
                :external-program
+               :flexi-streams
                #+sbcl :sb-sprof)
 
   :serial t

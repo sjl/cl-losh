@@ -19,6 +19,7 @@
   * `stream`: output will be returned as a character stream.
   * `string`: all output will be gathered up and returned as a single string.
   * `list`: all output will be gathered up and returned as a list of lines.
+  * `vector`: all output will be gathered up and returned as a vector of octets.
 
   If `wait` is `nil`, the only acceptable values for `result-type` are `null`
   and `stream`.
@@ -29,6 +30,7 @@
     ((cons string list)))
   (ctypecase input
     (string (setf input (make-string-input-stream input)))
+    (vector (setf input (flexi-streams:make-in-memory-input-stream input)))
     (stream)
     (null))
   (when (not wait)
@@ -37,9 +39,11 @@
   (let* ((out (if wait ; why is every external programming running facility a goddamn mess?
                 (ecase result-type
                   ((string stream list) (make-string-output-stream))
+                  (vector (flexi-streams:make-in-memory-output-stream))
                   (null nil))
                 (ecase result-type
                   ((string list) (make-string-output-stream))
+                  (vector (flexi-streams:make-in-memory-output-stream))
                   (stream :stream)
                   (null nil))))
          (result (multiple-value-list
@@ -56,6 +60,7 @@
                 (null nil)
                 (stream (output-stream))
                 (string (get-output-stream-string out))
+                (vector (flexi-streams:get-output-stream-sequence out))
                 (list (iterate (for line :in-stream (output-stream) :using #'read-line)
                                (collect line))))
               result)))))
