@@ -93,7 +93,9 @@
   (:export
     :0..   :1..   :n..
     :0...  :1...  :n...
-    :somelist))
+    :somelist
+    :assocar  :assocdr
+    :rassocar :rassocdr))
 
 (defpackage :losh.mutation
   (:use :cl :iterate :losh.quickutils)
