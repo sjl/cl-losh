@@ -345,6 +345,44 @@ Thread the given forms, with `<>` as a placeholder.
 
 Thread the given forms, with `_` as a placeholder.
 
+### `DO-FILE` (macro)
+
+    (DO-FILE (SYMBOL PATH &REST OPEN-OPTIONS &KEY (READER '#'READ-LINE) &ALLOW-OTHER-KEYS)
+      &BODY
+      BODY)
+
+Iterate over the contents of `file` using `reader`.
+
+    During iteration, `symbol` will be set to successive values read from the
+    file by `reader`.
+
+    `reader` can be any function that conforms to the usual reading interface,
+    i.e. anything that can handle `(read-foo stream eof-error-p eof-value)`.
+
+    Any keyword arguments other than `:reader` will be passed along to `open`.
+    If `nil` is used for one of the `:if-…` options to `open` and this results
+    in `open` returning `nil`, no iteration will take place.
+
+    An implicit block named `nil` surrounds the iteration, so `return` can be
+    used to terminate early.
+
+    Returns `nil` by default.
+
+    Examples:
+
+      (do-file (line "foo.txt")
+        (print line))
+
+      (do-file (form "foo.lisp" :reader #'read :external-format :EBCDIC-US)
+        (when (eq form :stop)
+          (return :stopped-early))
+        (print form))
+
+      (do-file (line "does-not-exist.txt" :if-does-not-exist nil)
+        (this-will-not-be-executed))
+
+    
+
 ### `DO-IRANGE` (macro)
 
     (DO-IRANGE RANGES
@@ -1464,17 +1502,57 @@ Return a fresh list of the range `[1, below)`.
 
 Return a fresh list of the range `[1, to]`.
 
-### `N..` (function)
+### `ASSOCAR` (function)
 
-    (N.. FROM BELOW)
+    (ASSOCAR ITEM ALIST &REST ARGS)
 
-Return a fresh list of the range `[from, below)`.
+Return the `car` of `(apply #'assoc item alist args)`.
 
-### `N...` (function)
+### `ASSOCDR` (function)
 
-    (N... FROM TO)
+    (ASSOCDR ITEM ALIST &REST ARGS)
 
-Return a fresh list of the range `[from, to]`.
+Return the `cdr` of `(apply #'assoc item alist args)`.
+
+### `IRANGE` (function)
+
+    (IRANGE START END &KEY (STEP 1))
+
+Return a fresh list of the range `[start, end]` by `step`.
+
+  `end` can be smaller than `start`, in which case the numbers will be stepped
+  down instead of up.
+
+  `step` must always be a positive value, regardless of the direction of the
+  range.
+
+  
+
+### `RANGE` (function)
+
+    (RANGE START END &KEY (STEP 1))
+
+Return a fresh list of the range `[start, end)` by `step`.
+
+  `end` can be smaller than `start`, in which case the numbers will be stepped
+  down instead of up.
+
+  `step` must always be a positive value, regardless of the direction of the
+  range.
+
+  
+
+### `RASSOCAR` (function)
+
+    (RASSOCAR ITEM ALIST &REST ARGS)
+
+Return the `car` of `(apply #'rassoc item alist args)`.
+
+### `RASSOCDR` (function)
+
+    (RASSOCDR ITEM ALIST &REST ARGS)
+
+Return the `cdr` of `(apply #'rassoc item alist args)`.
 
 ### `SOMELIST` (function)
 
@@ -1896,6 +1974,10 @@ Return a random number in [`min`, `max`].
 
 Return a random boolean with `chance` probability of `t`.
 
+## Package `LOSH.RING-BUFFERS`
+
+Simple ring buffer implementation.
+
 ## Package `LOSH.SEQUENCES`
 
 Utilities for operating on sequences.
@@ -2014,7 +2096,7 @@ Return an alist of `(n . element)` for each element of `sequence`.
     (enumerate '(a b c) :start 1)
     ; => ((1 . A) (2 . B) (3 . C))
 
-    (enumerate '(a b c) :key #'ensure-keyword)
+    (enumerate '(a b c) :key #'alexandria:make-keyword)
     ; => ((0 . :A) (1 . :B) (2 . :C))
 
   
@@ -2333,6 +2415,7 @@ Run `command`, piping `input` to it, optionally returning its output.
   * `stream`: output will be returned as a character stream.
   * `string`: all output will be gathered up and returned as a single string.
   * `list`: all output will be gathered up and returned as a list of lines.
+  * `vector`: all output will be gathered up and returned as a vector of octets.
 
   If `wait` is `nil`, the only acceptable values for `result-type` are `null`
   and `stream`.

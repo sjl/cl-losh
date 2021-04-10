@@ -2,12 +2,6 @@
 heading_printer = $(shell which heading || echo 'true')
 sourcefiles = $(shell ffind --full-path --literal .lisp)
 
-# Vendor ----------------------------------------------------------------------
-vendor: vendor/quickutils.lisp
-vendor/quickutils.lisp: vendor/make-quickutils.lisp
-	cd vendor && ros run -L sbcl --load make-quickutils.lisp  --eval '(quit)'
-
-
 # Documentation ---------------------------------------------------------------
 DOCUMENTATION.markdown: $(sourcefiles)
 	sbcl --noinform --load make-docs.lisp  --eval '(quit)'

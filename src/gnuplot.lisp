@@ -154,7 +154,7 @@
               (* bin-width (round y bin-width)))
             <>)
     frequencies
-    hash-table-alist
+    alexandria:hash-table-alist
     (apply #'gnuplot <>
            :style :boxes
            :min-y 0

@@ -345,7 +345,7 @@
 
   "
   (with-gensyms (outer inner)
-    (multiple-value-bind (body declarations) (parse-body body)
+    (multiple-value-bind (body declarations) (alexandria:parse-body body)
       (destructuring-bind (then else) body
         `(block ,outer
            (block ,inner
@@ -393,7 +393,7 @@
 
   "
   (with-gensyms (outer inner)
-    (multiple-value-bind (body declarations) (parse-body body)
+    (multiple-value-bind (body declarations) (alexandria:parse-body body)
       (destructuring-bind (then else) body
         `(block ,outer
            (block ,inner

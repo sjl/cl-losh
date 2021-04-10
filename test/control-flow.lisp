@@ -193,6 +193,12 @@
                (do-repeat 0
                  (gather 1))))))
 
+(define-test do-file
+  (is (equal '("1" "2" "34")
+             (gathering (do-file (line "test/example.txt") (gather line)))))
+  (is (equal '(1 2 34)
+             (gathering (do-file (s "test/example.txt" :reader #'read) (gather s))))))
+
 
 (define-test gathering
   #+sbcl (declare (sb-ext:muffle-conditions sb-ext:code-deletion-note))
@@ -244,5 +250,4 @@
                (let ((c a)
                      (d b)))
                (list a b c d)))))
-
 

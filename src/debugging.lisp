@@ -143,7 +143,7 @@
                     (mapcar (curry #'mapcar (compose #'length #'aesthetic-string))
                             rows))) ; lol
       (for row :in rows)
-      (format t "~{~vA~^ | ~}~%" (weave column-sizes row))))
+      (format t "~{~vA~^ | ~}~%" (mapcan #'list column-sizes row))))
   (values))
 
 

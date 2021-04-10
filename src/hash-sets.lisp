@@ -226,6 +226,6 @@
 
 (define-hset-op hset-elements (hset)
   "Return a fresh list containing the elements of `hset`."
-  (hash-table-keys storage))
+  (alexandria:hash-table-keys storage))
 
 

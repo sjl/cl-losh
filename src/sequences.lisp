@@ -72,7 +72,7 @@
 
   "
   (let* ((freqs (frequencies sequence :test test :key key))
-         (total (reduce #'+ (hash-table-values freqs)
+         (total (reduce #'+ (alexandria:hash-table-values freqs)
                         :initial-value (if float 1.0 1))))
     (mutate-hash-values (lambda (v) (/ v total))
                         freqs)))
@@ -272,7 +272,7 @@
     (enumerate '(a b c) :start 1)
     ; => ((1 . A) (2 . B) (3 . C))
 
-    (enumerate '(a b c) :key #'ensure-keyword)
+    (enumerate '(a b c) :key #'alexandria:make-keyword)
     ; => ((0 . :A) (1 . :B) (2 . :C))
 
   "

@@ -237,7 +237,7 @@
       `(progn
         (with ,len = nil)
         (with ,idx = nil)
-        (generate ,seq :in-whatever (remove-if #'emptyp ,seqs))
+        (generate ,seq :in-whatever (remove-if #'alexandria:emptyp ,seqs))
         (,kwd ,var next
          (progn
            (when (seq-done-p ,seq ,len ,idx)
@@ -678,7 +678,7 @@
 (defun keywordize-clause (clause)
   (iterate
     (for (k v . nil) :on clause :by #'cddr)
-    (collect (ensure-keyword k))
+    (collect (alexandria:make-keyword k))
     (collect v)))
 
 (defun keywordize-some-of-clause (clause)

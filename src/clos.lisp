@@ -4,7 +4,7 @@
   (destructuring-bind (name &rest slot-options) (ensure-list slot-spec)
     `(,name
       ,@(unless (getf slot-options :initarg)
-          `(:initarg ,(ensure-keyword name)))
+          `(:initarg ,(alexandria:make-keyword name)))
       ,@(unless (or (getf slot-options :reader)
                     (getf slot-options :writer)
                     (getf slot-options :accessor))

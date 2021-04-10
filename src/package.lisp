@@ -17,29 +17,44 @@
              :collect `(:export ,@(external-symbols parent-package)))))
 
 
+(defpackage :losh.base
+  (:use :cl)
+  (:import-from :alexandria
+    :compose :curry :rcurry
+    :with-gensyms :once-only
+    :ensure-list
+    )
+  (:export
+    :compose :curry :rcurry
+    :with-gensyms :once-only
+    :ensure-list
+
+    :symb :mkstr))
+
+
 (defpackage :losh.chili-dogs
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Gotta go FAST.")
   (:export
     :defun-inline
     :defun-inlineable))
 
 (defpackage :losh.clos
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Utilities for working with CLOS.")
   (:export
     :defclass*
     :define-condition*))
 
 (defpackage :losh.eldritch-horrors
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Abandon all hope, ye who enter here.")
   (:export
     :eval-dammit
     :define-with-macro))
 
 (defpackage :losh.functions
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Utilities for working with higher-order functions.")
   (:export
     :juxt
@@ -47,7 +62,7 @@
     :fixed-point))
 
 (defpackage :losh.hash-sets
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Simple hash set implementation.")
   (:export
     :hash-set
@@ -80,7 +95,7 @@
 
 
 (defpackage :losh.io
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Utilities for input/output/reading/etc.")
   (:export
     :read-all
@@ -88,17 +103,17 @@
     :read-all-from-string))
 
 (defpackage :losh.lists
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Utilities for operating on lists.")
   (:export
-    :0..   :1..   :n..
-    :0...  :1...  :n...
+    :0..   :1..   :range
+    :0...  :1...  :irange
     :somelist
     :assocar  :assocdr
     :rassocar :rassocdr))
 
 (defpackage :losh.mutation
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Utilities for mutating places in-place.")
   (:export
     :zapf
@@ -114,7 +129,7 @@
     :callf))
 
 (defpackage :losh.shell
-  (:use :cl :iterate :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation "Utilities for interacting with external programs.")
   (:export
     :sh
@@ -125,7 +140,7 @@
 
 
 (defpackage :losh.arrays
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.chili-dogs)
   (:documentation "Utilities related to arrays.")
   (:export
@@ -139,7 +154,7 @@
     :vector-last))
 
 (defpackage :losh.bits
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.chili-dogs)
   (:documentation "Utilities for low-level bit stuff.")
   (:export
@@ -153,7 +168,7 @@
     :-/64))
 
 (defpackage :losh.queues
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.chili-dogs)
   (:documentation "A simple queue implementation.")
   (:export
@@ -167,7 +182,7 @@
     :queue-append))
 
 (defpackage :losh.priority-queues
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.mutation)
   (:documentation "Jankass priority queue implementation.")
   (:export
@@ -179,7 +194,7 @@
     :pq-dequeue))
 
 (defpackage :losh.ring-buffers
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.chili-dogs
     :losh.eldritch-horrors
     :losh.mutation)
@@ -203,7 +218,7 @@
 
 
 (defpackage :losh.control-flow
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.queues)
   (:documentation "Utilities for managing control flow.")
   (:export
@@ -230,7 +245,7 @@
 
 
 (defpackage :losh.math
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.chili-dogs
     :losh.control-flow)
   (:documentation "Utilities related to math and numbers.")
@@ -264,7 +279,7 @@
     :digit))
 
 (defpackage :losh.hash-tables
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.control-flow)
   (:documentation "Utilities for operating on hash tables.")
   (:export
@@ -278,7 +293,7 @@
     :remhash-if-not-value))
 
 (defpackage :losh.iterate
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.hash-sets
     :losh.ring-buffers)
   (:documentation "Custom `iterate` drivers and clauses.")
@@ -329,7 +344,7 @@
 
 
 (defpackage :losh.random
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.chili-dogs
     :losh.math)
   (:documentation "Utilities related to randomness.")
@@ -346,7 +361,7 @@
     :d))
 
 (defpackage :losh.sequences
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.chili-dogs
     :losh.functions
     :losh.hash-tables
@@ -372,7 +387,7 @@
     :make-sorting-predicate))
 
 (defpackage :losh.debugging
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.math
     :losh.control-flow
     :losh.hash-tables)
@@ -400,9 +415,10 @@
 
 
 (defpackage :losh.gnuplot
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.control-flow
     :losh.debugging
+    :losh.lists
     :losh.sequences)
   (:documentation "Utilities for plotting data with gnuplot.")
   (:export
@@ -412,7 +428,7 @@
     :gnuplot-histogram))
 
 (defpackage :losh.weightlists
-  (:use :cl :iterate :losh.quickutils
+  (:use :cl :iterate :losh.base
     :losh.sequences)
   (:documentation
     "A simple data structure for choosing random items with weighted probabilities.")
@@ -452,10 +468,7 @@
    :losh.weightlists
 
    )
-  (:use
-    :cl
-    :iterate
-    :losh.quickutils)
+  (:use :cl :iterate :losh.base)
   (:documentation
     "This package exports all of the symbols in the other packages.
 

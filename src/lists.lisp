@@ -15,29 +15,52 @@
              (thereis (funcall predicate l)))))
 
 
+(defun range (start end &key (step 1))
+  "Return a fresh list of the range `[start, end)` by `step`.
+
+  `end` can be smaller than `start`, in which case the numbers will be stepped
+  down instead of up.
+
+  `step` must always be a positive value, regardless of the direction of the
+  range.
+
+  "
+  (check-type step (real (0) *))
+  (if (<= start end)
+    (loop :for i :from start :below end :by step :collect i)
+    (loop :for i :downfrom start :above end :by step :collect i)))
+
+(defun irange (start end &key (step 1))
+  "Return a fresh list of the range `[start, end]` by `step`.
+
+  `end` can be smaller than `start`, in which case the numbers will be stepped
+  down instead of up.
+
+  `step` must always be a positive value, regardless of the direction of the
+  range.
+
+  "
+  (check-type step (real (0) *))
+  (if (<= start end)
+    (loop :for i :from start :to end :by step :collect i)
+    (loop :for i :downfrom start :to end :by step :collect i)))
+
+
 (defun 0.. (below)
   "Return a fresh list of the range `[0, below)`."
-  (loop :for i :from 0 :below below :collect i))
+  (range 0 below))
 
 (defun 1.. (below)
   "Return a fresh list of the range `[1, below)`."
-  (loop :for i :from 1 :below below :collect i))
-
-(defun n.. (from below)
-  "Return a fresh list of the range `[from, below)`."
-  (loop :for i :from from :below below :collect i))
+  (range 1 below))
 
 (defun 0... (to)
   "Return a fresh list of the range `[0, to]`."
-  (loop :for i :from 0 :to to :collect i))
+  (irange 0 to))
 
 (defun 1... (to)
   "Return a fresh list of the range `[1, to]`."
-  (loop :for i :from 1 :to to :collect i))
-
-(defun n... (from to)
-  "Return a fresh list of the range `[from, to]`."
-  (loop :for i :from from :to to :collect i))
+  (irange 1 to))
 
 
 (declaim (inline assocar assocdr rassocar rassocdr
