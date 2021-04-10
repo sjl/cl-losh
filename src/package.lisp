@@ -203,6 +203,7 @@
 
     :do-ring-buffer
     :make-ring-buffer
+    :rb-clear
     :rb-contents
     :rb-count
     :rb-empty-p

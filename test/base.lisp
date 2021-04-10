@@ -2,7 +2,7 @@
 
 
 (defmacro define-test (name &body body)
-  `(test ,(intern (concatenate 'string (symbol-name 'test-) (symbol-name name)))
+  `(test ,(intern (concatenate 'string (symbol-name 'test/) (symbol-name name)))
     (let ((*package* ,*package*))
       ,@body)))
 

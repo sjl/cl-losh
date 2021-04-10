@@ -31,6 +31,14 @@
        (size ring-buffer)))
 
 
+(defun rb-clear (ring-buffer)
+  "Clear the contents of `ring-buffer`."
+  (fill (data ring-buffer) nil)
+  (setf (r ring-buffer) 0
+        (w ring-buffer) 0)
+  nil)
+
+
 (defmacro 1+mod ((field ring-buffer))
   (once-only (ring-buffer)
     (with-gensyms (result)
@@ -55,7 +63,7 @@
 
 
 (defun rb-push (ring-buffer object)
-  "Push `object` into `ring-buffer`.
+  "Push `object` into `ring-buffer` and return `object`.
 
   If `ring-buffer` is full, its oldest element will be silently dropped.  If you
   want an error to be signaled instead, use `rb-safe-push`.
@@ -140,7 +148,7 @@
 (defun rb-contents (ring-buffer &key (result-type 'list))
   "Return a fresh sequence of the contents of `ring-buffer` (oldest to newest).
 
-  `result-type` can currently only be `list`.  TODO: add `vector`.
+  `result-type` can be `list` or `vector`.
 
   "
   (ecase result-type
@@ -151,7 +159,18 @@
                 :until (= r w)
                 :collect (svref d r)
                 :do (incf r)
-                :when (= r s) :do (setf r 0)))))
+                :when (= r s) :do (setf r 0)))
+    (vector
+      (let* ((n (rb-count ring-buffer))
+             (result (make-array n))
+             (data (data ring-buffer))
+             (r (r ring-buffer))
+             (w (w ring-buffer)))
+        (if (<= r w)
+          (replace result data :start2 r :end2 w)
+          (progn (replace result data :start2 r)
+                 (replace result data :start2 0 :end2 w :start1 (- (size ring-buffer) r))))
+        result))))
 
 
 ;;;; Printing -----------------------------------------------------------------

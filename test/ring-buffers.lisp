@@ -1,8 +1,12 @@
 (in-package :losh.test)
 
 (defun check-ring-buffer (rb expected-contents)
-  ;; rb-contents
-  (is (equal expected-contents (rb-contents rb)))
+  ;; rb-contents (list)
+  (is (equal (coerce expected-contents 'list)
+             (rb-contents rb :result-type 'list)))
+  ;; rb-contents (vector)
+  (is (equalp (coerce expected-contents 'vector)
+              (rb-contents rb :result-type 'vector)))
   ;; rb-count
   (is (= (length expected-contents) (rb-count rb)))
   ;; rb-empty
@@ -55,7 +59,13 @@
     (rb-safe-push rb 'c)
     (is (= 4 (rb-size rb)))
     (check-ring-buffer rb '(a b c))
-    (signals error (rb-safe-push rb 'd))))
+    (signals error (rb-safe-push rb 'd))
+
+    (rb-clear rb)
+    (check-ring-buffer rb '())
+
+    (rb-clear rb)
+    (check-ring-buffer rb '())))
 
 (define-test fuzz-ring-buffers
   (do-range ((n 2 30))
