@@ -727,7 +727,6 @@
          (finally (return (get-output-stream-string ,sos)))))))
 
 
-
 (defmacro-clause (ORING expr &optional INTO var)
   (let ((result (or var iterate::*result-var*)))
     `(reducing ,expr :by #'or :into ,result :initial-value nil)))

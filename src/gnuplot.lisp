@@ -23,6 +23,13 @@
              (terpri s))
        sequence))
 
+(defun gnuplot-data-alist% (alist s)
+  (loop :for (k . v) :in alist :do
+        (princ k s)
+        (princ #\tab s)
+        (princ v s)
+        (terpri s)))
+
 (defun gnuplot-data-matrix% (matrix s)
   (destructuring-bind (rows cols) (array-dimensions matrix)
     (dotimes (r rows)
@@ -36,7 +43,8 @@
 
   `identifier` must be a string of the form `$foo`.
 
-  `data` must be a sequence of sequences of data or a 2D array of data.
+  `data` must be one of the following: a sequence of sequences of data points,
+  an alist of data points, or a 2D array of data points.
 
   Must be called from inside `with-gnuplot`.
 
@@ -47,6 +55,7 @@
   (format s "~A << EOD~%" identifier)
   (etypecase data
     ((array * (* *)) (gnuplot-data-matrix% data s))
+    ((cons (cons t (not cons))) (gnuplot-data-alist% data s))
     (sequence (gnuplot-data-sequence% data s)))
   (format s "EOD~%"))
 
@@ -72,9 +81,11 @@
 (defun gnuplot (data commands)
   "Graph `data` with gnuplot using `commands`.
 
-  `data` must be an alist of `(identifier . data)` pairs.  `identifier` must be
-  a string of the form `$foo`.  `data` must be a sequence of sequences of data
-  or a 2D array of data.
+  `data` must be an alist of `(identifier . data)` pairs.
+
+  Each `identifier` must be a string of the form `$foo`.  Each `data` must be
+  one of the following: a sequence of sequences of data points, an alist of data
+  points, or a 2D array of data points.
 
   `commands` must be a string or a sequence of strings.
 
@@ -85,4 +96,5 @@
     (etypecase commands
       (string (gnuplot-command commands))
       (sequence (map nil #'gnuplot-command commands)))))
+
 
