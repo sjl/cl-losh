@@ -7,7 +7,8 @@
 (defparameter *gnuplot-path* "gnuplot")
 (defparameter *gnuplot-process* nil)
 
-(defmacro with-gnuplot (&body body)
+(defmacro with-gnuplot (options &body body)
+  (assert (null options))
   `(let ((*gnuplot-process*
            (external-program:start *gnuplot-path* '() :input :stream :output t)))
      (unwind-protect (progn ,@body *gnuplot-process*)
@@ -90,7 +91,7 @@
   `commands` must be a string or a sequence of strings.
 
   "
-  (with-gnuplot
+  (with-gnuplot ()
     (dolist (d data)
       (gnuplot-data (car d) (cdr d)))
     (etypecase commands
