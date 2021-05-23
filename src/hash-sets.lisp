@@ -31,7 +31,7 @@
   themselves will not be copied.
 
   "
-  (make-hash-set% :storage (copy-hash-table (hash-set-storage hset))))
+  (make-hash-set% :storage (alexandria:copy-hash-table (hash-set-storage hset))))
 
 
 (defmacro define-hset-op (name arglist &body body)

@@ -1,165 +1,88 @@
 (in-package :losh.gnuplot)
 
-(defun gnuplot-args% (&rest args)
-  (mapcan (lambda (arg) (list "-e" arg))
-          (remove nil args)))
+;;; This very spartan gnuplot interface is inspired by the advice in Gnuplot in
+;;; Action (second edition) specifically the section "Thought for the design of
+;;; a gnuplot access layer" on page 253.
 
-(defun gnuplot-args (&key
-                     (output :qt)
-                     (filename "plot.png")
-                     (style :lines)
-                     (size-x 1200)
-                     (size-y 800)
-                     (label-x)
-                     (label-y)
-                     (line-title 'data)
-                     (line-width 4)
-                     (smooth nil)
-                     (axis-x nil)
-                     (axis-y nil)
-                     (min-x nil)
-                     (max-x nil)
-                     (min-y nil)
-                     (max-y nil)
-                     (tics-x nil)
-                     (tics-y nil)
-                     (graph-title)
-                     (logscale-x nil)
-                     (logscale-y nil)
-                     (box-width nil)
-                     &allow-other-keys)
-  "Return the formatted command line arguments for the given gnuplot arguments.
+(defparameter *gnuplot-path* "gnuplot")
+(defparameter *gnuplot-process* nil)
 
-  You shouldn't call this function directly — it's exposed just so you can see
-  the list of possible gnuplot arguments all in one place.
-
-  "
-  (check-type axis-x boolean)
-  (check-type axis-y boolean)
-  (check-type logscale-x boolean)
-  (check-type logscale-y boolean)
-  (check-type line-width (or integer float))
-  (check-type box-width (or null integer float))
-  (check-type min-x (or null integer float))
-  (check-type min-y (or null integer float))
-  (check-type max-x (or null integer float))
-  (check-type max-y (or null integer float))
-  (check-type tics-x (or null integer float))
-  (check-type tics-y (or null integer float))
-  (check-type graph-title (or null string))
-  (check-type label-x (or null string))
-  (check-type label-y (or null string))
-  (check-type smooth (member nil :unique :frequency :csplines :acsplines :bezier :sbezier))
-  (flet ((esc (string) (remove #\' (aesthetic-string string)))
-         (f (&rest args) (apply #'format nil (substitute "" nil args))))
-    (gnuplot-args%
-      (ccase output
-        ((:x :x11) (f "set terminal x11 persist"))
-        (:qt (f "set terminal qt"))
-        (:wxt (f "set terminal wxt persist"))
-        (:png
-         (f "set terminal pngcairo dashed size ~D,~D font \"Lucida Grande,20\""
-            size-x size-y)
-         (f "set output '~A'" (esc filename))))
-      (f "set border linewidth 1")
-      (f "set style line 10 dashtype 2 linewidth 3 linecolor \"#666666\"")
-      (when axis-x (f "set xzeroaxis linestyle 10"))
-      (when axis-y (f "set yzeroaxis linestyle 10"))
-      (when tics-x (f "set xtics ~A" tics-x))
-      (when tics-y (f "set ytics ~A" tics-y))
-      (when box-width (f "set boxwidth ~A" box-width))
-      (when graph-title (f "set title '~A'" (esc graph-title)))
-      (when label-x (f "set xlabel '~A'" (esc label-x)))
-      (when label-y (f "set ylabel '~A'" (esc label-y)))
-      (when logscale-x (f "set logscale x"))
-      (when logscale-y (f "set logscale y"))
-      (f "set xrange [~A:~A]" min-x max-x)
-      (f "set yrange [~A:~A]" min-y max-y)
-      (f "plot '-' using 1:2 title '~A' with ~(~A~) linewidth ~D ~A"
-         (esc line-title) style line-width
-         (when smooth (f "smooth ~(~A~)" smooth)))
-      (f "pause mouse close"))))
+(defmacro with-gnuplot (&body body)
+  `(let ((*gnuplot-process*
+           (external-program:start *gnuplot-path* '() :input :stream :output t)))
+     (unwind-protect (progn ,@body *gnuplot-process*)
+       (close (external-program:process-input-stream *gnuplot-process*)))))
 
 
-(defun gnuplot (data &rest args &key
-                (x #'car)
-                (y #'cdr)
-                (spew-output nil)
-                &allow-other-keys)
-  "Plot `data` to `filename` with gnuplot.
+(defun gnuplot-data-sequence% (sequence s)
+  (map nil (lambda (row)
+             (map nil (lambda (val)
+                        (princ val s)
+                        (princ #\tab s))
+                  row)
+             (terpri s))
+       sequence))
 
-  This will (silently) quickload the `external-program` system to handle the
-  communication with gnuplot.
+(defun gnuplot-data-matrix% (matrix s)
+  (destructuring-bind (rows cols) (array-dimensions matrix)
+    (dotimes (r rows)
+      (dotimes (c cols)
+        (princ (aref matrix r c) s)
+        (princ #\tab s))
+      (terpri s))))
 
-  `data` should be a sequence of data points to plot.
+(defun gnuplot-data (identifier data &aux (s (external-program:process-input-stream *gnuplot-process*)))
+  "Bind `identifier` to `data` inside the currently-running gnuplot process.
 
-  `x` should be a function to pull the x-values from each item in data.
+  `identifier` must be a string of the form `$foo`.
 
-  `y` should be a function to pull the y-values from each item in data.
+  `data` must be a sequence of sequences of data or a 2D array of data.
 
-  See the docstring of `gnuplot-args` for other keyword arguments.
+  Must be called from inside `with-gnuplot`.
 
   "
-  (funcall (read-from-string "ql:quickload") 'external-program :silent t)
-  (let* ((process (funcall (read-from-string "external-program:start")
-                           "gnuplot"
-                           (apply #'gnuplot-args args)
-                           :input :stream
-                           :output (if spew-output *standard-output* nil)))
-         (in (funcall (read-from-string "external-program:process-input-stream")
-                      process)))
-    (unwind-protect
-        (progn
-          (iterate (for item :in-whatever data)
-                   (format in "~F ~F~%" (funcall x item) (funcall y item)))
-          (finish-output in))
-      (close in))
-    process))
+  (assert (not (null *gnuplot-process*)) () "~A must be called inside ~S" 'gnuplot-data 'with-gnuplot)
+  (check-type identifier string)
+  (assert (char= #\$ (char identifier 0)))
+  (format s "~A << EOD~%" identifier)
+  (etypecase data
+    ((array * (* *)) (gnuplot-data-matrix% data s))
+    (sequence (gnuplot-data-sequence% data s)))
+  (format s "EOD~%"))
 
-(defun gnuplot-function (function &rest args &key
-                         (start 0.0)
-                         (end 1.0)
-                         (step 0.1)
-                         (include-end nil)
-                         &allow-other-keys)
-  "Plot `function` over `[start, end)` by `step` with gnuplot.
+(defun gnuplot-format (format-string &rest args &aux (s (external-program:process-input-stream *gnuplot-process*)))
+  "Send a `cl:format`ed string to the currently-running gnuplot process.
 
-  If `include-end` is `t` the `end` value will also be plotted.
-
-  See the docstring of `gnuplot-args` for other keyword arguments.
+  Must be called from inside `with-gnuplot`.
 
   "
-  (let* ((x (range start end :step step))
-         (x (append x
-                    (when (and include-end
-                               (/= (car (last x)) end))
-                      (list end))))
-         (y (mapcar function x))
-         (data (mapcar #'cons x y)))
-    (apply #'gnuplot data args)))
+  (assert (not (null *gnuplot-process*)) () "~A must be called inside ~S" 'gnuplot-format 'with-gnuplot)
+  (apply #'format s format-string args)
+  (terpri s))
 
+(defun gnuplot-command (command &aux (s (external-program:process-input-stream *gnuplot-process*)))
+  "Send the string `command` to the currently-running gnuplot process.
 
-(defun gnuplot-histogram (data &rest args &key
-                          (bin-width 1)
-                          &allow-other-keys)
-  "Plot `data` as a histogram with gnuplot.
-
-  `bin-width` should be the desired width of the bins.  The bins will be
-  centered on multiples of this number, and data will be rounded to the nearest
-  bin.
+  Must be called from inside `with-gnuplot`.
 
   "
-  (-<> data
-    (mapcar (lambda (y)
-              (* bin-width (round y bin-width)))
-            <>)
-    frequencies
-    alexandria:hash-table-alist
-    (apply #'gnuplot <>
-           :style :boxes
-           :min-y 0
-           :line-width 1
-           :box-width (* bin-width 1.0)
-           args)))
+  (assert (not (null *gnuplot-process*)) () "~A must be called inside ~S" 'gnuplot-command 'with-gnuplot)
+  (write-line command s))
 
+(defun gnuplot (data commands)
+  "Graph `data` with gnuplot using `commands`.
+
+  `data` must be an alist of `(identifier . data)` pairs.  `identifier` must be
+  a string of the form `$foo`.  `data` must be a sequence of sequences of data
+  or a 2D array of data.
+
+  `commands` must be a string or a sequence of strings.
+
+  "
+  (with-gnuplot
+    (dolist (d data)
+      (gnuplot-data (car d) (cdr d)))
+    (etypecase commands
+      (string (gnuplot-command commands))
+      (sequence (map nil #'gnuplot-command commands)))))
 

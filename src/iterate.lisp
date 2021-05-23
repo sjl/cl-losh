@@ -665,6 +665,68 @@
        (with ,hash-table = (make-hash-table :test ,test))
        (incf (gethash ,expr ,hash-table 0)))))
 
+(defmacro-clause (CONCATENATING expr &optional INTO var SEPARATOR separator)
+  "Concatenate the string `expr` into `var`.
+
+  If `var` is not given, `expr` will be accumulated into a string output stream
+  and the result returned.
+
+  If `var` is given, `expr` will be concatenated onto it.  Whether `var` is
+  a fresh string each time or whether an adjustable string is mutated is
+  implementation defined.
+
+  If `separator` is not `nil`, it must be a string designator.
+
+  Examples:
+
+    (iterate (for s :in '(\"foo\" \"bar\" \"baz\"))
+             (concatenating s))
+    ; => \"foobarbaz\"
+
+    (iterate (for s :in '(\"foo\" \"bar\" \"baz\"))
+             (concatenating s :separator #\,))
+    ; => \"foo,bar,baz\"
+
+    (iterate (for s :in '(\"foo\" \"bar\" \"baz\"))
+             (concatenating s :separator \", \"))
+    ; => \"foo, bar, baz\"
+
+    (iterate (for s :in '(\"foo\" \"bar\" \"baz\"))
+             (concatenating s :separator #\, :into v)
+             (format t \"> ~A~%\" v)
+             (collect v))
+    ; => > foo
+    ; => > foo,bar
+    ; => > foo,bar,baz
+    ;
+    ; Implementation defined result, might be one of:
+    ; => (\"foo\" \"foo,bar\" \"foo,bar,baz\")             ; 3 fresh strings
+    ; => (\"foo,bar,baz\" \"foo,bar,baz\" \"foo,bar,baz\") ; same string
+
+  "
+  (if var
+    (let ((sep (gensym "SEP")))
+      `(progn
+         (with ,sep = ,(if separator (string separator) ""))
+         (reducing ,expr
+                   :by (lambda (a b)
+                         (if (null a)
+                           (copy-seq b)
+                           (concatenate 'string a ,sep b)))
+                   :into ,var
+                   :initial-value nil)))
+    (let ((sos (gensym "SOS"))
+          (sep (gensym "SEP")))
+      `(progn
+         (with ,sos = (make-string-output-stream))
+         (with ,sep = ,(if separator (string separator) nil))
+         (if-first-time
+           nil
+           (when ,sep (write-string ,sep ,sos)))
+         (write-string ,expr ,sos)
+         (finally (return (get-output-stream-string ,sos)))))))
+
+
 
 (defmacro-clause (ORING expr &optional INTO var)
   (let ((result (or var iterate::*result-var*)))
@@ -731,7 +793,11 @@
 
 
 (defmacro-driver (FOR var IN-RING-BUFFER ring-buffer)
-  "Iterate over the elements of `ring-buffer`, oldest to newest."
+  "Iterate over the elements of `ring-buffer`, oldest to newest.
+
+  Does not modify the ring buffer.
+
+  "
   (let ((kwd (if generate 'generate 'for)))
     (with-gensyms (rb r w d s)
       `(progn

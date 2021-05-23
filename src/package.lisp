@@ -308,6 +308,7 @@
     :collect-hash
     :collect-set
     :cycling
+    :concatenating
     :end
     :every-nth
     :finding-all
@@ -424,9 +425,10 @@
   (:documentation "Utilities for plotting data with gnuplot.")
   (:export
     :gnuplot
-    :gnuplot-args
-    :gnuplot-function
-    :gnuplot-histogram))
+    :with-gnuplot
+    :gnuplot-data
+    :gnuplot-command
+    :gnuplot-format))
 
 (defpackage :losh.weightlists
   (:use :cl :iterate :losh.base

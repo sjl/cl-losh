@@ -1108,62 +1108,57 @@ Utilities for plotting data with gnuplot.
 
 ### `GNUPLOT` (function)
 
-    (GNUPLOT DATA &REST ARGS &KEY (X #'CAR) (Y #'CDR) (SPEW-OUTPUT NIL) &ALLOW-OTHER-KEYS)
+    (GNUPLOT DATA COMMANDS)
 
-Plot `data` to `filename` with gnuplot.
+Graph `data` with gnuplot using `commands`.
 
-  This will (silently) quickload the `external-program` system to handle the
-  communication with gnuplot.
+  `data` must be an alist of `(identifier . data)` pairs.  `identifier` must be
+  a string of the form `$foo`.  `data` must be a sequence of sequences of data
+  or a 2D array of data.
 
-  `data` should be a sequence of data points to plot.
-
-  `x` should be a function to pull the x-values from each item in data.
-
-  `y` should be a function to pull the y-values from each item in data.
-
-  See the docstring of `gnuplot-args` for other keyword arguments.
+  `commands` must be a string or a sequence of strings.
 
   
 
-### `GNUPLOT-ARGS` (function)
+### `GNUPLOT-COMMAND` (function)
 
-    (GNUPLOT-ARGS &KEY (OUTPUT :QT) (FILENAME plot.png) (STYLE :LINES) (SIZE-X 1200) (SIZE-Y 800)
-                  (LABEL-X) (LABEL-Y) (LINE-TITLE 'DATA) (LINE-WIDTH 4) (SMOOTH NIL) (AXIS-X NIL)
-                  (AXIS-Y NIL) (MIN-X NIL) (MAX-X NIL) (MIN-Y NIL) (MAX-Y NIL) (TICS-X NIL)
-                  (TICS-Y NIL) (GRAPH-TITLE) (LOGSCALE-X NIL) (LOGSCALE-Y NIL) (BOX-WIDTH NIL)
-                  &ALLOW-OTHER-KEYS)
+    (GNUPLOT-COMMAND COMMAND &AUX (S (PROCESS-INPUT-STREAM *GNUPLOT-PROCESS*)))
 
-Return the formatted command line arguments for the given gnuplot arguments.
+Send the string `command` to the currently-running gnuplot process.
 
-  You shouldn't call this function directly — it's exposed just so you can see
-  the list of possible gnuplot arguments all in one place.
+  Must be called from inside `with-gnuplot`.
 
   
 
-### `GNUPLOT-FUNCTION` (function)
+### `GNUPLOT-DATA` (function)
 
-    (GNUPLOT-FUNCTION FUNCTION &REST ARGS &KEY (START 0.0) (END 1.0) (STEP 0.1) (INCLUDE-END NIL)
-                      &ALLOW-OTHER-KEYS)
+    (GNUPLOT-DATA IDENTIFIER DATA &AUX (S (PROCESS-INPUT-STREAM *GNUPLOT-PROCESS*)))
 
-Plot `function` over `[start, end)` by `step` with gnuplot.
+Bind `identifier` to `data` inside the currently-running gnuplot process.
 
-  If `include-end` is `t` the `end` value will also be plotted.
+  `identifier` must be a string of the form `$foo`.
 
-  See the docstring of `gnuplot-args` for other keyword arguments.
+  `data` must be a sequence of sequences of data or a 2D array of data.
+
+  Must be called from inside `with-gnuplot`.
+
+  
+
+### `GNUPLOT-FORMAT` (function)
+
+    (GNUPLOT-FORMAT FORMAT-STRING &REST ARGS &AUX (S (PROCESS-INPUT-STREAM *GNUPLOT-PROCESS*)))
+
+Send a `cl:format`ed string to the currently-running gnuplot process.
+
+  Must be called from inside `with-gnuplot`.
 
   
 
-### `GNUPLOT-HISTOGRAM` (function)
+### `WITH-GNUPLOT` (macro)
 
-    (GNUPLOT-HISTOGRAM DATA &REST ARGS &KEY (BIN-WIDTH 1) &ALLOW-OTHER-KEYS)
-
-Plot `data` as a histogram with gnuplot.
-
-  `bin-width` should be the desired width of the bins.  The bins will be
-  centered on multiples of this number, and data will be rounded to the nearest
-  bin.
-
-  
+    (WITH-GNUPLOT
+      &BODY
+      BODY)
 
 ## Package `LOSH.HASH-SETS`
 
@@ -1977,6 +1972,111 @@ Return a random boolean with `chance` probability of `t`.
 ## Package `LOSH.RING-BUFFERS`
 
 Simple ring buffer implementation.
+
+### `DO-RING-BUFFER` (macro)
+
+    (DO-RING-BUFFER (SYMBOL RING-BUFFER)
+      &BODY
+      BODY)
+
+Iterate over `ring-buffer`, executing `body` with `symbol` bound to each element.
+
+  Elements are walked oldest to newest.
+
+  
+
+### `MAKE-RING-BUFFER` (function)
+
+    (MAKE-RING-BUFFER &KEY (SIZE 64))
+
+Create and return a fresh ring buffer able to hold `(1- size)` elements.
+
+### `RB-CLEAR` (function)
+
+    (RB-CLEAR RING-BUFFER)
+
+Clear the contents of `ring-buffer`.
+
+### `RB-CONTENTS` (function)
+
+    (RB-CONTENTS RING-BUFFER &KEY (RESULT-TYPE 'LIST))
+
+Return a fresh sequence of the contents of `ring-buffer` (oldest to newest).
+
+  `result-type` can be `list` or `vector`.
+
+  
+
+### `RB-COUNT` (function)
+
+    (RB-COUNT RING-BUFFER)
+
+Return the number of elements currently stored in `ring-buffer`.
+
+### `RB-EMPTY-P` (function)
+
+    (RB-EMPTY-P RING-BUFFER)
+
+Return whether `ring-buffer` is empty.
+
+### `RB-FULL-P` (function)
+
+    (RB-FULL-P RING-BUFFER)
+
+Return whether `ring-buffer` is full.
+
+### `RB-POP` (function)
+
+    (RB-POP RING-BUFFER)
+
+Remove and return the oldest element of `ring-buffer`, or signal an error if it is empty.
+
+### `RB-PUSH` (function)
+
+    (RB-PUSH RING-BUFFER OBJECT)
+
+Push `object` into `ring-buffer` and return `object`.
+
+  If `ring-buffer` is full, its oldest element will be silently dropped.  If you
+  want an error to be signaled instead, use `rb-safe-push`.
+
+  
+
+### `RB-REF` (function)
+
+    (RB-REF RING-BUFFER INDEX)
+
+Return the element of `ring-buffer` at `index`.
+
+  Elements are indexed oldest to newest: element 0 is the oldest element in the
+  ring buffer, element 1 is the second oldest, and so on.
+
+  Negative indices are supported: element -1 is the newest element, element -2
+  the second newest, and so on.
+
+  An error will be signaled if `index` is out of range.
+
+  
+
+### `RB-SAFE-PUSH` (function)
+
+    (RB-SAFE-PUSH RING-BUFFER OBJECT)
+
+Push `object` into `ring-buffer`, or signal an error if it is already full.
+
+### `RB-SIZE` (function)
+
+    (RB-SIZE RING-BUFFER)
+
+Return the size of `ring-buffer`.
+
+  A ring buffer can hold at most `(1- (rb-size ring-buffer))` elements.
+
+  
+
+### `RING-BUFFER` (struct)
+
+Slots: `DATA`, `R`, `W`
 
 ## Package `LOSH.SEQUENCES`
 
