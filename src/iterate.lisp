@@ -675,7 +675,8 @@
   a fresh string each time or whether an adjustable string is mutated is
   implementation defined.
 
-  If `separator` is not `nil`, it must be a string designator.
+  If `separator` is not `nil` it must be a string designator, and it will be
+  evaluated once at the beginning of the iterate form.
 
   Examples:
 
@@ -718,11 +719,12 @@
     (let ((sos (gensym "SOS"))
           (sep (gensym "SEP")))
       `(progn
-         (with ,sos = (make-string-output-stream))
+         (with ,sos = nil)
          (with ,sep = ,(if separator (string separator) nil))
-         (if-first-time
-           nil
-           (when ,sep (write-string ,sep ,sos)))
+         (if (null ,sos)
+           (setf ,sos (make-string-output-stream))
+           (when ,sep
+             (write-string ,sep ,sos)))
          (write-string ,expr ,sos)
          (finally (return (get-output-stream-string ,sos)))))))
 
