@@ -242,7 +242,8 @@
     :do-repeat
     :do-range
     :do-irange
-    :do-file))
+    :do-file
+    :do-vector))
 
 
 (defpackage :losh.math
