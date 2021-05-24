@@ -4,17 +4,13 @@
 ;;; Action (second edition) specifically the section "Thought for the design of
 ;;; a gnuplot access layer" on page 253.
 
+
+;;;; State --------------------------------------------------------------------
 (defparameter *gnuplot-path* "gnuplot")
 (defparameter *gnuplot-process* nil)
 
-(defmacro with-gnuplot (options &body body)
-  (assert (null options))
-  `(let ((*gnuplot-process*
-           (external-program:start *gnuplot-path* '() :input :stream :output t)))
-     (unwind-protect (progn ,@body *gnuplot-process*)
-       (close (external-program:process-input-stream *gnuplot-process*)))))
 
-
+;;;; Data Printers ------------------------------------------------------------
 (defun gnuplot-data-sequence% (sequence s)
   (map nil (lambda (row)
              (map nil (lambda (val)
@@ -38,6 +34,15 @@
         (princ (aref matrix r c) s)
         (princ #\tab s))
       (terpri s))))
+
+
+;;;; Basic API ----------------------------------------------------------------
+(defmacro with-gnuplot (options &body body)
+  (assert (null options))
+  `(let ((*gnuplot-process*
+           (external-program:start *gnuplot-path* '() :input :stream :output t)))
+     (unwind-protect (progn ,@body *gnuplot-process*)
+       (close (external-program:process-input-stream *gnuplot-process*)))))
 
 (defun gnuplot-data (identifier data &aux (s (external-program:process-input-stream *gnuplot-process*)))
   "Bind `identifier` to `data` inside the currently-running gnuplot process.
@@ -98,4 +103,21 @@
       (string (gnuplot-command commands))
       (sequence (map nil #'gnuplot-command commands)))))
 
+
+;;;; Convenience Wrappers -----------------------------------------------------
+(defun plot (data &key (style :linespoints) (file "plot.pdf"))
+  "Plot `data` with gnuplot.
+
+  Convenience wrapper around the gnuplot functions.  This is only intended for
+  REPL-driven experimentation — if you want any customization you should use the
+  gnuplot interface instead.
+
+  "
+  (with-gnuplot ()
+    (gnuplot-data "$data" data)
+    (gnuplot-format "set terminal pdfcairo size 10in, 8in
+                     set output '~A'
+                     plot $data using 1:2 with ~A"
+                    file
+                    (string-downcase (symbol-name style)))))
 

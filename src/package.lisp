@@ -429,7 +429,8 @@
     :with-gnuplot
     :gnuplot-data
     :gnuplot-command
-    :gnuplot-format))
+    :gnuplot-format
+    :plot))
 
 (defpackage :losh.weightlists
   (:use :cl :iterate :losh.base
