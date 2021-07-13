@@ -1061,3 +1061,54 @@
                                              (aref ,reg-start% ,i)
                                              (aref ,reg-end% ,i))))))))))))))))
 
+
+(defmacro WHEN-FIRST-TIME (expr)
+  "Sugar for `(if-first-time expr nil)`."
+  `(if-first-time ,expr nil))
+
+(defmacro UNLESS-FIRST-TIME (expr)
+  "Sugar for `(if-first-time nil expr)`."
+  `(if-first-time nil ,expr))
+
+
+(defmacro IF-FIRST-ITERATION (then else)
+  "Evaluate `then` if this clause is executed on the first iteration, otherwise `else`.
+
+  This is similar to from iterate's built-in `if-first-time`, but slightly different:
+
+  * `if-first-time` evaluates `then` the first time the clause is evaluated,
+    even if that happens on a subsequent iteration.
+  * `if-first-iteration` evaluates `then` only if the clause is evaluated on
+    the first iteration.
+
+  Example:
+
+    (iterate
+      (for i :from 1 :to 4)
+      (collect (cons i (when (evenp i)
+                         (list
+                           (if-first-time :first-time :later-time)
+                           (if-first-iteration :first-iter :later-iter))))))
+    ; =>
+    ; ((1)
+    ;  (2 :FIRST-TIME :LATER-ITER)
+    ;  (3)
+    ;  (4 :LATER-TIME :LATER-ITER))
+
+  in that it will only evaluate `then` on the first iteration of the loop, "
+  (with-gensyms (first-iteration)
+    `(progn
+       (with ,first-iteration = t)
+       (after-each (setf ,first-iteration nil))
+       (if ,first-iteration
+         ,then
+         ,else))))
+
+(defmacro WHEN-FIRST-ITERATION (expr)
+  "Sugar for `(if-first-iteration expr nil)`."
+  `(if-first-iteration ,expr nil))
+
+(defmacro UNLESS-FIRST-ITERATION (expr)
+  "Sugar for `(if-first-iteration nil expr)`."
+  `(if-first-iteration nil ,expr))
+

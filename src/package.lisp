@@ -308,13 +308,14 @@
     :collect-frequencies
     :collect-hash
     :collect-set
-    :cycling
     :concatenating
+    :cycling
     :end
     :every-nth
     :finding-all
     :finding-first
     :for-nested
+    :if-first-iteration
     :in-array
     :in-hashset
     :in-lists
@@ -341,6 +342,10 @@
     :test
     :then
     :timing
+    :unless-first-iteration
+    :unless-first-time
+    :when-first-iteration
+    :when-first-time
     :within-radius
 
     ))

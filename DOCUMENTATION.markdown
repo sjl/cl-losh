@@ -455,6 +455,28 @@ Perform `body` on the given `ranges`.
 
 Perform `body` `n` times.
 
+### `DO-VECTOR` (macro)
+
+    (DO-VECTOR (VAR-OR-VARS VECTOR)
+      &BODY
+      BODY)
+
+Iterate over `vector`, performing `body` with `var-or-vars` bound.
+
+  `var-or-vars` can be one of the following:
+
+  * `value-symbol`
+  * `(value-symbol)`
+  * `(index-symbol value-symbol)`
+
+  Successive elements of `vector` will be bound to `value-symbol` while `body`
+  is executed.  If `index-symbol` is given, the current index will be bound to
+  it.
+
+  Returns `nil`.
+
+  
+
 ### `GATHERING` (macro)
 
     (GATHERING
@@ -1112,9 +1134,11 @@ Utilities for plotting data with gnuplot.
 
 Graph `data` with gnuplot using `commands`.
 
-  `data` must be an alist of `(identifier . data)` pairs.  `identifier` must be
-  a string of the form `$foo`.  `data` must be a sequence of sequences of data
-  or a 2D array of data.
+  `data` must be an alist of `(identifier . data)` pairs.
+
+  Each `identifier` must be a string of the form `$foo`.  Each `data` must be
+  one of the following: a sequence of sequences of data points, an alist of data
+  points, or a 2D array of data points.
 
   `commands` must be a string or a sequence of strings.
 
@@ -1138,7 +1162,8 @@ Bind `identifier` to `data` inside the currently-running gnuplot process.
 
   `identifier` must be a string of the form `$foo`.
 
-  `data` must be a sequence of sequences of data or a 2D array of data.
+  `data` must be one of the following: a sequence of sequences of data points,
+  an alist of data points, or a 2D array of data points.
 
   Must be called from inside `with-gnuplot`.
 
@@ -1154,9 +1179,21 @@ Send a `cl:format`ed string to the currently-running gnuplot process.
 
   
 
+### `PLOT` (function)
+
+    (PLOT DATA &KEY (STYLE :LINESPOINTS) (FILE plot.pdf))
+
+Plot `data` with gnuplot.
+
+  Convenience wrapper around the gnuplot functions.  This is only intended for
+  REPL-driven experimentation — if you want any customization you should use the
+  gnuplot interface instead.
+
+  
+
 ### `WITH-GNUPLOT` (macro)
 
-    (WITH-GNUPLOT
+    (WITH-GNUPLOT OPTIONS
       &BODY
       BODY)
 
@@ -1442,6 +1479,35 @@ Read all forms from `string` and return them as a fresh list.
 
 Custom `iterate` drivers and clauses.
 
+### `IF-FIRST-ITERATION` (macro)
+
+    (IF-FIRST-ITERATION THEN ELSE)
+
+Evaluate `then` if this clause is executed on the first iteration, otherwise `else`.
+
+  This is similar to from iterate's built-in `if-first-time`, but slightly different:
+
+  * `if-first-time` evaluates `then` the first time the clause is evaluated,
+    even if that happens on a subsequent iteration.
+  * `if-first-iteration` evaluates `then` only if the clause is evaluated on
+    the first iteration.
+
+  Example:
+
+    (iterate
+      (for i :from 1 :to 4)
+      (collect (cons i (when (evenp i)
+                         (list
+                           (if-first-time :first-time :later-time)
+                           (if-first-iteration :first-iter :later-iter))))))
+    ; =>
+    ; ((1)
+    ;  (2 :FIRST-TIME :LATER-ITER)
+    ;  (3)
+    ;  (4 :LATER-TIME :LATER-ITER))
+
+  in that it will only evaluate `then` on the first iteration of the loop, 
+
 ### `MACROEXPAND-ITERATE` (function)
 
     (MACROEXPAND-ITERATE CLAUSE)
@@ -1468,6 +1534,30 @@ Return `values` from the iterate clause.
   Equivalent to `(finally (return (values ...)))`.
 
   
+
+### `UNLESS-FIRST-ITERATION` (macro)
+
+    (UNLESS-FIRST-ITERATION EXPR)
+
+Sugar for `(if-first-iteration nil expr)`.
+
+### `UNLESS-FIRST-TIME` (macro)
+
+    (UNLESS-FIRST-TIME EXPR)
+
+Sugar for `(if-first-time nil expr)`.
+
+### `WHEN-FIRST-ITERATION` (macro)
+
+    (WHEN-FIRST-ITERATION EXPR)
+
+Sugar for `(if-first-iteration expr nil)`.
+
+### `WHEN-FIRST-TIME` (macro)
+
+    (WHEN-FIRST-TIME EXPR)
+
+Sugar for `(if-first-time expr nil)`.
 
 ## Package `LOSH.LISTS`
 
