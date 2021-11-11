@@ -1112,3 +1112,77 @@
   "Sugar for `(if-first-iteration nil expr)`."
   `(if-first-iteration nil ,expr))
 
+
+(defmacro-clause (FOR vars WINDOW size ON sequence-or-length
+                  &optional START start END end)
+  "Iterate a window over a sequence.
+
+  The exact nature of the iteration depends on the form of `vars`:
+
+  If `vars` is a symbol, or a list of a single symbol, it will be bound to
+  a `size`-element `subseq` of `sequence-or-length` on each iteration.  In this
+  case, `sequence-or-length` must be a sequence.
+
+  If `vars` is a list of two symbols `(start end)`, they will be bound to the
+  start and end bounding indices of a a `size`-element window of
+  `sequence-or-length` on each iteration.  In this case, `sequence-or-length`
+  can be a sequence (in which case its `length` is used) or an integer.
+
+  If `vars` is a list of three symbols `(subseq start end)`, both of the above
+  bindings will happen.  In this case, `sequence-or-length` must be a sequence.
+
+  If `start` or `end` are given, they are used to restrict the range of the
+  sequence being iterated over.
+
+  `generate` is not supported at this time.
+
+  Examples:
+
+    (iterate (with string = \"abcdefg\")
+             (for x :window 2 :on string)
+             (collect x))
+    ; => (\"ab\" \"bc\" \"cd\" \"de\" \"ef\" \"fg\")
+
+    (iterate (with string = \"abcdefg\")
+             (for (start end) :window 2 :on 5)
+             (collect (subseq string start end)))
+    ; => (\"ab\" \"bc\" \"cd\" \"de\")
+
+    (iterate (with string = \"abcdefg\")
+             (for (x start end) :window 2 :on string)
+             (collect (list x start end)))
+    ; => ((\"ab\" 0 2) (\"bc\" 1 3) (\"cd\" 2 4) (\"de\" 3 5) (\"ef\" 4 6) (\"fg\" 5 7))
+
+    (iterate (with string = \"abcdefg\")
+             (for (x start end) :window 2 :on string :start 1 :end 5)
+             (collect (list x start end)))
+    ; => ((\"bc\" 1 3) (\"cd\" 2 4) (\"de\" 3 5))
+
+  "
+  (setf vars (ensure-list vars))
+  (alexandria:with-gensyms (n seq s)
+    (let (subseq% start% end%)
+      (ecase (length vars)
+        (1 (setf subseq% (first vars)
+                 start% (gensym "START")
+                 end% (gensym "END")))
+        (2 (setf subseq% nil
+                 start% (first vars)
+                 end% (second vars)))
+        (3 (setf subseq% (first vars)
+                 start% (second vars)
+                 end% (third vars))))
+      `(progn
+         (with ,s = ,(or start 0))
+         (with ,n = ,size)
+         (with ,seq = ,sequence-or-length)
+         (for ,start% :from ,s)
+         (for ,end% :from (+ ,n ,s) :to
+              ,(cond
+                 (end end)
+                 (subseq% `(length ,seq))
+                 (t `(etypecase ,seq
+                       (integer ,seq)
+                       (sequence (length ,seq))))))
+         ,@(when subseq%
+             `((for ,subseq% = (subseq ,seq ,start% ,end%))))))))

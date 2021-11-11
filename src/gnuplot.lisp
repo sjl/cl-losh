@@ -105,7 +105,7 @@
 
 
 ;;;; Convenience Wrappers -----------------------------------------------------
-(defun plot (data &key (style :linespoints) (file "plot.pdf"))
+(defun plot (data &key (style :linespoints) (file "plot.pdf") (logscale nil))
   "Plot `data` with gnuplot.
 
   Convenience wrapper around the gnuplot functions.  This is only intended for
@@ -116,8 +116,8 @@
   (with-gnuplot ()
     (gnuplot-data "$data" data)
     (gnuplot-format "set terminal pdfcairo size 10in, 8in
-                     set output '~A'
-                     plot $data using 1:2 with ~A"
-                    file
-                    (string-downcase (symbol-name style)))))
-
+                     set output '~A'"
+                    file)
+    (when logscale
+      (gnuplot-format "set logscale y"))
+    (gnuplot-format "plot $data using 1:2 with ~A" (string-downcase (symbol-name style)))))

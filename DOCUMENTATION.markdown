@@ -179,6 +179,33 @@ Return the last element of `vector`, or `nil` if it is empty.
 
   
 
+## Package `LOSH.BASE`
+
+A few utilities re-exported from Alexandria, plus some other basic stuff.
+
+### `MKSTR` (function)
+
+    (MKSTR &REST ARGS)
+
+### `SYMB` (function)
+
+    (SYMB &REST ARGS)
+
+### `TIMING` (macro)
+
+    (TIMING (&KEY (TIME :RUN) (RESULT-TYPE 'INTEGER))
+      &BODY
+      BODY)
+
+Execute `body`, discard its result, and return the time taken.
+
+  `time` must be one of `:run` or `:real`.
+
+  `result-type` must be `integer` (which will return internal time units) or
+  `rational`/`single-float`/`double-float` (which will return seconds).
+
+  
+
 ## Package `LOSH.BITS`
 
 Utilities for low-level bit stuff.
@@ -1181,7 +1208,7 @@ Send a `cl:format`ed string to the currently-running gnuplot process.
 
 ### `PLOT` (function)
 
-    (PLOT DATA &KEY (STYLE :LINESPOINTS) (FILE plot.pdf))
+    (PLOT DATA &KEY (STYLE :LINESPOINTS) (FILE plot.pdf) (LOGSCALE NIL))
 
 Plot `data` with gnuplot.
 
@@ -2596,8 +2623,9 @@ Run `command`, piping `input` to it, optionally returning its output.
   completes.  If false, it will return immediately and allow the program to run
   asynchronously.
 
-  `input` must be a character input stream, a string, or `nil`.  If non-`nil`
-  its contents will be sent to the program as its standard input.
+  `input` must be a character input stream, a string, a list of strings, or
+  `nil`.  If non-`nil` its contents will be sent to the program as its standard
+  input.  A list of strings will be sent separated by newlines.
 
   `result-type` must be one of:
 

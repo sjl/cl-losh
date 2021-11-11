@@ -10,8 +10,9 @@
   completes.  If false, it will return immediately and allow the program to run
   asynchronously.
 
-  `input` must be a character input stream, a string, or `nil`.  If non-`nil`
-  its contents will be sent to the program as its standard input.
+  `input` must be a character input stream, a string, a list of strings, or
+  `nil`.  If non-`nil` its contents will be sent to the program as its standard
+  input.  A list of strings will be sent separated by newlines.
 
   `result-type` must be one of:
 
@@ -31,6 +32,7 @@
   (ctypecase input
     (string (setf input (make-string-input-stream input)))
     (vector (setf input (flexi-streams:make-in-memory-input-stream input)))
+    (cons (setf input (make-string-input-stream (format nil "~{~A~^~%~}" input)))) ; todo make this not cons as much
     (stream)
     (null))
   (when (not wait)

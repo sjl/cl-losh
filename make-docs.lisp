@@ -4,6 +4,7 @@
   (list "LOSH"
 
         "LOSH.ARRAYS"
+        "LOSH.BASE"
         "LOSH.BITS"
         "LOSH.CHILI-DOGS"
         "LOSH.CLOS"

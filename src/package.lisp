@@ -19,6 +19,7 @@
 
 (defpackage :losh.base
   (:use :cl)
+  (:documentation "A few utilities re-exported from Alexandria, plus some other basic stuff.")
   (:import-from :alexandria
     :compose :curry :rcurry
     :with-gensyms :once-only
@@ -28,6 +29,8 @@
     :compose :curry :rcurry
     :with-gensyms :once-only
     :ensure-list
+
+    :timing ; both profiling and iterate use this symbol
 
     :symb :mkstr))
 
@@ -346,6 +349,7 @@
     :unless-first-time
     :when-first-iteration
     :when-first-time
+    :window
     :within-radius
 
     ))
@@ -418,6 +422,7 @@
     :prl
     :shut-up
     :structural-string
+    :timing
 
     ))
 
@@ -453,6 +458,7 @@
 (defpackage-inheriting :losh
   (
 
+   :losh.base
    :losh.arrays
    :losh.bits
    :losh.chili-dogs

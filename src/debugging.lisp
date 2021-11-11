@@ -210,6 +210,31 @@
        (stop-profiling))))
 
 
+(defmacro timing ((&key (time :run) (result-type 'integer)) &body body)
+  "Execute `body`, discard its result, and return the time taken.
+
+  `time` must be one of `:run` or `:real`.
+
+  `result-type` must be `integer` (which will return internal time units) or
+  `rational`/`single-float`/`double-float` (which will return seconds).
+
+  "
+  (with-gensyms (start end result)
+    `(let ((,start ,(ecase time
+                      (:run '(get-internal-run-time))
+                      (:real '(get-internal-real-time)))))
+       (progn ,@body)
+       (let* ((,end ,(ecase time
+                       (:run '(get-internal-run-time))
+                       (:real '(get-internal-real-time))))
+              (,result (- ,end ,start)))
+         ,(ecase result-type
+            (integer `,result)
+            (rational `(/ ,result internal-time-units-per-second))
+            (single-float `(coerce (/ ,result internal-time-units-per-second) 'single-float))
+            (double-float `(coerce (/ ,result internal-time-units-per-second) 'double-float)))))))
+
+
 (defmacro gimme (n &body body)
   `(iterate (repeat ,n)
      (collect (progn ,@body))))
