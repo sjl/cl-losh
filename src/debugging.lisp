@@ -184,10 +184,10 @@
 
   "
   (sb-sprof::reset)
-  (-<> call-count-packages
-    (mapcar #'mkstr <>)
-    (mapcar #'string-upcase <>)
-    (mapc #'sb-sprof::profile-call-counts <>))
+  (_ call-count-packages
+    (mapcar #'mkstr _)
+    (mapcar #'string-upcase _)
+    (mapc #'sb-sprof::profile-call-counts _))
   (sb-sprof::start-profiling :max-samples 50000
                              :mode mode
                              ; :mode :time

@@ -226,8 +226,6 @@
     :losh.queues)
   (:documentation "Utilities for managing control flow.")
   (:export
-    :-<>
-    :<>
     :_
     :nest
     :recursively

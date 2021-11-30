@@ -360,12 +360,6 @@ Utilities for working with CLOS.
 
 Utilities for managing control flow.
 
-### `-<>` (macro)
-
-    (-<> EXPR &REST FORMS)
-
-Thread the given forms, with `<>` as a placeholder.
-
 ### `_` (macro)
 
     (_ EXPR &REST FORMS)

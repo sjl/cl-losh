@@ -136,8 +136,8 @@
     (digit 1 #xD4 16) ; => 13
 
   "
-  (-<> integer
-    (floor <> (expt base position))
-    (mod <> base)))
+  (_ integer
+    (floor _ (expt base position))
+    (mod _ base)))
 
 
