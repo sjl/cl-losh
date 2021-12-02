@@ -518,6 +518,9 @@
     ; the point it is works in arbitrary dimensions.
 
   "
+  ;; TODO rewrite this as bare `for`s without all the generator cruft to avoid
+  ;; the bullshit SBCL `deleting unreachable code` garbage we get every time
+  ;; skip-origin is true.
   (let* ((delta-vars (ensure-list delta-vars))
          (origin-vars (mapcar (lambda (dv) (gensym (mkstr 'origin- dv)))
                               delta-vars))
@@ -539,7 +542,8 @@
              `((with ,skip = ,should-skip-origin)
                (when (and ,skip
                           ,@(iterate (for var :in (ensure-list delta-vars))
-                                     (collect `(zerop ,var))))
+                                     (for ovar :in origin-vars)
+                                     (collect `(= ,ovar ,var))))
                  (next ,control))))))))
 
 
