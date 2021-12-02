@@ -74,7 +74,7 @@
 (defparameter *pbpaste-command* "pbpaste"
   "The shell command to use for `pbpaste`.  When run, this command should print the clipboard contents on standard output.")
 
-(defun pbcopy (object)
+(defun pbcopy (&optional (object *))
   "`pbcopy` the `aesthetic-string` of `object`."
   (sh *pbcopy-command* :input (format nil "~A" object) :wait nil)
   (values))
