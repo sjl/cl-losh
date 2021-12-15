@@ -91,6 +91,7 @@
                              (:file "base")
                              (:file "arrays")
                              (:file "lists")
+                             (:file "iterate")
                              (:file "sequences")
                              (:file "control-flow")
                              (:file "ring-buffers"))))

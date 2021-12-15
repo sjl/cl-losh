@@ -530,6 +530,7 @@
     (with-gensyms (r control skip)
       `(progn
          (with ,r = ,radius)
+         (with ,skip = ,should-skip-origin)
          ,@(mapcar (lambda (ovar oval)
                      `(with ,ovar = ,oval))
                    origin-vars origin-vals)
@@ -538,13 +539,11 @@
                                     (collect `(,var :from (- ,orig ,r) :to (+ ,orig ,r))))
                           :control-var ,control)
          (next ,control)
-         ,@(unless (null should-skip-origin)
-             `((with ,skip = ,should-skip-origin)
-               (when (and ,skip
-                          ,@(iterate (for var :in (ensure-list delta-vars))
-                                     (for ovar :in origin-vars)
-                                     (collect `(= ,ovar ,var))))
-                 (next ,control))))))))
+         (when (and ,skip
+                    ,@(iterate (for var :in (ensure-list delta-vars))
+                               (for ovar :in origin-vars)
+                               (collect `(= ,ovar ,var))))
+           (next ,control))))))
 
 
 (defmacro-driver (FOR var EVERY-NTH n DO form)
@@ -710,9 +709,11 @@
 
   "
   (if var
-    (let ((sep (gensym "SEP")))
+    (let ((separator% (gensym "SEPARATOR"))
+          (sep (gensym "SEP")))
       `(progn
-         (with ,sep = ,(if separator (string separator) ""))
+         (with ,separator% = ,separator)
+         (with ,sep = (if ,separator% (string ,separator%) ""))
          (reducing ,expr
                    :by (lambda (a b)
                          (if (null a)
@@ -720,11 +721,15 @@
                            (concatenate 'string a ,sep b)))
                    :into ,var
                    :initial-value nil)))
-    (let ((sos (gensym "SOS"))
+    (let ((separator% (gensym "SEPARATOR"))
+          (sos (gensym "SOS"))
           (sep (gensym "SEP")))
       `(progn
+         (with ,separator% = ,separator)
          (with ,sos = nil)
-         (with ,sep = ,(if separator (string separator) nil))
+         (with ,sep = (if (or (null ,separator%) (equal ,separator% ""))
+                        nil
+                        (string ,separator%)))
          (if (null ,sos)
            (setf ,sos (make-string-output-stream))
            (when ,sep
