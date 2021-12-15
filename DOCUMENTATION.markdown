@@ -1580,6 +1580,16 @@ Sugar for `(if-first-iteration expr nil)`.
 
 Sugar for `(if-first-time expr nil)`.
 
+### `WITH-RESULT` (macro)
+
+    (WITH-RESULT SYMBOL = EXPR)
+
+Bind `expr` to symbol using `with`, and return it at the end.
+
+  Equivalent to `(progn (with symbol = expr) (returning expr))`.
+
+  
+
 ## Package `LOSH.LISTS`
 
 Utilities for operating on lists.
@@ -2594,7 +2604,7 @@ The shell command to use for `pbpaste`.  When run, this command should print the
 
 ### `PBCOPY` (function)
 
-    (PBCOPY OBJECT)
+    (PBCOPY &OPTIONAL (OBJECT *))
 
 `pbcopy` the `aesthetic-string` of `object`.
 

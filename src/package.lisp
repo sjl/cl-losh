@@ -348,6 +348,7 @@
     :when-first-iteration
     :when-first-time
     :window
+    :with-result
     :within-radius
 
     ))

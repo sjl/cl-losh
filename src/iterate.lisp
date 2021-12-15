@@ -978,6 +978,16 @@
   "
   `(finally (return (values ,@values))))
 
+(defmacro with-result (symbol = expr)
+  "Bind `expr` to symbol using `with`, and return it at the end.
+
+  Equivalent to `(progn (with symbol = expr) (returning expr))`.
+
+  "
+  (assert (eql = '=))
+  `(progn (with ,symbol = ,expr)
+     (returning ,symbol)))
+
 (defmacro-driver (FOR var-or-vars MATCHING regex AGAINST string &optional OVERLAP overlap? START start END end)
   "Iterate over the matches of `regex` in `string`, binding `var-or-vars`.
 
