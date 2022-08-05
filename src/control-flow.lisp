@@ -548,13 +548,14 @@
     i.e. anything that can handle `(read-foo stream eof-error-p eof-value)`.
 
     Any keyword arguments other than `:reader` will be passed along to `open`.
+
     If `nil` is used for one of the `:if-…` options to `open` and this results
     in `open` returning `nil`, no iteration will take place.
 
     An implicit block named `nil` surrounds the iteration, so `return` can be
     used to terminate early.
 
-    Returns `nil` by default.
+    Returns `nil`.
 
     Examples:
 

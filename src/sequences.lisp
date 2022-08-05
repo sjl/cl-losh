@@ -462,10 +462,10 @@
 
   `predicate-spec` can be one of:
 
+  * A quoted symbol.
   * `(function ...)`
   * `(lambda ...)`
-  * A list of `(predicate &key key)`.
-  * Any other object, which will be treated as a predicate.
+  * A list of `(predicate &key key)`, where `predicate` is any of the above.
 
   If a `key` is specified, it will be called on arguments before passing them to
   `predicate`.  Note that the `key` only affects the predicate it's consed to,
@@ -477,7 +477,7 @@
 
     ;; Sort shorter strings first, breaking ties lexicographically:
     (define-sorting-predicate fancy<
-      (#\< :key #'length)
+      (#'< :key #'length)
       #'string<)
 
     (sort (list \"zz\" \"abc\" \"yy\") #'fancy<)
@@ -485,43 +485,38 @@
 
     ;; Sort customers by last name, then first name, then ID number:
     (define-sorting-predicate customer<
-       (#\string< :key #'last-name)
-       (#\string< :key #'first-name)
-       (#\< :key #'id))
+       (#'string< :key #'last-name)
+       (#'string< :key #'first-name)
+       (#'< :key #'id))
 
     (sort (find-customers) #'customer<)
 
   "
-  (with-gensyms (x y kx ky)
-    (labels
-        ((parse-spec (spec)
-           (if (consp spec)
-             (if (member (first spec) '(function lambda))
-               (values spec nil)
-               (destructuring-bind (predicate &key key) spec
-                 (values predicate key)))
-             (values spec nil)))
-         (expand (spec more-specs)
-           (multiple-value-bind (predicate key) (parse-spec spec)
-             (once-only (predicate)
-               (if (null more-specs)
-                 `(if ,(if key
-                         (once-only (key)
-                           `(funcall ,predicate (funcall ,key ,x) (funcall ,key ,y)))
-                         `(funcall ,predicate ,x ,y))
-                    t
-                    nil)
-                 (if key
-                   (once-only (key)
-                     `(let ((,kx (funcall ,key ,x))
-                            (,ky (funcall ,key ,y)))
-                        (cond
-                          ((funcall ,predicate ,kx ,ky) t)
-                          ((funcall ,predicate ,ky ,kx) nil)
-                          (t ,(expand (first more-specs) (rest more-specs))))))
-                   `(cond
-                      ((funcall ,predicate ,x ,y) t)
-                      ((funcall ,predicate ,y ,x) nil)
-                      (t ,(expand (first more-specs) (rest more-specs))))))))))
+  (with-gensyms (x y)
+    (labels ((parse-spec (spec)
+               "Parse `spec` and return the predicate and key as values."
+               (if (consp spec)
+                 (if (member (first spec) '(function lambda quote))
+                   (values spec '#'identity)
+                   (destructuring-bind (predicate &key (key '#'identity)) spec
+                     (values predicate key)))
+                 (values spec '#'identity)))
+             (expand (specs)
+               "Expand `specs` into the body code of the new predicate."
+               (destructuring-bind (spec . remaining) specs
+                 (multiple-value-bind (predicate key) (parse-spec spec)
+                   (once-only (predicate key)
+                     (with-gensyms (kx ky)
+                       `(let ((,kx (funcall ,key ,x))
+                              (,ky (funcall ,key ,y)))
+                          ,(if (null remaining)
+                             `(if (funcall ,predicate ,kx ,ky)
+                                t
+                                nil)
+                             `(cond
+                                ((funcall ,predicate ,kx ,ky) t)
+                                ((funcall ,predicate ,ky ,kx) nil)
+                                (t ,(expand remaining)))))))))))
       `(defun ,name (,x ,y)
-         ,(expand predicate-spec more-predicate-specs)))))
+         ,(expand (cons predicate-spec more-predicate-specs))))))
+

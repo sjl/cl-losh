@@ -247,6 +247,14 @@
     :do-vector))
 
 
+(defpackage :losh.astar
+  (:use :cl :iterate :losh.base
+    :losh.chili-dogs
+    :losh.control-flow)
+  (:documentation "A★ search in a handy package.")
+  (:export
+    :astar))
+
 (defpackage :losh.math
   (:use :cl :iterate :losh.base
     :losh.chili-dogs
@@ -459,6 +467,7 @@
 
    :losh.base
    :losh.arrays
+   :losh.astar
    :losh.bits
    :losh.chili-dogs
    :losh.clos

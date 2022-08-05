@@ -18,6 +18,56 @@ This package exports all of the symbols in the other packages.
 
   
 
+## Package `LOSH.ASTAR`
+
+A★ search in a handy package.
+
+### `ASTAR` (function)
+
+    (ASTAR &KEY START NEIGHBORS GOALP COST HEURISTIC TEST LIMIT GET-SEEN SET-SEEN)
+
+Search for a path from `start` to a goal using A★.
+
+  The following parameters are all required:
+
+  * `start`: the starting state.
+
+  * `neighbors`: a function that takes a state and returns all states reachable
+    from it.
+
+  * `goalp`: a predicate that takes a state and returns whether it is a goal.
+
+  * `cost`: a function that takes two states `a` and `b` and returns the cost
+    to move from `a` to `b`.
+
+  * `heuristic`: a function that takes a state and estimates the distance
+    remaining to the goal.
+
+  * `test`: an equality predicate for comparing nodes.  It must be suitable for
+    passing to `make-hash-table`.
+
+  If the heuristic function is admissable (i.e. it never overestimates the
+  remaining distance) the algorithm will find the shortest path.  If you don't
+  have a decent heuristic, just use `(constantly 0)` to degrade to Dijkstra.
+
+  Note that `test` is required.  The only sensible default would be `eql`, but
+  if you were using states that need a different predicate and forgot to pass it
+  the algorithm would end up blowing the heap, which is unpleasant.
+
+  The following parameters are optional:
+
+  * `limit`: a maximum cost.  Any paths that exceed this cost will not be
+    considered.
+
+  * `set-seen`: a function that takes a state and a cost, and records it.
+    If not provided a hash table will be used, but sometimes (depending on what
+    your states are) it can be faster to store visited nodes more efficiently.
+
+  * `get-seen`: a function that takes a state and retrieves the stored cost, or
+    `nil` if the state has not been seen.
+
+  
+
 ## Package `LOSH.ARRAYS`
 
 Utilities related to arrays.
@@ -381,13 +431,14 @@ Iterate over the contents of `file` using `reader`.
     i.e. anything that can handle `(read-foo stream eof-error-p eof-value)`.
 
     Any keyword arguments other than `:reader` will be passed along to `open`.
+
     If `nil` is used for one of the `:if-…` options to `open` and this results
     in `open` returning `nil`, no iteration will take place.
 
     An implicit block named `nil` surrounds the iteration, so `return` can be
     used to terminate early.
 
-    Returns `nil` by default.
+    Returns `nil`.
 
     Examples:
 
@@ -2217,10 +2268,10 @@ Define `name` as a predicate that composes the given predicates.
 
   `predicate-spec` can be one of:
 
+  * A quoted symbol.
   * `(function ...)`
   * `(lambda ...)`
-  * A list of `(predicate &key key)`.
-  * Any other object, which will be treated as a predicate.
+  * A list of `(predicate &key key)`, where `predicate` is any of the above.
 
   If a `key` is specified, it will be called on arguments before passing them to
   `predicate`.  Note that the `key` only affects the predicate it's consed to,
@@ -2232,7 +2283,7 @@ Define `name` as a predicate that composes the given predicates.
 
     ;; Sort shorter strings first, breaking ties lexicographically:
     (define-sorting-predicate fancy<
-      (#< :key #'length)
+      (#'< :key #'length)
       #'string<)
 
     (sort (list "zz" "abc" "yy") #'fancy<)
@@ -2240,9 +2291,9 @@ Define `name` as a predicate that composes the given predicates.
 
     ;; Sort customers by last name, then first name, then ID number:
     (define-sorting-predicate customer<
-       (#string< :key #'last-name)
-       (#string< :key #'first-name)
-       (#< :key #'id))
+       (#'string< :key #'last-name)
+       (#'string< :key #'first-name)
+       (#'< :key #'id))
 
     (sort (find-customers) #'customer<)
 

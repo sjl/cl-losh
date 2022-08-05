@@ -62,6 +62,11 @@
   (#'< :key #'length)
   #'string<)
 
+(define-sorting-predicate sort-fancy-quoted<
+  ('char< :key (lambda (s) (char s (1- (length s)))))
+  ('< :key #'length)
+  'string<)
+
 (define-test define-sorting-predicate
   (flet ((check (original expected pred)
            (let ((actual (sort (copy-seq original) pred)))
@@ -80,7 +85,10 @@
            #'sort-last-char<)
     (check '("az" "by" "aby" "zzy")
            '("by" "aby" "zzy" "az")
-           #'sort-fancy<)))
+           #'sort-fancy<)
+    (check '("az" "by" "aby" "zzy")
+           '("by" "aby" "zzy" "az")
+           #'sort-fancy-quoted<)))
 
 (defun sortedp (sequence predicate)
   ;; TODO Should this be a util of its own?

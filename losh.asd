@@ -9,12 +9,17 @@
 
   :in-order-to ((asdf:test-op (asdf:test-op :losh/test)))
 
-  :depends-on (:alexandria
-               :iterate
+  :depends-on (
+
+               #+sbcl :sb-sprof
+               :alexandria
                :cl-ppcre
                :external-program
                :flexi-streams
-               #+sbcl :sb-sprof)
+               :iterate
+               :pileup
+
+               )
 
   :components
   ((:module "src"
@@ -47,6 +52,8 @@
                  (:file "control-flow" :depends-on ("queues"))
 
                  ;; 3 ---------------------------------------------------------
+                 (:file "astar" :depends-on ("control-flow"
+                                             "chili-dogs"))
                  (:file "iterate" :depends-on ("control-flow"
                                                "hash-sets"))
                  (:file "math" :depends-on ("control-flow"

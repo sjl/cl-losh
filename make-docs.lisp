@@ -3,6 +3,7 @@
 (defparameter *document-packages*
   (list "LOSH"
 
+        "LOSH.ASTAR"
         "LOSH.ARRAYS"
         "LOSH.BASE"
         "LOSH.BITS"
