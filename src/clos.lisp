@@ -45,3 +45,11 @@
        ,(mapcar (curry #'build-slot-definition conc-name) slots)
        ,@options)))
 
+
+
+(defmacro ensure-slot-value (object slot &optional default)
+  "Return the `slot-value` of `slot` in `object`, setting it to `default` if unbound."
+  (alexandria:once-only (object slot)
+    `(if (slot-boundp ,object ,slot)
+       (slot-value ,object ,slot)
+       (setf (slot-value ,object ,slot) ,default))))

@@ -95,6 +95,15 @@
 
   `commands` must be a string or a sequence of strings.
 
+  Example:
+
+    (gnuplot `((\"$data\" . ,foo-data)) \"
+      @xrfc3339
+      set terminal qt
+      plot $data using 1:2 with linespoints
+      pause mouse close
+      \")
+
   "
   (with-gnuplot ()
     (dolist (d data)

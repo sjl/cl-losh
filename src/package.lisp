@@ -47,14 +47,16 @@
   (:documentation "Utilities for working with CLOS.")
   (:export
     :defclass*
-    :define-condition*))
+    :define-condition*
+    :ensure-slot-value))
 
 (defpackage :losh.eldritch-horrors
   (:use :cl :iterate :losh.base)
   (:documentation "Abandon all hope, ye who enter here.")
   (:export
     :eval-dammit
-    :define-with-macro))
+    :define-with-macro
+    :scratch))
 
 (defpackage :losh.functions
   (:use :cl :iterate :losh.base)
@@ -398,6 +400,8 @@
     :take-while
     :drop
     :drop-while
+    :chunk
+    :ngrams
     :summation
     :product
     :doseq

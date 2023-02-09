@@ -71,3 +71,47 @@
   "Just evaluate `body` all the time, jesus christ lisp."
   `(eval-when (:compile-toplevel :load-toplevel :execute) ,@body))
 
+
+(defmacro scratch% (&body forms)
+  (assert (not (null forms)) () "Malformed scratch block, missing final expr.")
+  (destructuring-bind (head . forms) forms
+    (cond
+      ((null forms) head)
+      ((eql head :mv) (destructuring-bind (symbols expr . forms) forms
+                        `(multiple-value-bind ,symbols ,expr
+                           (scratch% ,@forms))))
+      ((eql head :db) (destructuring-bind (bindings expr . forms) forms
+                        `(destructuring-bind ,bindings ,expr
+                           (scratch% ,@forms))))
+      ((symbolp head) (destructuring-bind (expr . forms) forms
+                        `(let ((,head ,expr))
+                           (scratch% ,@forms))))
+      (t `(progn ,head (scratch% ,@forms))))))
+
+
+(defmacro scratch (&body forms)
+  "Evaluate `forms` in an imperative fashion.
+
+  Each expression in `forms` will be evaluated, with the following exceptions:
+
+  * A bare symbol will be bound via (nested) `let` to the next expression.
+  * `:mv` will bind the next expression (which must be a list of symbols) to the
+    expression after it with `multiple-value-bind`.
+  * `:db` will bind the next expression (which must be a valid binding) to the
+    expression after it with `destructuring-bind`.
+
+  Example:
+
+      (scratch
+        a 10
+        b 20
+        c (+ a b)
+        :mv (d e)   (truncate 100 23)
+        :db (f (g)) (list 100 (list 22))
+        (+ a (- b c) d e (* f g)))
+
+  "
+  ;; Similar to `bb` described here:
+  ;; https://blog.rongarret.info/2023/01/lisping-at-jpl-revisited.html
+  `(block nil (scratch% ,@forms)))
+

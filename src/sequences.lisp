@@ -237,6 +237,59 @@
     (sequence (drop-while-seq predicate seq))))
 
 
+(defun-inline chunk-list (list chunk-size)
+  ;; Since lists have O(N) access time, we iterate through manually,
+  ;; collecting each chunk as we pass through it. Using SUBSEQ would
+  ;; be O(N^2).
+  (loop :while list
+        :collect (loop :repeat chunk-size :while list :collect (pop list))))
+
+(defun-inline chunk-sequence (sequence chunk-size)
+  ;; For other sequences like strings or arrays, we can simply chunk
+  ;; by repeated SUBSEQs.
+  (loop :with len := (length sequence)
+        :for i :below len :by chunk-size
+        :collect (subseq sequence i (min len (+ chunk-size i)))))
+
+(defun chunk (sequence chunk-size)
+  "Split `sequence` into a list of subsequences of size `chunk-size`.
+
+  The final chunk may be smaller than `chunk-size` if the length of `sequence`
+  is not evenly divisible by `chunk-size`.
+
+  "
+  ;; Based on `subdivide` from http://quickutil.org/
+  (check-type sequence sequence)
+  (check-type chunk-size (integer 1))
+  (etypecase sequence
+    (list (chunk-list sequence chunk-size))
+    (sequence (chunk-sequence sequence chunk-size))))
+
+
+(defun-inline ngrams-list (n list)
+  (loop :repeat (1+ (- (length list) n))
+        :for l :on list
+        :collect (take-list n l)))
+
+(defun-inline ngrams-sequence (n sequence)
+  (loop :for i :to (- (length sequence) n)
+        :collect (subseq sequence i (+ i n))))
+
+(defun ngrams (n sequence)
+  "Return a list of the `n`grams of `sequence`.
+
+  The length of `sequence` must be at least `n`.
+
+  "
+  ;; Based on `n-grams` from http://quickutil.org/
+  (check-type sequence sequence)
+  (check-type n (integer 1))
+  (assert (<= n (length sequence)))
+  (etypecase sequence
+    (list (ngrams-list n sequence))
+    (sequence (ngrams-sequence n sequence))))
+
+
 (defun extrema (predicate sequence &key (key #'identity))
   "Return the smallest and largest elements of `sequence` according to `predicate`.
 
@@ -519,4 +572,6 @@
                                 (t ,(expand remaining)))))))))))
       `(defun ,name (,x ,y)
          ,(expand (cons predicate-spec more-predicate-specs))))))
+
+
 

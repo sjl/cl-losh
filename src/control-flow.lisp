@@ -418,7 +418,8 @@
   `(dotimes (,(gensym) ,n)
      ,@body))
 
-(defmacro do-vector ((var-or-vars vector) &body body)
+(defmacro do-vector
+    ((var-or-vars vector &key (start nil start?) (end nil end?)) &body body)
   "Iterate over `vector`, performing `body` with `var-or-vars` bound.
 
   `var-or-vars` can be one of the following:
@@ -434,19 +435,20 @@
   Returns `nil`.
 
   "
-  (setf var-or-vars (alexandria:ensure-list var-or-vars))
-  (alexandria:once-only (vector)
+  (setf var-or-vars (alexandria:ensure-list var-or-vars)
+        start (if start? start 0))
+  (alexandria:once-only (vector start)
     (let ((i nil)
           (v nil)
-          (len (gensym "LEN")))
+          (end% (gensym "END")))
       (ecase (length var-or-vars)
         (1 (setf i (gensym "I")
                  v (first var-or-vars)))
         (2 (setf i (first var-or-vars)
                  v (second var-or-vars))))
-      `(do ((,len (length ,vector))
-            (,i 0 (1+ ,i)))
-         ((>= ,i ,len))
+      `(do ((,end% ,(if end? end `(length ,vector)))
+            (,i ,start (1+ ,i)))
+         ((>= ,i ,end%))
          (let ((,v (aref ,vector ,i)))
            ,@body)))))
 
