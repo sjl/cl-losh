@@ -229,3 +229,10 @@
   (alexandria:hash-table-keys storage))
 
 
+(defmacro do-hash-set ((symbol hset) &body body)
+  "Iterate over `hset` with `symbol` bound to successive elements."
+  (with-gensyms (iter found)
+    `(with-hash-table-iterator (,iter (hash-set-storage ,hset))
+       (loop (multiple-value-bind (,found ,symbol) (,iter)
+               (unless ,found (return nil))
+               ,@body)))))

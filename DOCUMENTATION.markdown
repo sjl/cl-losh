@@ -1327,6 +1327,14 @@ Create a (shallow) copy of the given hash set.
 
   
 
+### `DO-HASH-SET` (macro)
+
+    (DO-HASH-SET (SYMBOL HSET)
+      &BODY
+      BODY)
+
+Iterate over `hset` with `symbol` bound to successive elements.
+
 ### `HASH-SET` (struct)
 
 Slots: `STORAGE`

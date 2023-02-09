@@ -96,7 +96,9 @@
     :hset-filter!
     :hset-map
     :hset-map!
-    :hset-reduce))
+    :hset-reduce
+
+    :do-hash-set))
 
 
 (defpackage :losh.io
