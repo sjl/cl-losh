@@ -406,6 +406,12 @@ Utilities for working with CLOS.
 
   
 
+### `ENSURE-SLOT-VALUE` (macro)
+
+    (ENSURE-SLOT-VALUE OBJECT SLOT &OPTIONAL DEFAULT)
+
+Return the `slot-value` of `slot` in `object`, setting it to `default` if unbound.
+
 ## Package `LOSH.CONTROL-FLOW`
 
 Utilities for managing control flow.
@@ -529,7 +535,7 @@ Perform `body` `n` times.
 
 ### `DO-VECTOR` (macro)
 
-    (DO-VECTOR (VAR-OR-VARS VECTOR)
+    (DO-VECTOR (VAR-OR-VARS VECTOR &KEY (START NIL START?) (END NIL END?))
       &BODY
       BODY)
 
@@ -1134,6 +1140,34 @@ Define a with-`type` macro for the given `type` and `slots`.
 
 Just evaluate `body` all the time, jesus christ lisp.
 
+### `SCRATCH` (macro)
+
+    (SCRATCH
+      &BODY
+      FORMS)
+
+Evaluate `forms` in an imperative fashion.
+
+  Each expression in `forms` will be evaluated, with the following exceptions:
+
+  * A bare symbol will be bound via (nested) `let` to the next expression.
+  * `:mv` will bind the next expression (which must be a list of symbols) to the
+    expression after it with `multiple-value-bind`.
+  * `:db` will bind the next expression (which must be a valid binding) to the
+    expression after it with `destructuring-bind`.
+
+  Example:
+
+      (scratch
+        a 10
+        b 20
+        c (+ a b)
+        :mv (d e)   (truncate 100 23)
+        :db (f (g)) (list 100 (list 22))
+        (+ a (- b c) d e (* f g)))
+
+  
+
 ## Package `LOSH.FUNCTIONS`
 
 Utilities for working with higher-order functions.
@@ -1213,6 +1247,15 @@ Graph `data` with gnuplot using `commands`.
   points, or a 2D array of data points.
 
   `commands` must be a string or a sequence of strings.
+
+  Example:
+
+    (gnuplot `(("$data" . ,foo-data)) "
+      @xrfc3339
+      set terminal qt
+      plot $data using 1:2 with linespoints
+      pause mouse close
+      ")
 
   
 
@@ -2254,6 +2297,17 @@ Slots: `DATA`, `R`, `W`
 
 Utilities for operating on sequences.
 
+### `CHUNK` (function)
+
+    (CHUNK SEQUENCE CHUNK-SIZE)
+
+Split `sequence` into a list of subsequences of size `chunk-size`.
+
+  The final chunk may be smaller than `chunk-size` if the length of `sequence`
+  is not evenly divisible by `chunk-size`.
+
+  
+
 ### `DEFINE-SORTING-PREDICATE` (macro)
 
     (DEFINE-SORTING-PREDICATE NAME PREDICATE-SPEC &REST MORE-PREDICATE-SPECS)
@@ -2480,6 +2534,16 @@ Compose the given predicates into a single predicate and return it.
             (cons #'string< #'last-name)
             (cons #'string< #'first-name)
             (cons #'< #'id)))
+
+  
+
+### `NGRAMS` (function)
+
+    (NGRAMS N SEQUENCE)
+
+Return a list of the `n`grams of `sequence`.
+
+  The length of `sequence` must be at least `n`.
 
   
 
