@@ -1055,6 +1055,14 @@ Print `args` labeled and readably.
 
 Profile `form` and dump the report to `lisp.prof`.
 
+### `PROFILE-WHEN` (macro)
+
+    (PROFILE-WHEN CONDITION
+      &BODY
+      BODY)
+
+Evaluate and return `body`, profiling when `condition` is true.
+
 ### `SHUT-UP` (macro)
 
     (SHUT-UP
@@ -1962,6 +1970,28 @@ Clamp `place` between `from` and `to` in-place.
 Divide `place` by `divisor` in-place.
 
   If `divisor` is not given, `place` will be set to `(/ 1 place)`.
+
+  
+
+### `ENSUREF` (macro)
+
+    (ENSUREF &REST PLACE-EXPR-PAIRS)
+
+Set each `place` that is currently `NIL` to its corresponding `expr`.
+
+  Syntactic sugar where `(ensuref place expr)` expands to something like
+  `(or place (setf place expr))` but doesn't multiply-evaluate the place.
+
+  Examples:
+
+    (defparameter *foo* nil)
+    *foo* ; => NIL
+
+    (ensuref *foo* (print 'hello)) ; prints HELLO
+    *foo* ; => HELLO
+
+    (ensuref *foo* (print 'world))
+    *foo* ; => HELLO
 
   
 

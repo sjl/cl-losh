@@ -133,7 +133,8 @@
     :clampf
     :negatef
     :notf
-    :callf))
+    :callf
+    :ensuref))
 
 (defpackage :losh.shell
   (:use :cl :iterate :losh.base)
@@ -420,6 +421,7 @@
   (:export
 
     #+sbcl :profile
+    #+sbcl :profile-when
     #+sbcl :start-profiling
     #+sbcl :stop-profiling
     :aesthetic-string

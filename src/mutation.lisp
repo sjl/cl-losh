@@ -86,3 +86,34 @@
      ,@(loop :for (place function . nil) :on place-function-pairs :by #'cddr
              :collect `(%callf ,place ,function))))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun build-ensure (place expr env)
+    (multiple-value-bind (temps exprs stores store-expr access-expr)
+        (get-setf-expansion place env)
+      `(let* (,@(mapcar #'list temps exprs))
+         (unless ,access-expr
+           (let ((,(car stores) ,expr))
+             ,store-expr))))))
+
+(defmacro ensuref (&rest place-expr-pairs &environment env)
+  "Set each `place` that is currently `NIL` to its corresponding `expr`.
+
+  Syntactic sugar where `(ensuref place expr)` expands to something like
+  `(or place (setf place expr))` but doesn't multiply-evaluate the place.
+
+  Examples:
+
+    (defparameter *foo* nil)
+    *foo* ; => NIL
+
+    (ensuref *foo* (print 'hello)) ; prints HELLO
+    *foo* ; => HELLO
+
+    (ensuref *foo* (print 'world))
+    *foo* ; => HELLO
+
+  "
+  `(progn
+    ,@(loop :for (place expr) :on place-expr-pairs :by #'cddr
+            :collect (build-ensure place expr env))))
+

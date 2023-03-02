@@ -209,6 +209,14 @@
          (time ,form)
        (stop-profiling))))
 
+(defmacro profile-when (condition &body body)
+  "Evaluate and return `body`, profiling when `condition` is true."
+  (with-gensyms (thunk)
+    `(flet ((,thunk () ,@body))
+       (if ,condition
+         (profile (,thunk))
+         (,thunk)))))
+
 
 (defmacro timing ((&key (time :run) (result-type 'integer)) &body body)
   "Execute `body`, discard its result, and return the time taken.
