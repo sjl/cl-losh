@@ -91,9 +91,8 @@
     (multiple-value-bind (temps exprs stores store-expr access-expr)
         (get-setf-expansion place env)
       `(let* (,@(mapcar #'list temps exprs))
-         (unless ,access-expr
-           (let ((,(car stores) ,expr))
-             ,store-expr))))))
+         (or ,access-expr (let ((,(car stores) ,expr))
+                            ,store-expr))))))
 
 (defmacro ensuref (&rest place-expr-pairs &environment env)
   "Set each `place` that is currently `NIL` to its corresponding `expr`.
