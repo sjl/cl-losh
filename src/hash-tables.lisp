@@ -76,3 +76,21 @@
                (remhash k hash-table)))
            hash-table)
   hash-table)
+
+(defun ht/eql (&rest keys-and-values)
+  (alexandria:plist-hash-table keys-and-values :test 'eql))
+
+(defun ht/equal (&rest keys-and-values)
+  (alexandria:plist-hash-table keys-and-values :test 'equal))
+
+(named-readtables:defreadtable hash-table-constructor-syntax
+  (:merge :standard)
+  (:macro-char #\{ (lambda (stream char)
+                     (declare (ignore char))
+                     `(ht/eql ,@(read-delimited-list #\} stream t))))
+  (:macro-char #\# :dispatch)
+  (:dispatch-macro-char #\# #\{ (lambda (stream char n)
+                                  (declare (ignore char n))
+                                  `(ht/equal ,@(read-delimited-list #\} stream t))))
+  (:macro-char #\} (get-macro-character #\) nil)))
+

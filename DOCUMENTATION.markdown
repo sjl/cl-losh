@@ -2222,6 +2222,10 @@ Return a random number in [`min`, `max`].
 
 Return a random boolean with `chance` probability of `t`.
 
+## Package `LOSH.READTABLE`
+
+Custom readtable.
+
 ## Package `LOSH.RING-BUFFERS`
 
 Simple ring buffer implementation.

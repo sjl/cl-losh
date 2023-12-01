@@ -26,6 +26,8 @@
     :ensure-list
     )
   (:export
+    :losh
+
     :compose :curry :rcurry
     :with-gensyms :once-only
     :ensure-list
@@ -367,6 +369,12 @@
     ))
 
 
+(defpackage :losh.readtable
+  (:use :cl :losh.base)
+  (:documentation "Custom readtable.")
+  (:export :losh))
+
+
 (defpackage :losh.random
   (:use :cl :iterate :losh.base
     :losh.chili-dogs
@@ -494,6 +502,7 @@
    :losh.priority-queues
    :losh.queues
    :losh.random
+   :losh.readtable
    :losh.ring-buffers
    :losh.sequences
    :losh.shell

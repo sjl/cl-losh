@@ -18,6 +18,7 @@
                :flexi-streams
                :iterate
                :pileup
+               :named-readtables
 
                )
 
@@ -64,6 +65,7 @@
                  ;; 4 ---------------------------------------------------------
                  (:file "random" :depends-on ("math"
                                               "chili-dogs"))
+                 (:file "readtable" :depends-on ("hash-tables"))
                  (:file "sequences" :depends-on ("chili-dogs"
                                                  "hash-tables"
                                                  "functions"
