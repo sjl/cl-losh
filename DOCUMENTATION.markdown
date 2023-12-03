@@ -412,6 +412,12 @@ Utilities for working with CLOS.
 
 Return the `slot-value` of `slot` in `object`, setting it to `default` if unbound.
 
+### `SLOT-VALUE-OR` (function)
+
+    (SLOT-VALUE-OR OBJECT SLOT &OPTIONAL DEFAULT)
+
+Return the `slot-value` of `slot` in `object`, or `default` if unbound.
+
 ## Package `LOSH.CONTROL-FLOW`
 
 Utilities for managing control flow.

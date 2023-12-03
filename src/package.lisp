@@ -50,6 +50,7 @@
   (:export
     :defclass*
     :define-condition*
+    :slot-value-or
     :ensure-slot-value))
 
 (defpackage :losh.eldritch-horrors

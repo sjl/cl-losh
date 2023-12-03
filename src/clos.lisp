@@ -46,6 +46,12 @@
        ,@options)))
 
 
+(defun slot-value-or (object slot &optional default)
+  "Return the `slot-value` of `slot` in `object`, or `default` if unbound."
+  (if (slot-boundp object slot)
+    (slot-value object slot)
+    default))
+
 
 (defmacro ensure-slot-value (object slot &optional default)
   "Return the `slot-value` of `slot` in `object`, setting it to `default` if unbound."
