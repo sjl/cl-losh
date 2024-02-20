@@ -2676,7 +2676,8 @@ Return a hash table containing the proportions of the items in `sequence`.
 
 ### `REDUCTIONS` (function)
 
-    (REDUCTIONS FUNCTION SEQUENCE &KEY KEY FROM-END START END (INITIAL-VALUE NIL IV?))
+    (REDUCTIONS FUNCTION SEQUENCE &KEY KEY FROM-END START END (INITIAL-VALUE NIL IV?)
+                (RESULT-TYPE 'LIST))
 
 Return a list of intermediate values of `reduce`ing `function` over `sequence`.
 
@@ -2693,6 +2694,8 @@ Return a list of intermediate values of `reduce`ing `function` over `sequence`.
   *Unlike* `reduce`, if the (sub)sequence is empty (and no `initial-value` is
   provided) an empty list will be returned, instead of calling `function` with
   no arguments.
+
+  `result-type` must be a subtype of `list` or `vector`.
 
   Examples:
 

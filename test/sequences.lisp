@@ -158,72 +158,96 @@
                     (* (1- n) (length (string sep))))
                  (length result))))))))
 
+(defun check-reductions (function expected input &rest args)
+  (is (equalp expected
+              (apply #'reductions function input :result-type 'list args)))
+  (is (equalp (coerce expected 'vector)
+              (apply #'reductions function input :result-type 'vector args)))
+  (is (equalp expected
+              (apply #'reductions function (coerce input 'vector) :result-type 'list args)))
+  (is (equalp (coerce expected 'vector)
+              (apply #'reductions function (coerce input 'vector) :result-type 'vector args))))
+
 (define-test reductions/basic
-  (is (equal '() (reductions #'+ '())))
-  (is (equal '(1) (reductions #'+ '(1))))
-  (is (equal '(1 3) (reductions #'+ '(1 2))))
-  (is (equal '(1 3 6) (reductions #'+ '(1 2 3))))
-  (is (equal '(100 101 103 106)
-             (reductions #'+ '(1 2 3) :initial-value 100)))
-  (is (equal '(nil (-3) (-2 -3) (-1 -2 -3))
-             (reductions #'cons '(1 2 3)
-                         :initial-value nil
-                         :key #'-
-                         :from-end t))))
+  (check-reductions #'+ '() '())
+  (check-reductions #'+ '(1) '(1))
+  (check-reductions #'+ '(1 3) '(1 2))
+  (check-reductions #'+ '(1 3 6) '(1 2 3))
+  (check-reductions #'+ '(100 101 103 106) '(1 2 3)
+                    :initial-value 100)
+  (check-reductions #'cons
+                    '(nil (-3) (-2 -3) (-1 -2 -3))
+                    '(1 2 3)
+                    :initial-value nil
+                    :key #'-
+                    :from-end t))
 
 (define-test reductions/initial-value
-  (is (equal '(23) (reductions #'+ '() :initial-value 23)))
-  (is (equal '(23 123) (reductions #'+ '(100) :initial-value 23)))
-  (is (equal '(23 123 1123) (reductions #'+ '(100 1000) :initial-value 23))))
+  (check-reductions #'+ '(23) '() :initial-value 23)
+  (check-reductions #'+ '(23 123) '(100) :initial-value 23)
+  (check-reductions #'+ '(23 123 1123) '(100 1000) :initial-value 23))
 
 (define-test reductions/key
   ;; Key should be called on the contents.
-  (is (equal '(-1 -3 -6)
-             (reductions #'+ '(1 2 3)
-                         :key #'-)))
+  (check-reductions #'+
+                    '(-1 -3 -6)
+                    '(1 2 3)
+                    :key #'-)
   ;; Key should NOT be called on the initial value, if given.
-  (is (equal '(100 101 103 106)
-             (reductions #'+ '((1) (2) (3))
-                         :initial-value 100
-                         :key #'car))))
+  (check-reductions #'+
+                    '(100 101 103 106)
+                    '((1) (2) (3))
+                    :initial-value 100
+                    :key #'car))
 
 (define-test reductions/start-end
-  (is (equal '(0 1 3 6 10 15) (reductions #'+ '(0 1 2 3 4 5) :start 0 :end nil)))
-  (is (equal '(  1 3 6 10 15) (reductions #'+ '(0 1 2 3 4 5) :start 1 :end nil)))
-  (is (equal '(0 1 3 6 10   ) (reductions #'+ '(0 1 2 3 4 5) :start 0 :end 5)))
-  (is (equal '(    2 5  9   ) (reductions #'+ '(0 1 2 3 4 5) :start 2 :end 5)))
-  (is (equal '(    2        ) (reductions #'+ '(0 1 2 3 4 5) :start 2 :end 3)))
-  (is (equal '(             ) (reductions #'+ '(0 1 2 3 4 5) :start 2 :end 2)))
-  (is (equal '(             ) (reductions #'+ '(0 1 2 3 4 5) :start 6 :end nil)))
-  (is (equal '(    2 5  9   ) (reductions #'+ (mapcar #'list '(0 1 2 3 4 5))
-                                          :start 2 :end 5 :key #'car))))
+  (check-reductions #'+ '(0 1 3 6 10 15) '(0 1 2 3 4 5) :start 0 :end nil)
+  (check-reductions #'+ '(  1 3 6 10 15) '(0 1 2 3 4 5) :start 1 :end nil)
+  (check-reductions #'+ '(0 1 3 6 10   ) '(0 1 2 3 4 5) :start 0 :end 5)
+  (check-reductions #'+ '(    2 5  9   ) '(0 1 2 3 4 5) :start 2 :end 5)
+  (check-reductions #'+ '(    2        ) '(0 1 2 3 4 5) :start 2 :end 3)
+  (check-reductions #'+ '(             ) '(0 1 2 3 4 5) :start 2 :end 2)
+  (check-reductions #'+ '(             ) '(0 1 2 3 4 5) :start 6 :end nil)
+  (check-reductions #'+ '(    2 5  9   ) (mapcar #'list '(0 1 2 3 4 5)) :start 2 :end 5 :key #'car))
 
 (define-test reductions/from-end
   (flet ((cat (a b) (concatenate 'string a b)))
-    (is (equalp '("E" "DE" "CDE" "BCDE" "ABCDE")
-                (reductions #'cat '(a b c d e) :from-end t
-                            :key #'string)))
-    (is (equalp '("" "E" "DE" "CDE" "BCDE" "ABCDE")
-                (reductions #'cat '(a b c d e) :from-end t
-                            :key #'string :initial-value "")))
-    (is (equalp '("" "C" "BC")
-                (reductions #'cat '(a b c d e) :from-end t
-                            :key #'string :initial-value ""
-                            :start 1 :end 3)))
-    (is (equalp '("C" "BC")
-                (reductions #'cat '(a b c d e) :from-end t
-                            :key #'string
-                            :start 1 :end 3)))
-    (is (equalp '()
-                (reductions #'cat '(a b c d e) :from-end t
-                            :key #'string
-                            :start 1 :end 1)))
-    (is (equalp '("")
-                (reductions #'cat '(a b c d e) :from-end t
-                            :key #'string :initial-value ""
-                            :start 1 :end 1)))))
+    (check-reductions #'cat
+                      '("E" "DE" "CDE" "BCDE" "ABCDE")
+                      '(a b c d e)
+                      :from-end t
+                      :key #'string)
+    (check-reductions #'cat
+                      '("" "E" "DE" "CDE" "BCDE" "ABCDE")
+                      '(a b c d e)
+                      :from-end t
+                      :key #'string :initial-value "")
+    (check-reductions #'cat
+                      '("" "C" "BC")
+                      '(a b c d e)
+                      :from-end t
+                      :key #'string :initial-value ""
+                      :start 1 :end 3)
+    (check-reductions #'cat
+                      '("C" "BC")
+                      '(a b c d e)
+                      :from-end t
+                      :key #'string
+                      :start 1 :end 3)
+    (check-reductions #'cat
+                      '()
+                      '(a b c d e)
+                      :from-end t
+                      :key #'string
+                      :start 1 :end 1)
+    (check-reductions #'cat
+                      '("")
+                      '(a b c d e)
+                      :from-end t
+                      :key #'string :initial-value ""
+                      :start 1 :end 1)))
 
 (define-test reductions/non-list
-  (is (equal '(1 3 6) (reductions #'+ (vector 1 2 3))))
-  (is (equal '(99 100) (reductions #'+ (vector 1 2 3) :start 0 :end 1 :initial-value 99)))
-  (is (equal '(99) (reductions #'+ (vector 1 2 3) :start 0 :end 0 :initial-value 99))))
+  (check-reductions #'+ '(1 3 6) (vector 1 2 3))
+  (check-reductions #'+ '(99 100) (vector 1 2 3) :start 0 :end 1 :initial-value 99)
+  (check-reductions #'+ '(99) (vector 1 2 3) :start 0 :end 0 :initial-value 99))
