@@ -418,6 +418,7 @@
     :product
     :doseq
     :string-join
+    :reductions
     :define-sorting-predicate
     :make-sorting-predicate))
 

@@ -336,6 +336,80 @@
                               el)))))
 
 
+(defun reductions (function sequence
+                   &key key from-end start end (initial-value nil iv?))
+  "Return a list of intermediate values of `reduce`ing `function` over `sequence`.
+
+  If `initial-value` is provided it will be included as the first element in the
+  results.
+
+  If `from-end` is true the sequence will be walked in reverse order, but the
+  order of the *results* will still be in the order they were produced (with the
+  `initial-value` first, if one is provided).
+
+  Like `reduce`, `key` is only called on the elements of `sequence`, *not* on
+  `initial-value` if one is provided.
+
+  *Unlike* `reduce`, if the (sub)sequence is empty (and no `initial-value` is
+  provided) an empty list will be returned, instead of calling `function` with
+  no arguments.
+
+  Examples:
+
+    (reductions #'+ '(0 1 2 3))
+    ; => (0 1 3 6)
+
+    (reductions #'+ '(0 1 2 3) :from-end t)
+    ; => (3 5 6 6)
+
+    (reductions #'+ '(10 20 30) :initial-value 100)
+    ; => (100 110 120 130)
+
+    (reductions #'+ '((10) (20) (30)) :initial-value 100 :key #'car)
+    ; => (100 110 120 130)
+
+    (reductions #'+ '(10 20 30) :start 1 :end 1)
+    ; => ()
+
+    (reductions #'+ '(10 20 30) :start 1 :end 1 :initial-value 111)
+    ; => (111)
+
+  "
+  (let ((result (list)))
+    (flet ((f (&optional (a nil a?) b)
+             ;; The only time the reducing function is called with zero
+             ;; arguments is if we have an empty (sub)seq.  If that's the case
+             ;; we can just bail immediately.
+             (when (not a?)
+               (return-from reductions (list)))
+             ;; Otherwise push the current value (we'll handle the final one at
+             ;; the end) and return the next.
+             (push (if from-end b a) result)
+             (funcall function a b)))
+      (let ((final (if iv?
+                     (reduce #'f sequence
+                             :key key
+                             :from-end from-end
+                             :start (or start 0)
+                             :end end
+                             :initial-value initial-value)
+                     ;; We have to specifically NOT pass :initial-value if it's
+                     ;; omitted.  We could apply (when …), but that's ugly.
+                     (reduce #'f sequence
+                             :key key
+                             :from-end from-end
+                             :start (or start 0)
+                             :end end))))
+        (if (null result)
+          ;; If we made it here without ever pushing to result or bailing on an
+          ;; empty (sub)seq, then we must have either had a one-element seq with
+          ;; no IV, or an empty seq with an IV.  Either way, return it.
+          (list final)
+          ;; Otherwise we built something, return it after tacking on the last
+          ;; value we didn't have a chance to record.
+          (nreverse (cons final result)))))))
+
+
 (defmacro doseq ((var sequence) &body body)
   "Perform `body` with `var` bound to each element in `sequence` in turn.
 
@@ -572,6 +646,5 @@
                                 (t ,(expand remaining)))))))))))
       `(defun ,name (,x ,y)
          ,(expand (cons predicate-spec more-predicate-specs))))))
-
 
 

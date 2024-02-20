@@ -209,3 +209,4 @@
     (if (zerop length)
       (values nil nil)
       (values (aref vector (1- length)) t))))
+
