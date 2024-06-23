@@ -103,6 +103,12 @@
 
     :do-hash-set))
 
+(defpackage :losh.streams
+  (:use :cl :iterate :losh.base)
+  (:documentation "Utilities related to strings, reading, and/or printing.")
+  (:export
+    :with-eof-handled))
+
 
 (defpackage :losh.io
   (:use :cl :iterate :losh.base)
@@ -508,6 +514,7 @@
    :losh.ring-buffers
    :losh.sequences
    :losh.shell
+   :losh.streams
    :losh.weightlists
 
    )

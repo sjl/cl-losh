@@ -39,6 +39,7 @@
                  (:file "lists" :depends-on ("base"))
                  (:file "mutation" :depends-on ("base"))
                  (:file "shell" :depends-on ("base"))
+                 (:file "streams" :depends-on ("base"))
 
                  ;; 1 ---------------------------------------------------------
                  (:file "arrays" :depends-on ("chili-dogs"))

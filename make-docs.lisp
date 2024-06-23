@@ -28,6 +28,7 @@
         "LOSH.RING-BUFFERS"
         "LOSH.SEQUENCES"
         "LOSH.SHELL"
+        "LOSH.STREAMS"
         "LOSH.WEIGHTLISTS"
 
         ))

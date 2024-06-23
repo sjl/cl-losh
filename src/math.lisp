@@ -140,4 +140,3 @@
     (floor _ (expt base position))
     (mod _ base)))
 
-
