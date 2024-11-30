@@ -335,7 +335,7 @@
 
 (defun parse-sequence-arguments
     (from upfrom downfrom to downto above below by)
-  (let* ((start (or from upfrom downfrom))
+  (let* ((start (or from upfrom downfrom (when below 0) (when to 0)))
          (end (or to downto above below))
          (increment (or by 1))
          (down (or downfrom downto above))
