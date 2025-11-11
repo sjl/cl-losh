@@ -77,7 +77,7 @@
     (mutate-hash-values (lambda (v) (/ v total))
                         freqs)))
 
-(defun group-by (function sequence &key (test #'eql) (key #'identity))
+(defun group-by (function sequence &key (test #'eql) (key #'identity) (map #'identity))
   "Return a hash table of the elements of `sequence` grouped by `function`.
 
   This function groups the elements of `sequence` into buckets.  The bucket for
@@ -90,6 +90,9 @@
   If `key` is given it will be called on each element before passing it to
   `function` to produce the bucket identifier.  This does not effect what is
   stored in the lists.
+
+  If `map` is given it will be called on each element before storing it in the
+  hash table.
 
   Examples:
 
@@ -113,7 +116,8 @@
   (iterate
     (with result = (make-hash-table :test test))
     (for i :in-whatever sequence)
-    (push i (gethash (funcall function (funcall key i)) result))
+    (push (funcall map i)
+          (gethash (funcall function (funcall key i)) result))
     (finally (return result))))
 
 

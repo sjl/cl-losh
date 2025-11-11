@@ -25,6 +25,7 @@
         "LOSH.QUEUES"
         "LOSH.RANDOM"
         "LOSH.READTABLE"
+        "LOSH.REGEX"
         "LOSH.RING-BUFFERS"
         "LOSH.SEQUENCES"
         "LOSH.SHELL"

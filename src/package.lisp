@@ -103,6 +103,12 @@
 
     :do-hash-set))
 
+(defpackage :losh.regex
+  (:use :cl :iterate :losh.base)
+  (:documentation "Utilities related to regular expressions.")
+  (:export
+    :recase))
+
 (defpackage :losh.streams
   (:use :cl :iterate :losh.base)
   (:documentation "Utilities related to strings, reading, and/or printing.")
@@ -153,7 +159,9 @@
     :pbcopy
     :pbpaste
     :*pbcopy-command*
-    :*pbpaste-command*))
+    :*pbpaste-command*
+    :rscript
+    :rscript-file))
 
 
 (defpackage :losh.arrays
@@ -489,9 +497,9 @@
 (defpackage-inheriting :losh
   (
 
-   :losh.base
    :losh.arrays
    :losh.astar
+   :losh.base
    :losh.bits
    :losh.chili-dogs
    :losh.clos
@@ -511,6 +519,7 @@
    :losh.queues
    :losh.random
    :losh.readtable
+   :losh.regex
    :losh.ring-buffers
    :losh.sequences
    :losh.shell
@@ -527,5 +536,7 @@
 
   "))
 
+(defpackage :losh-user
+  (:use :cl :iterate :losh))
 
 ;;;; Remember to add it to the docs!

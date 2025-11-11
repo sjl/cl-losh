@@ -59,25 +59,20 @@
 
   "
   ;; http://blog.chaitanyagupta.com/2013/10/print-bit-representation-of-signed.html
-  (format stream (format nil "~~~D,'0B" size) (ldb (byte size 0) n)))
+  (format stream (format nil "~~~D,'0B" size) (ldb (byte size 0) n))
+  (values))
 
-(defun hex (&optional (thing *) (stream t))
-  "Print the `thing` to `stream` with numbers in base 16.
+(defun hex (&optional (n *) (size 8) (stream t))
+  "Print the hex of the `size`-bit unsigned byte `n` to `stream`.
 
   Examples:
 
     (hex 255)
     => FF
 
-    (hex #(0 128))
-    => #(0 80)
-
   "
-  (let ((*print-base* 16))
-    (case stream
-      ((nil) (prin1-to-string thing))
-      ((t) (prin1 thing stream) (terpri stream) nil)
-      (otherwise (prin1 thing stream) (terpri stream) nil))))
+  (format stream "~v,'0X" (/ size 4) n)
+  (values))
 
 (defmacro shut-up (&body body)
   "Run `body` with stdout and stderr redirected to the void."

@@ -274,6 +274,7 @@
                                    (elt ,source ,i))))))))
 
 
+
 (defclause-sequence ACROSS-FLAT-ARRAY INDEX-OF-FLAT-ARRAY
   :access-fn 'row-major-aref
   :size-fn 'array-total-size

@@ -82,3 +82,37 @@
 (defun pbpaste ()
   "`pbpaste` the current clipboard as a string."
   (values (sh *pbpaste-command* :result-type 'string)))
+
+
+(defun rscript (code &rest args)
+  "Invoke `Rscript` on the given `code` and `args`.
+
+  `code` must be a string of R code and will be piped into `Rscript` over
+  `stdin`.  Use `rscript-file` if you have a file of R code to run.
+
+  `args` will be passed as command line arguments and can be retrieved on the
+  R side with e.g.:
+
+    args <- commandArgs(trailingOnly=TRUE)
+
+  "
+  (write-string (sh (list* "Rscript" "-" args)
+                    :input code
+                    :result-type 'string))
+  (values))
+
+(defun rscript-file (path &rest args)
+  "Invoke `Rscript` on the given `path` and `args`.
+
+  `path` must be a path to a file R code.  Use `rscript` if you have a string of
+  R code to run.
+
+  `args` will be passed as command line arguments and can be retrieved on the
+  R side with e.g.:
+
+    args <- commandArgs(trailingOnly=TRUE)
+
+  "
+  (write-string (sh (list* "Rscript" path args)
+                    :result-type 'string))
+  (values))

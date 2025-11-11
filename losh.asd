@@ -38,6 +38,7 @@
                  (:file "io" :depends-on ("base"))
                  (:file "lists" :depends-on ("base"))
                  (:file "mutation" :depends-on ("base"))
+                 (:file "regex" :depends-on ("base"))
                  (:file "shell" :depends-on ("base"))
                  (:file "streams" :depends-on ("base"))
 
