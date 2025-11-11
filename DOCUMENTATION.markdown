@@ -976,17 +976,14 @@ Disassemble the code generated for a `lambda` with `arglist` and `body`.
 
 ### `HEX` (function)
 
-    (HEX &OPTIONAL (THING *) (STREAM T))
+    (HEX &OPTIONAL (N *) (SIZE 8) (STREAM T))
 
-Print the `thing` to `stream` with numbers in base 16.
+Print the hex of the `size`-bit unsigned byte `n` to `stream`.
 
   Examples:
 
     (hex 255)
     => FF
-
-    (hex #(0 128))
-    => #(0 80)
 
   
 
@@ -2232,6 +2229,47 @@ Return a random boolean with `chance` probability of `t`.
 
 Custom readtable.
 
+## Package `LOSH.REGEX`
+
+Utilities related to regular expressions.
+
+### `RECASE` (macro)
+
+    (RECASE (TARGET-STRING &OPTIONAL)
+      &BODY
+      CLAUSES)
+
+Match a target string against regexes, also binding variables.
+
+  Each clause is of the form:
+
+    (condition &rest body)
+
+  Where `condition` is a list (or just the regex if no variables are required):
+
+    (regex &rest ppcre-var-list)
+
+  The target string will be matched against `regex` and `ppcre-var-list` bound
+  with `ppcre:register-groups-bind`.  If it matches, `body` will be executed and
+  its value returned, otherwise execution continues to later clauses.
+
+  A final condition of `t` can be used as a fallback.
+
+  Declarations are supported.
+
+  Example:
+
+    (recase (string)
+      (("([0-9]{4})-([0-9]{2})-([0-9]{2})" (#'parse-integer year month day))
+       (declare (ignore month day))
+       (format t "~S was a good year for PLs." year))
+      (("([A-Z][a-z]+) ([0-9]{1,2}), ([0-9]{4})" month (#'parse-integer day year))
+       (declare (ignore year day))
+       (format t "~A was a good month for Lisp." month))
+      (t "Programming is hard."))
+
+  
+
 ## Package `LOSH.RING-BUFFERS`
 
 Simple ring buffer implementation.
@@ -2509,7 +2547,7 @@ Return a hash table containing the frequencies of the elements of `sequence`.
 
 ### `GROUP-BY` (function)
 
-    (GROUP-BY FUNCTION SEQUENCE &KEY (TEST #'EQL) (KEY #'IDENTITY))
+    (GROUP-BY FUNCTION SEQUENCE &KEY (TEST #'EQL) (KEY #'IDENTITY) (MAP #'IDENTITY))
 
 Return a hash table of the elements of `sequence` grouped by `function`.
 
@@ -2523,6 +2561,9 @@ Return a hash table of the elements of `sequence` grouped by `function`.
   If `key` is given it will be called on each element before passing it to
   `function` to produce the bucket identifier.  This does not effect what is
   stored in the lists.
+
+  If `map` is given it will be called on each element before storing it in the
+  hash table.
 
   Examples:
 
@@ -2822,6 +2863,38 @@ The shell command to use for `pbpaste`.  When run, this command should print the
 
 `pbpaste` the current clipboard as a string.
 
+### `RSCRIPT` (function)
+
+    (RSCRIPT CODE &REST ARGS)
+
+Invoke `Rscript` on the given `code` and `args`.
+
+  `code` must be a string of R code and will be piped into `Rscript` over
+  `stdin`.  Use `rscript-file` if you have a file of R code to run.
+
+  `args` will be passed as command line arguments and can be retrieved on the
+  R side with e.g.:
+
+    args <- commandArgs(trailingOnly=TRUE)
+
+  
+
+### `RSCRIPT-FILE` (function)
+
+    (RSCRIPT-FILE PATH &REST ARGS)
+
+Invoke `Rscript` on the given `path` and `args`.
+
+  `path` must be a path to a file R code.  Use `rscript` if you have a string of
+  R code to run.
+
+  `args` will be passed as command line arguments and can be retrieved on the
+  R side with e.g.:
+
+    args <- commandArgs(trailingOnly=TRUE)
+
+  
+
 ### `SH` (function)
 
     (SH COMMAND &KEY INPUT (WAIT T) (RESULT-TYPE 'NULL))
@@ -2851,6 +2924,16 @@ Run `command`, piping `input` to it, optionally returning its output.
   and `stream`.
 
   
+
+## Package `LOSH.STREAMS`
+
+Utilities related to strings, reading, and/or printing.
+
+### `WITH-EOF-HANDLED` (macro)
+
+    (WITH-EOF-HANDLED (STREAM EOF-ERROR-P EOF-VALUE)
+      &BODY
+      BODY)
 
 ## Package `LOSH.WEIGHTLISTS`
 
