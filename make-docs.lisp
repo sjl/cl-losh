@@ -3,9 +3,10 @@
 (defparameter *document-packages*
   (list "LOSH"
 
-        "LOSH.ASTAR"
         "LOSH.ARRAYS"
+        "LOSH.ASTAR"
         "LOSH.BASE"
+        "LOSH.BIOINFORMATICS"
         "LOSH.BITS"
         "LOSH.CHILI-DOGS"
         "LOSH.CLOS"

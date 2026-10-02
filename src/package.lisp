@@ -115,6 +115,13 @@
   (:export
     :with-eof-handled))
 
+(defpackage :losh.bioinformatics
+  (:use :cl :iterate :losh.base)
+  (:documentation "Utilities related to bioinformatics.")
+  (:export
+    :n50
+    :n90))
+
 
 (defpackage :losh.io
   (:use :cl :iterate :losh.base)
@@ -439,6 +446,7 @@
 (defpackage :losh.debugging
   (:use :cl :iterate :losh.base
     :losh.math
+    :losh.shell
     :losh.control-flow
     :losh.hash-tables)
   (:documentation "Utilities for figuring out what the hell is going on.")
@@ -454,6 +462,7 @@
     :dis
     :gimme
     :hex
+    :hexdump
     :phr
     :pr
     :pretty-print-hash-table
@@ -500,6 +509,7 @@
    :losh.arrays
    :losh.astar
    :losh.base
+   :losh.bioinformatics
    :losh.bits
    :losh.chili-dogs
    :losh.clos

@@ -74,6 +74,11 @@
   (format stream "~v,'0X" (/ size 4) n)
   (values))
 
+(defun hexdump (bytes)
+  "Dump `bytes` to standard out by shelling out to `xeh`."
+  (write-string (sh (list "xeh") :input bytes :result-type 'string))
+  (values))
+
 (defmacro shut-up (&body body)
   "Run `body` with stdout and stderr redirected to the void."
   `(let ((*standard-output* (make-broadcast-stream))
@@ -241,5 +246,4 @@
 (defmacro gimme (n &body body)
   `(iterate (repeat ,n)
      (collect (progn ,@body))))
-
 

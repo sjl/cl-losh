@@ -30,6 +30,7 @@
                  (:file "base" :depends-on ("package"))
 
                  ;; 0 ---------------------------------------------------------
+                 (:file "bioinformatics" :depends-on ("base"))
                  (:file "chili-dogs" :depends-on ("base"))
                  (:file "clos" :depends-on ("base"))
                  (:file "eldritch-horrors" :depends-on ("base"))
@@ -75,6 +76,7 @@
                                                  "mutation"))
                  (:file "debugging" :depends-on ("control-flow"
                                                  "math"
+                                                 "shell"
                                                  "hash-tables"))
 
                  ;; 5 ---------------------------------------------------------
