@@ -18,56 +18,6 @@ This package exports all of the symbols in the other packages.
 
   
 
-## Package `LOSH.ASTAR`
-
-A★ search in a handy package.
-
-### `ASTAR` (function)
-
-    (ASTAR &KEY START NEIGHBORS GOALP COST HEURISTIC TEST LIMIT GET-SEEN SET-SEEN)
-
-Search for a path from `start` to a goal using A★.
-
-  The following parameters are all required:
-
-  * `start`: the starting state.
-
-  * `neighbors`: a function that takes a state and returns all states reachable
-    from it.
-
-  * `goalp`: a predicate that takes a state and returns whether it is a goal.
-
-  * `cost`: a function that takes two states `a` and `b` and returns the cost
-    to move from `a` to `b`.
-
-  * `heuristic`: a function that takes a state and estimates the distance
-    remaining to the goal.
-
-  * `test`: an equality predicate for comparing nodes.  It must be suitable for
-    passing to `make-hash-table`.
-
-  If the heuristic function is admissable (i.e. it never overestimates the
-  remaining distance) the algorithm will find the shortest path.  If you don't
-  have a decent heuristic, just use `(constantly 0)` to degrade to Dijkstra.
-
-  Note that `test` is required.  The only sensible default would be `eql`, but
-  if you were using states that need a different predicate and forgot to pass it
-  the algorithm would end up blowing the heap, which is unpleasant.
-
-  The following parameters are optional:
-
-  * `limit`: a maximum cost.  Any paths that exceed this cost will not be
-    considered.
-
-  * `set-seen`: a function that takes a state and a cost, and records it.
-    If not provided a hash table will be used, but sometimes (depending on what
-    your states are) it can be faster to store visited nodes more efficiently.
-
-  * `get-seen`: a function that takes a state and retrieves the stored cost, or
-    `nil` if the state has not been seen.
-
-  
-
 ## Package `LOSH.ARRAYS`
 
 Utilities related to arrays.
@@ -229,6 +179,56 @@ Return the last element of `vector`, or `nil` if it is empty.
 
   
 
+## Package `LOSH.ASTAR`
+
+A★ search in a handy package.
+
+### `ASTAR` (function)
+
+    (ASTAR &KEY START NEIGHBORS GOALP COST HEURISTIC TEST LIMIT GET-SEEN SET-SEEN)
+
+Search for a path from `start` to a goal using A★.
+
+  The following parameters are all required:
+
+  * `start`: the starting state.
+
+  * `neighbors`: a function that takes a state and returns all states reachable
+    from it.
+
+  * `goalp`: a predicate that takes a state and returns whether it is a goal.
+
+  * `cost`: a function that takes two states `a` and `b` and returns the cost
+    to move from `a` to `b`.
+
+  * `heuristic`: a function that takes a state and estimates the distance
+    remaining to the goal.
+
+  * `test`: an equality predicate for comparing nodes.  It must be suitable for
+    passing to `make-hash-table`.
+
+  If the heuristic function is admissable (i.e. it never overestimates the
+  remaining distance) the algorithm will find the shortest path.  If you don't
+  have a decent heuristic, just use `(constantly 0)` to degrade to Dijkstra.
+
+  Note that `test` is required.  The only sensible default would be `eql`, but
+  if you were using states that need a different predicate and forgot to pass it
+  the algorithm would end up blowing the heap, which is unpleasant.
+
+  The following parameters are optional:
+
+  * `limit`: a maximum cost.  Any paths that exceed this cost will not be
+    considered.
+
+  * `set-seen`: a function that takes a state and a cost, and records it.
+    If not provided a hash table will be used, but sometimes (depending on what
+    your states are) it can be faster to store visited nodes more efficiently.
+
+  * `get-seen`: a function that takes a state and retrieves the stored cost, or
+    `nil` if the state has not been seen.
+
+  
+
 ## Package `LOSH.BASE`
 
 A few utilities re-exported from Alexandria, plus some other basic stuff.
@@ -253,6 +253,64 @@ Execute `body`, discard its result, and return the time taken.
 
   `result-type` must be `integer` (which will return internal time units) or
   `rational`/`single-float`/`double-float` (which will return seconds).
+
+  
+
+## Package `LOSH.BIOINFORMATICS`
+
+Utilities related to bioinformatics.
+
+### `N50` (function)
+
+    (N50 DATA &KEY (KEY #'IDENTITY))
+
+Return the N50 statistic of `data`.
+
+  `key` will be called on each element of `data` and should return the length
+  of each datum.
+
+  An empty `data` will return an N50 of `0`.
+
+  Examples:
+
+    (n50 (list 2 3 4 5 6 7 8 9 10))
+    ;; => 8
+
+    (n50 (vector "ACTACCAT"
+                 "CAGAC"
+                 "GCTT"
+                 "CCCCCCC"
+                 "CCAACCAAA"
+                 "CA")
+         :key #'length)
+    ;; => 7
+
+  
+
+### `N90` (function)
+
+    (N90 DATA &KEY (KEY #'IDENTITY))
+
+Return the N90 statistic of `data`.
+
+  `key` will be called on each element of `data` and should return the length
+  of each datum.
+
+  An empty `data` will return an N90 of `0`.
+
+  Examples:
+
+    (n90 (list 2 3 4 5 6 7 8 9 10))
+    ;; => 4
+
+    (n90 (vector "ACTACCAT"
+                 "CAGAC"
+                 "GCTT"
+                 "CCCCCCC"
+                 "CCAACCAAA"
+                 "CA")
+         :key #'length)
+    ;; => 4
 
   
 
@@ -986,6 +1044,12 @@ Print the hex of the `size`-bit unsigned byte `n` to `stream`.
     => FF
 
   
+
+### `HEXDUMP` (function)
+
+    (HEXDUMP BYTES)
+
+Dump `bytes` to standard out by shelling out to `xeh`.
 
 ### `PHR` (function)
 
